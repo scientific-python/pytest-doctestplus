@@ -4,16 +4,13 @@ normalizations of Python expression output.  See the docstring on
 `AstropyOutputChecker` for more details.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import doctest
 import re
 
 import numpy as np
 
-from ..extern import six
-from ..extern.six.moves import zip
+import six
+from six.moves import zip
 
 # Much of this code, particularly the parts of floating point handling, is
 # borrowed from the SymPy project with permission.  See licenses/SYMPY.rst
