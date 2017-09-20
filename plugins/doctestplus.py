@@ -3,10 +3,7 @@
 This plugin provides advanced doctest support and enables the testing of .rst
 files.
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
-from ...extern import six
+import six
 
 import doctest
 import fnmatch
@@ -17,17 +14,11 @@ import sys
 
 import pytest
 
-from ..output_checker import AstropyOutputChecker, FIX
+from .output_checker import AstropyOutputChecker, FIX
 
-try:
-    import importlib.machinery as importlib_machinery
-except ImportError:  # Python 2.7
-    importlib_machinery = None
 
 # these pytest hooks allow us to mark tests and run the marked tests with
 # specific command line options.
-
-
 def pytest_addoption(parser):
 
     parser.addoption("--doctest-plus", action="store_true",
