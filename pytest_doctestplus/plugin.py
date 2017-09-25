@@ -14,7 +14,7 @@ import sys
 
 import pytest
 
-from .output_checker import AstropyOutputChecker, FIX
+from .output_checker import OutputChecker, FIX
 
 
 # these pytest hooks allow us to mark tests and run the marked tests with
@@ -44,7 +44,7 @@ def pytest_addoption(parser):
 # We monkey-patch in our replacement doctest OutputChecker.  Not
 # great, but there isn't really an API to replace the checker when
 # using doctest.testfile, unfortunately.
-doctest.OutputChecker = AstropyOutputChecker
+doctest.OutputChecker = OutputChecker
 
 REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
 
@@ -90,8 +90,8 @@ def pytest_configure(config):
 
             # uses internal doctest module parsing mechanism
             finder = DocTestFinderPlus()
-            runner = doctest.DebugRunner(verbose=False, optionflags=opts,
-                                         checker=AstropyOutputChecker())
+            runner = doctest.DebugRunner(
+                verbose=False, optionflags=opts, checker=OutputChecker())
             for test in finder.find(module):
                 if test.examples:  # skip empty doctests
                     if config.getvalue("remote_data") != 'any':

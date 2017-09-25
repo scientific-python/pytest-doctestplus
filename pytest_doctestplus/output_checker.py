@@ -1,7 +1,7 @@
 """
 Implements a replacement for `doctest.OutputChecker` that handles certain
 normalizations of Python expression output.  See the docstring on
-`AstropyOutputChecker` for more details.
+`OutputChecker` for more details.
 """
 
 import doctest
@@ -23,7 +23,7 @@ IGNORE_OUTPUT_2 = doctest.register_optionflag('IGNORE_OUTPUT_2')
 IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
 
 
-class AstropyOutputChecker(doctest.OutputChecker):
+class OutputChecker(doctest.OutputChecker):
     """
     - Removes u'' prefixes on string literals
     - Ignores the 'L' suffix on long integers
