@@ -94,7 +94,7 @@ def pytest_configure(config):
                 verbose=False, optionflags=opts, checker=OutputChecker())
             for test in finder.find(module):
                 if test.examples:  # skip empty doctests
-                    if config.getvalue("remote_data") != 'any':
+                    if config.getoption('remote_data', 'none') != 'any':
                         for example in test.examples:
                             if example.options.get(REMOTE_DATA):
                                 example.options[doctest.SKIP] = True
@@ -188,7 +188,7 @@ def pytest_configure(config):
                         not DocTestFinderPlus.check_required_modules(required)):
                         entry.options[doctest.SKIP] = True
 
-                    if (config.getvalue('remote_data') != 'any' and
+                    if (config.getoption('remote_data', 'none') != 'any' and
                         entry.options.get(REMOTE_DATA)):
                         entry.options[doctest.SKIP] = True
 
