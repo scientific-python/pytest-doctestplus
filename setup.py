@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pytest-doctestplus',
-    version='0.1.0',
+    version='0.1.1.dev',
     license='BSD',
     description='Pytest plugin with advanced doctest features.',
     author='The Astropy Developers',
