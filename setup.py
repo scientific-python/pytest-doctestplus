@@ -42,7 +42,7 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[ 'doctest', 'rst', 'pytest', 'py.test' ],
-    install_requires=[ 'six', 'pytest>=2.8.0' ],
+    install_requires=[ 'six', 'pytest>=2.8.0', 'numpy' ],
     python_requires='>=2.7',
     entry_points={
         'pytest11': [
