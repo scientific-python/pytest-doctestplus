@@ -1,0 +1,43 @@
+# We set the language to c because python isn't supported on the MacOS X nodes
+# on Travis. However, the language ends up being irrelevant anyway, since we
+# install Python ourselves using conda.
+language: c
+
+os:
+    - linux
+
+# Use Travis' container-based architecture
+sudo: false
+
+env:
+    global:
+        # The following versions are the 'default' for tests, unless
+        # overidden underneath. They are defined here in order to save having
+        # to repeat them for all configurations.
+        - PYTHON_VERSION=3.6
+        - PYTEST_VERSION=3.2
+        - PYTEST_COMMAND='pytest'
+        - NUMPY_VERSION=stable
+        - CONDA_DEPENDENCIES='six'
+
+    matrix:
+        - PYTHON_VERSION=2.7 PYTEST_VERSION=2.8 PYTEST_COMMAND='py.test'
+        - PYTHON_VERSION=2.7
+        - PYTHON_VERSION=3.5 PYTEST_VERSION=3.0
+        - PYTHON_VERSION=3.6 PYTEST_VERSION=3.1
+        - PYTHON_VERSION=3.6 PYTEST_VERSION=3.2
+
+matrix:
+    include:
+        # Try a run on OSX with latest versions of python and pytest
+        - os: osx
+          env: PYTHON_VERSION=3.6 PYTEST_VERSION=3.2
+
+install:
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
+    - python ./setup.py install
+
+script:
+   - $PYTEST_COMMAND --doctest-plus
+   - $PYTEST_COMMAND --doctest-plus --doctest-rst
