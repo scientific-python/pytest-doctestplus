@@ -21,7 +21,6 @@ setup(
     author_email='astropy.team@gmail.com',
     url='https://astropy.org',
     packages=find_packages(),
-    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
