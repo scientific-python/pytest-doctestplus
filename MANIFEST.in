@@ -1,0 +1,10 @@
+include LICENSE.rst
+include README.rst
+include CHANGES.rst
+
+include setup.cfg
+
+include tests/python/*.py
+include tests/docs/*.rst
+
+global-exclude *.pyc *.o
