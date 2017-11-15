@@ -21,11 +21,11 @@ included in Python docstrings and in standalone documentation files.
 Good documentation for developers contains example code. This is true of both
 standalone documentation and of documentation that is integrated with the code
 itself. Python provides a mechanism for testing code snippets that are provided
-in Python docstrings. Pytest provides a mechanism for running doctests against
-both docstrings in source code and in standalone documentation files. These are
-Good Things.
+in Python docstrings. The unit test framework pytest provides a mechanism for
+running doctests against both docstrings in source code and in standalone
+documentation files.
 
-This plugin augments the functionality provided by Python and Pytest by
+This plugin augments the functionality provided by Python and pytest by
 providing the following features:
 
 * approximate floating point comparison for doctests that produce floating
@@ -101,7 +101,7 @@ strings this can cause such tests to fail.
 To address this issue, the ``pytest-doctestplus`` plugin provides support for a
 ``FLOAT_CMP`` flag that can be used with doctests.  For example:
 
-.. code-block:: none
+.. code-block:: python
 
   >>> 1.0 / 3.0  # doctest: +FLOAT_CMP
   0.333333333333333311
@@ -135,8 +135,10 @@ functions/classes whose doctests should be skipped.  For example::
 skips the doctests in a function called ``myfunction``, the doctest for a
 class called ``MyClass``, and all *methods* of ``MyClass``.
 
-Module docstrings may contain doctests as well.  To skip the module-level
-doctests include the string ``'.'`` in ``__doctest_skip__``.
+Module docstrings may contain doctests as well. To skip the module-level
+doctests::
+
+    __doctest_skip__  = ['.', 'myfunction', 'MyClass']
 
 To skip all doctests in a module::
 
