@@ -1,5 +1,7 @@
-0.1.2 (unreleased)
+0.1.2 (2017-12-07)
 ==================
+
+- Update README. Use README for long description on PyPi. [#12]
 
 
 0.1.1 (2017-10-18)
