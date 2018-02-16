@@ -13,8 +13,8 @@ import six
 from six.moves import zip
 
 # Much of this code, particularly the parts of floating point handling, is
-# borrowed from the SymPy project with permission.  See licenses/SYMPY.rst
-# for the full SymPy license.
+# borrowed from the SymPy project with permission.  See
+# licenses/SYMPY_LICENSE.rst for the full SymPy license.
 
 FIX = doctest.register_optionflag('FIX')
 FLOAT_CMP = doctest.register_optionflag('FLOAT_CMP')
