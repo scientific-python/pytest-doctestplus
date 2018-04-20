@@ -1,5 +1,8 @@
-0.1.3 (unreleased)
+0.1.3 (2018-04-20)
 ==================
+
+- Fix packaging error: do not include tests as part of package distribution.
+  [#19]
 
 0.1.2 (2017-12-07)
 ==================
