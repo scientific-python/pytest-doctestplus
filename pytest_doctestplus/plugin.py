@@ -29,6 +29,16 @@ def pytest_addoption(parser):
     parser.addoption("--doctest-rst", action="store_true",
                      help="enable running doctests in .rst documentation")
 
+    # Defaults to `atol` parameter from `numpy.allclose`.
+    parser.addoption("--doctest-plus-atol", action="store",
+                     help="set the absolute tolerance for float comparison",
+                     default=1e-08)
+
+    # Defaults to `rtol` parameter from `numpy.allclose`.
+    parser.addoption("--doctest-plus-rtol", action="store",
+                     help="set the relative tolerance for float comparison",
+                     default=1e-05)
+
     parser.addini("doctest_plus", "enable running doctests with additional "
                   "features not found in the normal doctest plugin")
 
@@ -40,16 +50,25 @@ def pytest_addoption(parser):
                   "Run the doctests in the rst documentation",
                   default=False)
 
+    parser.addini("doctest_plus_atol",
+                  "set the absolute tolerance for float comparison",
+                  default=1e-08)
 
-# We monkey-patch in our replacement doctest OutputChecker.  Not
-# great, but there isn't really an API to replace the checker when
-# using doctest.testfile, unfortunately.
-doctest.OutputChecker = OutputChecker
-
-REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
+    parser.addini("doctest_plus_rtol",
+                  "set the relative tolerance for float comparison",
+                  default=1e-05)
 
 
 def pytest_configure(config):
+
+    # We monkey-patch in our replacement doctest OutputChecker.  Not
+    # great, but there isn't really an API to replace the checker when
+    # using doctest.testfile, unfortunately.
+    OutputChecker.rtol = float(config.getini("doctest_plus_rtol"))
+    OutputChecker.atol = float(config.getini("doctest_plus_atol"))
+    doctest.OutputChecker = OutputChecker
+
+    REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
 
     doctest_plugin = config.pluginmanager.getplugin('doctest')
     if (doctest_plugin is None or config.option.doctestmodules or not
