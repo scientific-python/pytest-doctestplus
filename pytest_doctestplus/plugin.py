@@ -64,8 +64,10 @@ def pytest_configure(config):
     # We monkey-patch in our replacement doctest OutputChecker.  Not
     # great, but there isn't really an API to replace the checker when
     # using doctest.testfile, unfortunately.
-    OutputChecker.rtol = float(config.getini("doctest_plus_rtol"))
-    OutputChecker.atol = float(config.getini("doctest_plus_atol"))
+    OutputChecker.rtol = max(float(config.getini("doctest_plus_rtol")),
+                             float(config.getoption("doctest_plus_rtol")))
+    OutputChecker.atol = max(float(config.getini("doctest_plus_atol")),
+                             float(config.getoption("doctest_plus_atol")))
     doctest.OutputChecker = OutputChecker
 
     REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
