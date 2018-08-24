@@ -1,6 +1,9 @@
 0.1.4 (unreleased)
 ==================
 
+- Add `doctest-plus-atol` and `doctest-plus-rtol` options for setting the
+  numerical tolerance. [#21]
+
 0.1.3 (2018-04-20)
 ==================
 
