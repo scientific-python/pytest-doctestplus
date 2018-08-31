@@ -77,6 +77,13 @@ This means that configuring ``testpaths`` and ``norecursedirs`` in
 that should be ignored by ``pytest-doctestplus`` but do not need to be ignored
 by other ``pytest`` features.
 
+Using ``pytest``'s built-in ``--doctest-modules`` option will override the
+behavior of this plugin, even if ``doctest_plus = enabled`` in ``setup.cfg``,
+and will cause the default doctest plugin to be used. However, if for some
+reason both ``--doctest-modules`` and ``--doctest-plus`` are given, the
+``pytest-doctestplus`` plugin will be used, regardless of the contents of
+``setup.cfg``.
+
 Doctest Directives
 ~~~~~~~~~~~~~~~~~~
 
