@@ -39,6 +39,9 @@ environment:
         platform: x64
 
       - PYTHON_VERSION: "3.7"
+        PYTEST_VERSION: "3.6"
+
+      - PYTHON_VERSION: "3.7"
         PYTEST_VESION: "3.7"
 
 matrix:
