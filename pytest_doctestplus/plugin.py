@@ -73,7 +73,8 @@ def pytest_configure(config):
     REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
 
     doctest_plugin = config.pluginmanager.getplugin('doctest')
-    if (doctest_plugin is None or config.option.doctestmodules or not
+    run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
+    if (doctest_plugin is None or run_regular_doctest or not
             (config.getini('doctest_plus') or config.option.doctest_plus)):
         return
 

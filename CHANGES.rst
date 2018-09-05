@@ -1,8 +1,10 @@
-0.1.4 (unreleased)
+0.2.0 (unreleased)
 ==================
 
 - Add `doctest-plus-atol` and `doctest-plus-rtol` options for setting the
   numerical tolerance. [#21]
+
+- Update behavior of `--doctest-modules` option when plugin is installed. [#26]
 
 0.1.3 (2018-04-20)
 ==================
