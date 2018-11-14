@@ -1,4 +1,4 @@
-0.2.0 (unreleased)
+0.2.0 (2018-11-14)
 ==================
 
 - Add `doctest-plus-atol` and `doctest-plus-rtol` options for setting the
