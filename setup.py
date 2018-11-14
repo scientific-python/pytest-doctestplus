@@ -19,7 +19,7 @@ def readme():
 
 setup(
     name='pytest-doctestplus',
-    version='0.2.0',
+    version='0.3.0.dev',
     license='BSD',
     description='Pytest plugin with advanced doctest features.',
     long_description=readme(),
