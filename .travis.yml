@@ -15,7 +15,7 @@ env:
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
         - PYTHON_VERSION=3.6
-        - PYTEST_VERSION=3.4
+        - PYTEST_VERSION=3.10
         - PYTEST_COMMAND='pytest'
         - NUMPY_VERSION=stable
         - CONDA_DEPENDENCIES='six'
@@ -25,19 +25,15 @@ env:
         - PYTHON_VERSION=2.7
         - PYTHON_VERSION=3.5
         - PYTHON_VERSION=3.6
-        - PYTHON_VERSION=3.6 PYTEST_VERSION=3.5
-        - PYTHON_VERSION=3.6 PYTEST_VERSION=3.6
-        - PYTHON_VERSION=3.7 PYTEST_VERSION=3.6
+        - PYTHON_VERSION=3.7 PYTEST_VERSION=3.8
+        - PYTHON_VERSION=3.7 PYTEST_VERSION=3.9
+        - PYTHON_VERSION=3.7
 
 matrix:
     include:
         # Try a run on OSX with latest versions of python and pytest
         - os: osx
-          env: PYTHON_VERSION=3.7 PYTEST_VERSION=3.7
-
-    allow_failures:
-        - os: osx
-          env: PYTHON_VERSION=3.7 PYTEST_VERSION=3.7
+          env: PYTHON_VERSION=3.7
 
 install:
     - git clone git://github.com/astropy/ci-helpers.git
