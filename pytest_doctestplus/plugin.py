@@ -252,6 +252,13 @@ class DoctestPlus(object):
 
     def pytest_ignore_collect(self, path, config):
         """Skip paths that match any of the doctest_norecursedirs patterns."""
+        collect_ignore = config._getconftest_pathlist("collect_ignore",
+                                                    path=path.dirpath())
+
+        # The collect_ignore conftest.py variable should cause all test
+        # runners to ignore this file and all subfiles and subdirectories
+        if collect_ignore is not None and path in collect_ignore:
+            return True
 
         for pattern in config.getini("doctest_norecursedirs"):
             if path.check(fnmatch=pattern):
@@ -294,7 +301,6 @@ class DoctestPlus(object):
             __doctest_requires__ = {('func1', 'func2'): ['scipy']}
 
         """
-
         for ignore_path in self._ignore_paths:
             if ignore_path.common(path) == ignore_path:
                 return None
