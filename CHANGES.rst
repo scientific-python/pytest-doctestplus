@@ -3,6 +3,8 @@
 
 - Honor the ``collect_ignore`` option used in ``conftest.py``. [#36]
 
+- Make use of ``doctest_optionflags`` settings. [#39]
+
 0.2.0 (2018-11-14)
 ==================
 

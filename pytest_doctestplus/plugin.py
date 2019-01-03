@@ -13,6 +13,7 @@ import re
 import sys
 
 import pytest
+from _pytest.doctest import get_optionflags
 
 from .output_checker import OutputChecker, FIX
 
@@ -38,6 +39,10 @@ def pytest_addoption(parser):
     parser.addoption("--doctest-plus-rtol", action="store",
                      help="set the relative tolerance for float comparison",
                      default=1e-05)
+
+    parser.addini("doctest_optionflags", "option flags for doctests",
+                  type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],
+    )
 
     parser.addini("doctest_plus", "enable running doctests with additional "
                   "features not found in the normal doctest plugin")
@@ -78,13 +83,6 @@ def pytest_configure(config):
             (config.getini('doctest_plus') or config.option.doctest_plus)):
         return
 
-    # These are the default doctest options we use for everything.
-    # There shouldn't be any need to manually put them in doctests
-    # themselves.
-    opts = (doctest.ELLIPSIS |
-            doctest.NORMALIZE_WHITESPACE |
-            FIX)
-
     class DocTestModulePlus(doctest_plugin.DoctestModule):
         # pytest 2.4.0 defines "collect".  Prior to that, it defined
         # "runtest".  The "collect" approach is better, because we can
@@ -110,10 +108,12 @@ def pytest_configure(config):
                 except ImportError:
                     return
 
+            options = get_optionflags(self) | FIX
+
             # uses internal doctest module parsing mechanism
             finder = DocTestFinderPlus()
             runner = doctest.DebugRunner(
-                verbose=False, optionflags=opts, checker=OutputChecker())
+                verbose=False, optionflags=options, checker=OutputChecker())
             for test in finder.find(module):
                 if test.examples:  # skip empty doctests
                     if config.getoption('remote_data', 'none') != 'any':
@@ -137,9 +137,11 @@ def pytest_configure(config):
             self.funcargs = {}
             fixture_request = doctest_plugin._setup_fixtures(self)
 
+            options = get_optionflags(self) | FIX
+
             failed, tot = doctest.testfile(
                 str(self.fspath), module_relative=False,
-                optionflags=opts, parser=DocTestParserPlus(),
+                optionflags=options, parser=DocTestParserPlus(),
                 extraglobs=dict(getfixture=fixture_request.getfuncargvalue),
                 raise_on_error=True, verbose=False, encoding='utf-8')
 
