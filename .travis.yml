@@ -15,7 +15,7 @@ env:
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
         - PYTHON_VERSION=3.6
-        - PYTEST_VERSION=3.10
+        - PYTEST_VERSION=4
         - PYTEST_COMMAND='pytest'
         - NUMPY_VERSION=stable
         - CONDA_DEPENDENCIES='six'
