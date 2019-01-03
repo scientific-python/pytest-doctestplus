@@ -253,6 +253,10 @@ class DoctestPlus(object):
     def pytest_ignore_collect(self, path, config):
         """Skip paths that match any of the doctest_norecursedirs patterns."""
 
+        ignore_paths = config._getconftest_pathlist("collect_ignore",
+                                                    path=path.dirpath())
+        self._ignore_paths = ignore_paths or []
+
         for pattern in config.getini("doctest_norecursedirs"):
             if path.check(fnmatch=pattern):
                 # Apparently pytest_ignore_collect causes files not to be
