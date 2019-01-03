@@ -6,8 +6,7 @@ normalizations of Python expression output.  See the docstring on
 
 import doctest
 import re
-
-import numpy as np
+import math
 
 import six
 from six.moves import zip
@@ -125,8 +124,10 @@ class OutputChecker(doctest.OutputChecker):
                 else:
                     nw_.append(nw)
 
-                if not np.allclose(float(ng), float(nw), rtol=self.rtol,
-                                   atol=self.atol, equal_nan=True):
+                ng = float(ng)
+                nw = float(nw)
+                if not (abs(ng - nw) <= self.atol + self.rtol * abs(nw)
+                        or (math.isnan(ng) and math.isnan(nw))):
                     return False
 
             # replace all floats in the "got" string by those from "wanted".
