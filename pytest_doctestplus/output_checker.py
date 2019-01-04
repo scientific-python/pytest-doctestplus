@@ -16,11 +16,18 @@ from six.moves import zip
 # borrowed from the SymPy project with permission.  See
 # licenses/SYMPY_LICENSE.rst for the full SymPy license.
 
+
 FIX = doctest.register_optionflag('FIX')
 FLOAT_CMP = doctest.register_optionflag('FLOAT_CMP')
 IGNORE_OUTPUT = doctest.register_optionflag('IGNORE_OUTPUT')
 IGNORE_OUTPUT_2 = doctest.register_optionflag('IGNORE_OUTPUT_2')
 IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
+
+# These might appear in some doctests and are used in the default pytest
+# doctest plugin. This plugin doesn't actually implement these flags but this
+# allows them to appear in docstrings.
+ALLOW_BYTES = doctest.register_optionflag('ALLOW_BYTES')
+ALLOW_UNICODE = doctest.register_optionflag('ALLOW_UNICODE')
 
 
 class OutputChecker(doctest.OutputChecker):

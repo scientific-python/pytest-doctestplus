@@ -99,3 +99,29 @@ def test_float_cmp_global(testdir):
     )
     reprec = testdir.inline_run(p, "--doctest-plus")
     reprec.assertoutcome(passed=1)
+
+
+def test_allow_bytes_unicode(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """
+    )
+    # These are dummy tests just to check tht doctest-plus can parse the
+    # ALLOW_BYTES and ALLOW_UNICODE options. It doesn't actually implement
+    # these options.
+    p = testdir.makepyfile(
+        """
+        def f():
+            '''
+            >>> 1 # doctest: +ALLOW_BYTES
+            1
+            >>> 1 # doctest: +ALLOW_UNICODE
+            1
+            '''
+            pass
+    """
+    )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(passed=1)
