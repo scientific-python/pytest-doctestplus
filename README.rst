@@ -126,6 +126,16 @@ differences in representation of roundoff digits will be ignored by the
 doctest.  The values are otherwise compared exactly, so more significant
 (albeit possibly small) differences will still be caught by these tests.
 
+This flag can be enabled globally by adding it to ``setup.cfg`` as in
+
+.. code-block:: ini
+
+    doctest_optionflags =
+        NORMALIZE_WHITESPACE
+        ELLIPSIS
+        FLOAT_CMP
+
+
 Skipping Tests
 ~~~~~~~~~~~~~~
 
