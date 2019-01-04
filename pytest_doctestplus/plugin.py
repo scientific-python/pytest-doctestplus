@@ -13,7 +13,6 @@ import re
 import sys
 
 import pytest
-from _pytest.doctest import get_optionflags
 
 from .output_checker import OutputChecker, FIX
 
@@ -62,6 +61,14 @@ def pytest_addoption(parser):
     parser.addini("doctest_plus_rtol",
                   "set the relative tolerance for float comparison",
                   default=1e-05)
+
+
+def get_optionflags(parent):
+    optionflags_str = parent.config.getini('doctest_optionflags')
+    flag_int = 0
+    for flag_str in optionflags_str:
+        flag_int |= doctest.OPTIONFLAGS_BY_NAME[flag_str]
+    return flag_int
 
 
 def pytest_configure(config):

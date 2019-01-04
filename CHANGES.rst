@@ -5,6 +5,8 @@
 
 - Make use of ``doctest_optionflags`` settings. [#39]
 
+- Make it possible to set ``FLOAT_CMP`` globally in ``setup.cfg``. [#40]
+
 0.2.0 (2018-11-14)
 ==================
 
