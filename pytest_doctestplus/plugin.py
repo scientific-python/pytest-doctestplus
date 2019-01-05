@@ -15,6 +15,7 @@ import sys
 import pytest
 
 from .output_checker import OutputChecker, FIX
+from .skipping import get_should_skip
 
 
 # these pytest hooks allow us to mark tests and run the marked tests with
@@ -408,3 +409,13 @@ class DocTestFinderPlus(doctest.DocTestFinder):
             tests = list(filter(test_filter, tests))
 
         return tests
+
+    def _find(self, tests, obj, name, module, source_lines, globs, seen):
+        # This method of DocTestFinder calls itself recursively descending
+        # over all attributes of obj looking for docstrings that may contain
+        # doctests. We override it here so that we can skip collecting
+        # doctests from objects marked with @doctest_skip.
+        if get_should_skip(obj):
+            return
+        doctest.DocTestFinder._find(self, tests, obj, name, module,
+                                          source_lines, globs, seen)

@@ -2,3 +2,5 @@
 """
 This package contains pytest plugins that are used by the astropy test suite.
 """
+
+from pytest_doctestplus.skipping import doctest_skip, doctest_skipif

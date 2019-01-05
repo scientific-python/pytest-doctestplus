@@ -189,6 +189,45 @@ Having this module-level variable will require ``scipy`` to be importable
 in order to run the doctests for functions ``func1`` and ``func2`` in that
 module.
 
+Doctest skip decorators
+^^^^^^^^^^^^^^^^^^^^^^^
+
+A function or class can be marked with the decorator ``@doctest_skip`` or
+``@doctest_skipif`` to inddicate that it should be skipped when collecting
+doctests.
+
+This can be used to unconditionally skip collection optionally providing a
+reason::
+
+    from pytest_doctestplus import doctest_skip
+
+    @doctest_skip(reason="Integer division")
+    def func1():
+        '''
+        >>> 1/2
+        0.5
+        '''
+        pass
+
+This can also be used to conditionally skip doctests::
+
+    import sys
+    from pytest_doctestplus import doctest_skipif
+
+    @doctest_skipif(sys.version_info < (3,0), "Integer division on Python 2.x")
+    def func1():
+        '''
+        >>> 1/2
+        0.5
+        '''
+        pass
+
+The ``doctest_skipif`` decorator can also accept a callable::
+
+    @doctest_skipif(lambda: not thing_installed(), "Need thing")
+    def func1():
+        ...
+
 Remote Data
 ~~~~~~~~~~~
 
