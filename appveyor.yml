@@ -15,7 +15,6 @@ environment:
 
   matrix:
       - PYTHON_VERSION: "2.7"
-        PYTEST_VESION: "2.8"
         PYTEST_COMMAND: "py.test"
         platform: x86
 

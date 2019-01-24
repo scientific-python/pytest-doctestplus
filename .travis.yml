@@ -21,7 +21,7 @@ env:
         - CONDA_DEPENDENCIES='six'
 
     matrix:
-        - PYTHON_VERSION=2.7 PYTEST_VERSION=2.8 PYTEST_COMMAND='py.test'
+        - PYTHON_VERSION=2.7 PYTEST_COMMAND='py.test'
         - PYTHON_VERSION=2.7
         - PYTHON_VERSION=3.5
         - PYTHON_VERSION=3.6
