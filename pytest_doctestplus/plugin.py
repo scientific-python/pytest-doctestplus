@@ -18,7 +18,7 @@ from .output_checker import OutputChecker, FIX
 
 comment_characters = {'txt': '#',
                       'tex': '%',
-                      'rst': '..'
+                      'rst': '\.\.'
                       }
 
 
@@ -203,7 +203,7 @@ def pytest_configure(config):
             skip_next = False
             skip_all = False
 
-            comment_char = '..'
+            comment_char = '\.\.'
             for entry in result:
                 if isinstance(entry, six.string_types) and entry:
                     file_format = config.getoption('text_file_format', None)
@@ -214,7 +214,7 @@ def pytest_configure(config):
                     required = []
                     skip_next = False
                     lines = entry.strip().splitlines()
-                    if '{} doctest-skip-all'.format(comment_char) in (x.strip() for x in lines):
+                    if any([re.match('{} doctest-skip-all'.format(comment_char), x.strip()) for x in lines]):
                         skip_all = True
                         continue
 
