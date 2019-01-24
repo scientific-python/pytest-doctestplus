@@ -49,3 +49,4 @@ install:
 script:
    - $PYTEST_COMMAND --doctest-plus
    - $PYTEST_COMMAND --doctest-plus --doctest-rst
+   - $PYTEST_COMMAND --doctest-plus --doctest-rst --text-file-format=tex
