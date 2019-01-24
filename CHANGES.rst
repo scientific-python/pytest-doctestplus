@@ -7,6 +7,8 @@
 
 - Make it possible to set ``FLOAT_CMP`` globally in ``setup.cfg``. [#40]
 
+- Drop support for ``pytest`` versions earlier than 3.0. [#46]
+
 0.2.0 (2018-11-14)
 ==================
 
