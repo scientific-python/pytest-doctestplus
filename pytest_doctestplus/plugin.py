@@ -16,6 +16,11 @@ import pytest
 
 from .output_checker import OutputChecker, FIX
 
+comment_characters = {'txt': '#',
+                      'tex': '%',
+                      'rst': '..'
+                      }
+
 
 # these pytest hooks allow us to mark tests and run the marked tests with
 # specific command line options.
@@ -39,9 +44,15 @@ def pytest_addoption(parser):
                      help="set the relative tolerance for float comparison",
                      default=1e-05)
 
+    parser.addoption("--text-file-format", action="store",
+                     help=("Text file format for narrative documentation. "
+                           "Options accepted are 'txt', 'tex', and 'rst'"),
+                     default='rst')
+
+    parser.addini("text_file_format", "changing default format for docs")
+
     parser.addini("doctest_optionflags", "option flags for doctests",
-                  type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],
-    )
+                  type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],)
 
     parser.addini("doctest_plus", "enable running doctests with additional "
                   "features not found in the normal doctest plugin")
@@ -192,22 +203,31 @@ def pytest_configure(config):
             skip_next = False
             skip_all = False
 
+            comment_char = '..'
             for entry in result:
                 if isinstance(entry, six.string_types) and entry:
+                    file_format = config.getoption('text_file_format', None)
+
+                    if file_format in comment_characters:
+                        comment_char = comment_characters[file_format]
+
                     required = []
                     skip_next = False
                     lines = entry.strip().splitlines()
-
-                    if '.. doctest-skip-all' in (x.strip() for x in lines):
+                    if '{} doctest-skip-all'.format(comment_char) in (x.strip() for x in lines):
                         skip_all = True
                         continue
 
                     if not len(lines):
                         continue
 
-                    last_line = lines[-1]
-                    match = re.match(
-                        r'\.\.\s+doctest-skip\s*::(\s+.*)?', last_line)
+                    # We allow last and second to last lines to match to allow
+                    # special environment to be in between, e.g. \begin{python}
+                    last_lines = lines[-2:]
+                    matches = [re.match(
+                        r'{}\s+doctest-skip\s*::(\s+.*)?'.format(comment_char),
+                        last_line) for last_line in last_lines]
+                    match = matches[0] or matches[1]
                     if match:
                         marker = match.group(1)
                         if (marker is None or
@@ -216,9 +236,10 @@ def pytest_configure(config):
                             skip_next = True
                             continue
 
-                    match = re.match(
-                        r'\.\.\s+doctest-requires\s*::\s+(.*)',
-                        last_line)
+                    matches = [re.match(
+                        r'{}\s+doctest-requires\s*::\s+(.*)'.format(comment_char),
+                        last_line) for last_line in last_lines]
+                    match = matches[0] or matches[1]
                     if match:
                         required = re.split(r'\s*,?\s*', match.group(1))
                 elif isinstance(entry, doctest.Example):
@@ -234,7 +255,8 @@ def pytest_configure(config):
 
     config.pluginmanager.register(
         DoctestPlus(DocTestModulePlus, DocTestTextfilePlus,
-                    config.getini('doctest_rst') or config.option.doctest_rst),
+                    config.getini('doctest_rst') or config.option.doctest_rst,
+                    config.getini('text_file_format') or config.option.text_file_format),
         'doctestplus')
 
     # Remove the doctest_plugin, or we'll end up testing the .rst files twice.
@@ -243,7 +265,7 @@ def pytest_configure(config):
 
 class DoctestPlus(object):
     def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls,
-                 run_rst_doctests):
+                 run_rst_doctests, text_file_format):
         """
         doctest_module_item_cls should be a class inheriting
         `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
@@ -255,14 +277,14 @@ class DoctestPlus(object):
         self._doctest_module_item_cls = doctest_module_item_cls
         self._doctest_textfile_item_cls = doctest_textfile_item_cls
         self._run_rst_doctests = run_rst_doctests
-
+        self._text_file_ext = '.{}'.format(text_file_format)
         # Directories to ignore when adding doctests
         self._ignore_paths = []
 
     def pytest_ignore_collect(self, path, config):
         """Skip paths that match any of the doctest_norecursedirs patterns."""
         collect_ignore = config._getconftest_pathlist("collect_ignore",
-                                                    path=path.dirpath())
+                                                      path=path.dirpath())
 
         # The collect_ignore conftest.py variable should cause all test
         # runners to ignore this file and all subfiles and subdirectories
@@ -320,7 +342,7 @@ class DoctestPlus(object):
 
             # Don't override the built-in doctest plugin
             return self._doctest_module_item_cls(path, parent)
-        elif self._run_rst_doctests and path.ext == '.rst':
+        elif self._run_rst_doctests and path.ext == self._text_file_ext:
             # Ignore generated .rst files
             parts = str(path).split(os.path.sep)
 
