@@ -227,7 +227,12 @@ def pytest_configure(config):
                     matches = [re.match(
                         r'{}\s+doctest-skip\s*::(\s+.*)?'.format(comment_char),
                         last_line) for last_line in last_lines]
-                    match = matches[0] or matches[1]
+
+                    if len(matches) > 1:
+                        match = matches[0] or matches[1]
+                    else:
+                        match = matches[0]
+
                     if match:
                         marker = match.group(1)
                         if (marker is None or
@@ -239,7 +244,12 @@ def pytest_configure(config):
                     matches = [re.match(
                         r'{}\s+doctest-requires\s*::\s+(.*)'.format(comment_char),
                         last_line) for last_line in last_lines]
-                    match = matches[0] or matches[1]
+
+                    if len(matches) > 1:
+                        match = matches[0] or matches[1]
+                    else:
+                        match = matches[0]
+
                     if match:
                         required = re.split(r'\s*,?\s*', match.group(1))
                 elif isinstance(entry, doctest.Example):
