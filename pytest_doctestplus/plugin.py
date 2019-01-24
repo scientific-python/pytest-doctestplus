@@ -203,14 +203,13 @@ def pytest_configure(config):
             skip_next = False
             skip_all = False
 
-            comment_char = '\.\.'
+            file_format = config.getoption('text_file_format', 'rst')
+
+            if file_format in comment_characters:
+                comment_char = comment_characters[file_format]
+
             for entry in result:
                 if isinstance(entry, six.string_types) and entry:
-                    file_format = config.getoption('text_file_format', None)
-
-                    if file_format in comment_characters:
-                        comment_char = comment_characters[file_format]
-
                     required = []
                     skip_next = False
                     lines = entry.strip().splitlines()
