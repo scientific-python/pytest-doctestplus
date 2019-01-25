@@ -56,3 +56,4 @@ build: false
 test_script:
   - "%CMD_IN_ENV% %PYTEST_COMMAND% --doctest-plus"
   - "%CMD_IN_ENV% %PYTEST_COMMAND% --doctest-plus --doctest-rst"
+  - "%CMD_IN_ENV% %PYTEST_COMMAND% --doctest-plus --doctest-rst --text-file-format=tex"

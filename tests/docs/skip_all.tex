@@ -1,0 +1,54 @@
+% doctest-skip-all
+
+\documentclass{article}
+\setlength{\parindent}{0cm}
+
+\usepackage{listings}
+\lstnewenvironment{python}[1][]{
+\lstset{
+language=python,
+}}{}
+
+\begin{document}
+
+\section{Some Bad Test Cases}
+
+All of the example code blocks in this file are going to fail if they run. So
+if the directive used at the top of this file does not work, then there are
+going to be test failures.
+
+\subsection{Undefined Variables}
+
+This one will fail because the variables haven't been defined::
+
+\begin{python}
+>>> x + y
+5
+
+\end{python}
+
+
+\subsection{No Such Module}
+
+This one will fail because there's (probably) no such module::
+
+\begin{python}
+>>> import foobar
+>>> foobar.baz(42)
+0
+
+\end{python}
+
+
+\section{What???}
+
+This one will fail because it's just not valid python::
+
+\begin{python}
+>>> NOT VALID PYTHON, OKAY?
+>>> + 5
+10
+
+\end{python}
+
+\end{document}
