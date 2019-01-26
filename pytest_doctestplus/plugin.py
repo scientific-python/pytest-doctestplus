@@ -11,6 +11,7 @@ import imp
 import os
 import re
 import sys
+import warnings
 
 import pytest
 
@@ -207,6 +208,9 @@ def pytest_configure(config):
             if file_format in comment_characters:
                 comment_char = comment_characters[file_format]
             else:
+                warnings.warn("file format '{}' is not recognized, assuming "
+                              "'{}' as the comment character."
+                              .format(file_format, comment_characters['rst']))
                 comment_char = comment_characters['rst']
 
             for entry in result:
