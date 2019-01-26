@@ -46,8 +46,7 @@ def pytest_addoption(parser):
 
     parser.addoption("--text-file-format", action="store",
                      help=("Text file format for narrative documentation. "
-                           "Options accepted are 'txt', 'tex', and 'rst'"),
-                     default='rst')
+                           "Options accepted are 'txt', 'tex', and 'rst'"))
 
     parser.addini("text_file_format", "changing default format for docs")
 
@@ -203,10 +202,12 @@ def pytest_configure(config):
             skip_next = False
             skip_all = False
 
-            file_format = config.getoption('text_file_format', 'rst')
+            file_format = config.option.text_file_format or config.getini('text_file_format')
 
             if file_format in comment_characters:
                 comment_char = comment_characters[file_format]
+            else:
+                comment_char = comment_characters['rst']
 
             for entry in result:
                 if isinstance(entry, six.string_types) and entry:
@@ -265,9 +266,8 @@ def pytest_configure(config):
     config.pluginmanager.register(
         DoctestPlus(DocTestModulePlus, DocTestTextfilePlus,
                     config.getini('doctest_rst') or config.option.doctest_rst,
-                    config.getini('text_file_format') or config.option.text_file_format),
+                    config.option.text_file_format or config.getini('text_file_format')),
         'doctestplus')
-
     # Remove the doctest_plugin, or we'll end up testing the .rst files twice.
     config.pluginmanager.unregister(doctest_plugin)
 
@@ -286,7 +286,10 @@ class DoctestPlus(object):
         self._doctest_module_item_cls = doctest_module_item_cls
         self._doctest_textfile_item_cls = doctest_textfile_item_cls
         self._run_rst_doctests = run_rst_doctests
-        self._text_file_ext = '.{}'.format(text_file_format)
+        if text_file_format:
+            self._text_file_ext = '.{}'.format(text_file_format)
+        else:
+            self._text_file_ext = '.rst'
         # Directories to ignore when adding doctests
         self._ignore_paths = []
 
