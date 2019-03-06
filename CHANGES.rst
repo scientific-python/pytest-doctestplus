@@ -1,10 +1,25 @@
+0.3.0 (unreleased)
+==================
+
+- Honor the ``collect_ignore`` option used in ``conftest.py``. [#36]
+
+- Make use of ``doctest_optionflags`` settings. [#39]
+
+- Make it possible to set ``FLOAT_CMP`` globally in ``setup.cfg``. [#40]
+
+- Drop support for ``pytest`` versions earlier than 3.0. [#46]
+
+- Extend ``doctest-skip``, ``doctest-skip-all``, and ``doctest-requires``
+  directives to work in TeX files. [#43]
+
+
 0.2.0 (2018-11-14)
 ==================
 
-- Add `doctest-plus-atol` and `doctest-plus-rtol` options for setting the
+- Add ``doctest-plus-atol`` and ``doctest-plus-rtol`` options for setting the
   numerical tolerance. [#21]
 
-- Update behavior of `--doctest-modules` option when plugin is installed. [#26]
+- Update behavior of ``--doctest-modules`` option when plugin is installed. [#26]
 
 0.1.3 (2018-04-20)
 ==================

@@ -84,6 +84,12 @@ reason both ``--doctest-modules`` and ``--doctest-plus`` are given, the
 ``pytest-doctestplus`` plugin will be used, regardless of the contents of
 ``setup.cfg``.
 
+This plugin respects the doctest options that are used by the built-in doctest
+plugin and are set in ``doctest_optionflags`` in ``setup.cfg``. By default,
+``ELLIPSIS`` and ``NORMALIZE_WHITESPACE`` are used. For a description of all
+doctest settings, see the `doctest documentation
+<https://https://docs.python.org/3/library/doctest.html#option-flags>`_.
+
 Doctest Directives
 ~~~~~~~~~~~~~~~~~~
 
@@ -119,6 +125,16 @@ Python `float` objects and compared numerically.  This means that small
 differences in representation of roundoff digits will be ignored by the
 doctest.  The values are otherwise compared exactly, so more significant
 (albeit possibly small) differences will still be caught by these tests.
+
+This flag can be enabled globally by adding it to ``setup.cfg`` as in
+
+.. code-block:: ini
+
+    doctest_optionflags =
+        NORMALIZE_WHITESPACE
+        ELLIPSIS
+        FLOAT_CMP
+
 
 Skipping Tests
 ~~~~~~~~~~~~~~

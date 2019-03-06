@@ -19,7 +19,7 @@ def readme():
 
 setup(
     name='pytest-doctestplus',
-    version='0.2.0',
+    version='0.3.0.dev',
     license='BSD',
     description='Pytest plugin with advanced doctest features.',
     long_description=readme(),
@@ -48,7 +48,7 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=[ 'doctest', 'rst', 'pytest', 'py.test' ],
-    install_requires=[ 'six', 'pytest>=2.8.0', 'numpy>=1.10' ],
+    install_requires=[ 'six', 'pytest>=3.0', 'numpy>=1.10' ],
     python_requires='>=2.7',
     entry_points={
         'pytest11': [
