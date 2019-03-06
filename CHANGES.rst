@@ -1,4 +1,4 @@
-0.3.0 (unreleased)
+0.3.0 (2019-03-06)
 ==================
 
 - Honor the ``collect_ignore`` option used in ``conftest.py``. [#36]
