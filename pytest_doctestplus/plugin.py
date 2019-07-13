@@ -19,7 +19,7 @@ from .output_checker import OutputChecker, FIX
 
 comment_characters = {'txt': '#',
                       'tex': '%',
-                      'rst': '\.\.'
+                      'rst': r'\.\.'
                       }
 
 
