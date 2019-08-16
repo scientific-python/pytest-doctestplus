@@ -36,10 +36,11 @@ matrix:
           env: PYTHON_VERSION=3.7
 
         # Try a run against latest pytest
-        - env: PYTHON_VERSION=3.7 PYTEST_VERSION=4
+        - env: PYTHON_VERSION=3.7 PYTEST_VERSION=5
 
-    allow_failures:
-        - env: PYTHON_VERSION=3.7 PYTEST_VERSION=4
+# COMMENTED OUT FOR NOW
+#    allow_failures:
+#        - env: PYTHON_VERSION=3.7 PYTEST_VERSION=5
 
 install:
     - git clone git://github.com/astropy/ci-helpers.git
