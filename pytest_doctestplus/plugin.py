@@ -160,7 +160,7 @@ def pytest_configure(config):
             failed, tot = doctest.testfile(
                 str(self.fspath), module_relative=False,
                 optionflags=options, parser=DocTestParserPlus(),
-                extraglobs=dict(getfixture=fixture_request.getfuncargvalue),
+                extraglobs=dict(getfixture=fixture_request.getfixturevalue),
                 raise_on_error=True, verbose=False, encoding='utf-8')
 
         def reportinfo(self):
