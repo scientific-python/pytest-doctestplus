@@ -1,6 +1,11 @@
 0.4.0 (unreleased)
 ==================
 
+- Avoid ``SyntaxWarning`` regarding invalid escape sequence in Python
+  3.9. [#62]
+
+- Compatibility with ``pytest`` 5.1 to avoid ``AttributeError`` caused by
+  ``FixtureRequest``. [#63]
 
 0.3.0 (2019-03-06)
 ==================
