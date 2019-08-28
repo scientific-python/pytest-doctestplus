@@ -203,7 +203,7 @@ The following example illustrates how a doctest that uses remote data should be
 marked::
 
     .. code-block:: python
-    
+
         >>> from urlib.request import urlopen
         >>> url = urlopen('http://astropy.org') # doctest: +REMOTE_DATA
 
@@ -220,10 +220,6 @@ Development Status
 .. image:: https://travis-ci.org/astropy/pytest-doctestplus.svg
     :target: https://travis-ci.org/astropy/pytest-doctestplus
     :alt: Travis CI Status
-
-.. image:: https://ci.appveyor.com/api/projects/status/vwbkv8vulemhak2p?svg=true 
-    :target: https://ci.appveyor.com/project/Astropy/pytest-remotedata/branch/master
-    :alt: Appveyor Status
 
 Questions, bug reports, and feature requests can be submitted on `github`_.
 

@@ -5,6 +5,7 @@ language: c
 
 os:
     - linux
+    - windows
 
 # Use Travis' container-based architecture
 sudo: false
