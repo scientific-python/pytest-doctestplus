@@ -1,4 +1,4 @@
-0.4.0 (unreleased)
+0.4.0 (2019-09-17)
 ==================
 
 - Avoid ``SyntaxWarning`` regarding invalid escape sequence in Python
@@ -6,6 +6,7 @@
 
 - Compatibility with ``pytest`` 5.1 to avoid ``AttributeError`` caused by
   ``FixtureRequest``. [#63]
+
 
 0.3.0 (2019-03-06)
 ==================
@@ -19,7 +20,7 @@
 - Drop support for ``pytest`` versions earlier than 3.0. [#46]
 
 - Extend ``doctest-skip``, ``doctest-skip-all``, and ``doctest-requires``
-  directives to work in TeX files. [#43]
+  directives to work in TeX files. [#43, #47]
 
 
 0.2.0 (2018-11-14)
