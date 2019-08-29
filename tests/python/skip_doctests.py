@@ -12,6 +12,7 @@ def bad_doctest():
     5
     """
 
+
 def another_bad_doctest():
     """
     This test will fail if __doctest_skip__ is not working properly.
@@ -21,10 +22,11 @@ def another_bad_doctest():
     5
     """
 
+
 def yet_another_bad_doctest():
     """
     This test will fail if __doctest_skip__ is not working properly.
-    
+
     >>> NOT VALID PYTHON, RIGHT
     >>> + 7
     42

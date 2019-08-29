@@ -429,8 +429,8 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                 name = obj.__name__
             else:
                 raise ValueError("DocTestFinder.find: name must be given "
-                                 "when obj.__name__ doesn't exist: {!r}".format(
-                        (type(obj),)))
+                                 "when obj.__name__ doesn't exist: {!r}"
+                                 .format((type(obj),)))
 
             def test_filter(test):
                 for pat in getattr(obj, '__doctest_skip__', []):
