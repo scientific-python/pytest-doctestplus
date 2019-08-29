@@ -7,11 +7,13 @@ import six
 
 import doctest
 import fnmatch
-import imp
+import importlib
 import os
 import re
 import sys
 import warnings
+
+from distutils.version import LooseVersion
 
 import pytest
 
@@ -400,9 +402,17 @@ class DocTestFinderPlus(doctest.DocTestFinder):
             if mod in cls._import_cache:
                 if not cls._import_cache[mod]:
                     return False
-            try:
-                imp.find_module(mod)
-            except ImportError:
+
+            if LooseVersion(sys.version) < LooseVersion('3.4'):
+                import imp
+                try:
+                    module = imp.find_module(mod)
+                except ImportError:
+                    module = None
+            else:
+                module = importlib.find_loader(mod)
+
+            if module is None:
                 cls._import_cache[mod] = False
                 return False
             else:
