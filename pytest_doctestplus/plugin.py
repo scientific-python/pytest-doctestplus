@@ -410,7 +410,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                 except ImportError:
                     module = None
             else:
-                module = importlib.find_loader(mod)
+                module = importlib.util.find_spec(mod)
 
             if module is None:
                 cls._import_cache[mod] = False
