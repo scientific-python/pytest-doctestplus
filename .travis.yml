@@ -7,6 +7,8 @@ os:
     - linux
     - windows
 
+stage: All tests
+
 # Use Travis' container-based architecture
 sudo: false
 
@@ -23,15 +25,32 @@ env:
 
     matrix:
         - PYTHON_VERSION=2.7 PYTEST_COMMAND='py.test'
-        - PYTHON_VERSION=2.7
         - PYTHON_VERSION=3.5 NUMPY_VERSION=1.15
         - PYTHON_VERSION=3.6
         - PYTHON_VERSION=3.7 PYTEST_VERSION=3.8
         - PYTHON_VERSION=3.7 PYTEST_VERSION=3.9
-        - PYTHON_VERSION=3.7
+
+stages:
+    # only run 2 jobs initially
+    - name: Initial tests
+    - name: All tests
 
 matrix:
     include:
+        - os: linux
+          env: PYTHON_VERSION=3.7
+          stage: Initial tests
+
+        - os: linux
+          env: PYTHON_VERSION=2.7
+          stage: Initial tests
+
+        - os: windows
+          env: PYTHON_VERSION=3.7
+
+        - os: windows
+          env: PYTHON_VERSION=2.7
+
         # Try a run on OSX with latest versions of python and pytest
         - os: osx
           env: PYTHON_VERSION=3.7
