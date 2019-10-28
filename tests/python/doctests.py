@@ -11,6 +11,7 @@ __doctest_requires__ = {
     'depends_on_two_modules': ['os', 'foobar'],
 }
 
+
 def this_test_works():
     """
     This test should be executed by --doctest-plus and should pass.
@@ -19,6 +20,7 @@ def this_test_works():
     2
     """
 
+
 def skip_this_test():
     """
     This test will cause a failure if __doctest_skip__ is not working properly.
@@ -26,6 +28,7 @@ def skip_this_test():
     >>> x + y
     2
     """
+
 
 def depends_on_real_module():
     """
@@ -36,14 +39,16 @@ def depends_on_real_module():
     '.'
     """
 
+
 def depends_on_foobar():
     """
     This test will cause a failure if __doctest_requires__ is not working.
 
     >>> import foobar
     >>> foobar.foo.bar('baz')
-    42 
+    42
     """
+
 
 def depends_on_two_modules():
     """
@@ -54,6 +59,7 @@ def depends_on_two_modules():
     >>> foobar.foo.bar(os.path.curdir)
     'The meaning of life'
     """
+
 
 class ClassWithSomeBadDocTests(object):
     def this_test_works():
@@ -71,6 +77,7 @@ class ClassWithSomeBadDocTests(object):
         >>> x + y
         5
         """
+
 
 class ClassWithAllBadDocTests(object):
     def this_test_fails():

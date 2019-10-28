@@ -48,6 +48,11 @@ cover
 htmlcov
 .pytest_cache
 
+# Env
+.venv
+venv
+.env
+
 # Mac OSX
 .DS_Store
 

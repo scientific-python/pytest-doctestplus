@@ -1,3 +1,5 @@
+import pytest
+
 pytest_plugins = ['pytester']
 
 
@@ -97,6 +99,30 @@ def test_float_cmp_global(testdir):
             pass
     """
     )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(passed=1)
+
+
+@pytest.mark.xfail(reason='FLOAT_CMP and ELLIPSIS are not currently compatible')
+def test_float_cmp_and_ellipsis(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctest_optionflags = FLOAT_CMP ELLIPSIS
+        doctestplus = enabled
+    """)
+    p = testdir.makepyfile(
+        """
+        def f():
+            '''
+            >>> for char in ['A', 'B', 'C', 'D', 'E']:
+            ...     print(char, float(ord(char)))
+            A 65.0
+            B 66.0
+            ...
+            '''
+            pass
+    """)
     reprec = testdir.inline_run(p, "--doctest-plus")
     reprec.assertoutcome(passed=1)
 

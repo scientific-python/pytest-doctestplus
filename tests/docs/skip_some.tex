@@ -1,0 +1,91 @@
+\documentclass{article}
+\setlength{\parindent}{0cm}
+
+\usepackage{listings}
+\lstnewenvironment{python}[1][]{
+\lstset{
+language=python,
+}}{}
+
+\begin{document}
+
+Some of the example code blocks in this file are perfectly valid and will pass
+if they run. Some are not. The intent of this file is to test the directives
+that are provided by the ``--doctest-text'' option to make sure that the bad
+ones get skipped.
+
+\section{Here's One That Works}
+
+This code block should work just fine::
+
+\begin{python}
+>>> 1 + 1
+2
+
+\end{python}
+
+This one should work just fine as well::
+
+\begin{python}
+>>> x = 5
+>>> x
+5
+
+\end{python}
+
+\section{Here's One That Doesn't}
+
+This code won't run. So let's make sure that it gets skipped:
+
+% doctest-skip::
+\begin{python}
+>>> y + z
+42
+
+\end{python}
+
+This one doesn't work either:
+
+% doctest-skip::
+\begin{python}
+>>> print(blue)
+'blue'
+
+\end{python}
+
+\section{Good Imports}
+
+There should be nothing wrong with this code, so we'll let it run:
+
+\begin{python}
+>>> import os
+>>> os.path.curdir
+'.'
+
+\end{python}
+
+Make sure the `doctest-requires` directive works for modules that are
+available:
+
+% doctest-requires:: sys
+\begin{python}
+>>> import sys
+
+\end{python}
+
+
+\section{Bad Imports}
+
+
+I don't think this module exists, so we should make sure that this code doesn't
+run:
+
+% doctest-requires:: foobar
+\begin{python}
+>>> import foobar
+>>> foobar.baz(42)
+1
+
+\end{python}
+
+\end{document}
