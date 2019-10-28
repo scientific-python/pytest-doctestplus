@@ -128,7 +128,7 @@ def test_float_cmp_global(testdir):
             '''
             pass
     """)
-    testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=0)  # not close enough
+    testdir.inline_run(p, "--doctest-plus").assertoutcome(failed=1)  # not close enough
 
 
 @pytest.mark.xfail(reason='FLOAT_CMP and ELLIPSIS are not currently compatible')
