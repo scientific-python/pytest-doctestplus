@@ -124,10 +124,7 @@ class OutputChecker(doctest.OutputChecker):
                 else:
                     nw_.append(nw)
 
-                ng = float(ng)
-                nw = float(nw)
-                if not (abs(ng - nw) <= self.atol + self.rtol * abs(nw)
-                        or (math.isnan(ng) and math.isnan(nw))):
+                if not isclose(ng, nw, rtol=self.rtol, atol=self.atol):
                     return False
 
             # replace all floats in the "got" string by those from "wanted".
@@ -190,3 +187,9 @@ class OutputChecker(doctest.OutputChecker):
         # new-style class.
         return self._original_output_checker.output_difference(
             self, want, got, flags)
+
+
+def isclose(ng, nw, rtol=1e-05, atol=1e-08):
+    ng = float(ng)
+    nw = float(nw)
+    return abs(ng - nw) <= atol + rtol * abs(nw) or (math.isnan(ng) and math.isnan(nw))
