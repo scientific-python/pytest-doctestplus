@@ -189,7 +189,12 @@ class OutputChecker(doctest.OutputChecker):
             self, want, got, flags)
 
 
-def isclose(ng, nw, rtol=1e-05, atol=1e-08):
-    ng = float(ng)
-    nw = float(nw)
-    return abs(ng - nw) <= atol + rtol * abs(nw) or (math.isnan(ng) and math.isnan(nw))
+try:
+    import numpy
+    from functools import partial
+    isclose = partial(numpy.isclose, equal_nan=True)
+except ImportError:
+    def isclose(ng, nw, rtol=1e-05, atol=1e-08):
+        ng = float(ng)
+        nw = float(nw)
+        return abs(ng - nw) <= atol + rtol * abs(nw) or (math.isnan(ng) and math.isnan(nw))
