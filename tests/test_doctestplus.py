@@ -65,8 +65,7 @@ def test_float_cmp(testdir):
             >>> x
             0.333333
             '''
-            pass
-
+            fail
         def g():
             '''
             >>> x = 1/3.
@@ -78,6 +77,29 @@ def test_float_cmp(testdir):
     )
     reprec = testdir.inline_run(p, "--doctest-plus")
     reprec.assertoutcome(failed=1, passed=1)
+
+
+def test_float_cmp_list(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctest_optionflags = ELLIPSIS
+        doctestplus = enabled
+    """
+    )
+    p = testdir.makepyfile(
+        """
+        def g():
+            '''
+            >>> x = [1/3., 2/3.]
+            >>> x    # doctest: +FLOAT_CMP
+            [0.333333, 0.666666]
+            '''
+            pass
+    """
+    )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(failed=0, passed=1)
 
 
 def test_float_cmp_global(testdir):
