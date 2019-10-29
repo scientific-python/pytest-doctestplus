@@ -20,7 +20,6 @@ env:
         - PYTHON_VERSION=3.6
         - PYTEST_VERSION=4
         - PYTEST_COMMAND='pytest'
-        - NUMPY_VERSION=stable
         - CONDA_DEPENDENCIES='six'
 
     matrix:
@@ -38,18 +37,12 @@ stages:
 matrix:
     include:
         - os: linux
-          env: PYTHON_VERSION=3.7
+          env: PYTHON_VERSION=3.7 NUMPY_VERSION=stable
           stage: Initial tests
 
         - os: linux
           env: PYTHON_VERSION=2.7
           stage: Initial tests
-
-        - os: windows
-          env: PYTHON_VERSION=3.7
-
-        - os: windows
-          env: PYTHON_VERSION=2.7
 
         # Try a run on OSX with latest versions of python and pytest
         - os: osx
@@ -57,10 +50,6 @@ matrix:
 
         # Try a run against latest pytest
         - env: PYTHON_VERSION=3.7 PYTEST_VERSION=5
-
-# COMMENTED OUT FOR NOW
-#    allow_failures:
-#        - env: PYTHON_VERSION=3.7 PYTEST_VERSION=5
 
 install:
     - git clone git://github.com/astropy/ci-helpers.git

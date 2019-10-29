@@ -81,15 +81,12 @@ def test_float_cmp(testdir):
 
 
 def test_float_cmp_global(testdir):
-    testdir.makeini(
-        """
+    testdir.makeini("""
         [pytest]
         doctest_optionflags = FLOAT_CMP
         doctestplus = enabled
-    """
-    )
-    p = testdir.makepyfile(
-        """
+    """)
+    p = testdir.makepyfile("""
         def f():
             '''
             >>> x = 1/3.
@@ -97,10 +94,41 @@ def test_float_cmp_global(testdir):
             0.333333
             '''
             pass
-    """
-    )
-    reprec = testdir.inline_run(p, "--doctest-plus")
-    reprec.assertoutcome(passed=1)
+    """)
+    testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
+
+    p = testdir.makepyfile("""
+        def f():
+            '''
+            >>> x = 2/7.
+            >>> x
+            0.285714
+            '''
+            pass
+    """)
+    testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
+
+    p = testdir.makepyfile("""
+        def f():
+            '''
+            >>> x = 1/13.
+            >>> x
+            0.076923
+            '''
+            pass
+    """)
+    testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
+
+    p = testdir.makepyfile("""
+        def f():
+            '''
+            >>> x = 1/13.
+            >>> x
+            0.07692
+            '''
+            pass
+    """)
+    testdir.inline_run(p, "--doctest-plus").assertoutcome(failed=1)  # not close enough
 
 
 @pytest.mark.xfail(reason='FLOAT_CMP and ELLIPSIS are not currently compatible')

@@ -6,8 +6,7 @@ normalizations of Python expression output.  See the docstring on
 
 import doctest
 import re
-
-import numpy as np
+import math
 
 import six
 from six.moves import zip
@@ -125,8 +124,7 @@ class OutputChecker(doctest.OutputChecker):
                 else:
                     nw_.append(nw)
 
-                if not np.allclose(float(ng), float(nw), rtol=self.rtol,
-                                   atol=self.atol, equal_nan=True):
+                if not isclose(ng, nw, rtol=self.rtol, atol=self.atol):
                     return False
 
             # replace all floats in the "got" string by those from "wanted".
@@ -189,3 +187,15 @@ class OutputChecker(doctest.OutputChecker):
         # new-style class.
         return self._original_output_checker.output_difference(
             self, want, got, flags)
+
+
+try:
+    import numpy
+
+    def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
+        a, b = float(a), float(b)
+        return numpy.isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
+except ImportError:
+    def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
+        a, b = float(a), float(b)
+        return abs(a - b) <= atol + rtol * abs(b) or (equal_nan and math.isnan(a) and math.isnan(b))
