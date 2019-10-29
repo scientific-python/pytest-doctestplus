@@ -191,10 +191,11 @@ class OutputChecker(doctest.OutputChecker):
 
 try:
     import numpy
-    from functools import partial
-    isclose = partial(numpy.isclose, equal_nan=True)
+
+    def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
+        a, b = float(a), float(b)
+        return numpy.isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
 except ImportError:
-    def isclose(ng, nw, rtol=1e-05, atol=1e-08):
-        ng = float(ng)
-        nw = float(nw)
-        return abs(ng - nw) <= atol + rtol * abs(nw) or (math.isnan(ng) and math.isnan(nw))
+    def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
+        a, b = float(a), float(b)
+        return abs(a - b) <= atol + rtol * abs(b) or (equal_nan and math.isnan(a) and math.isnan(b))
