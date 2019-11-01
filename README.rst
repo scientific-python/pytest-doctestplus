@@ -146,7 +146,7 @@ not be executed when testing documentation.
 
     >>> open('file.txt') # doctest: +SKIP
 
-And in `.rst` documentation, whole code example blocks can be skipped with the
+In Sphinx ``.rst`` documentation, whole code example blocks can be skipped with the
 directive
 
 .. code-block:: rst
@@ -156,9 +156,8 @@ directive
         >>> import asdf
         >>> asdf.open('file.asdf')
 
-However, it is often useful to be
-able to skip docstrings associated with particular functions, methods, classes,
-or even entire files.
+However, it is often useful to be able to skip docstrings associated with
+particular functions, methods, classes, or even entire files.
 
 Skip Unconditionally
 ^^^^^^^^^^^^^^^^^^^^
@@ -204,6 +203,16 @@ Consider the following example::
 Having this module-level variable will require ``scipy`` to be importable
 in order to run the doctests for functions ``func1`` and ``func2`` in that
 module.
+
+Similarly, in Sphinx ``.rst`` documentation, whole code example blocks can be
+conditionally skipped if a dependency is not available.
+
+.. code-block:: rst
+
+    .. doctest-requires:: asdf
+    
+        >>> import asdf
+        >>> asdf.open('file.asdf')
 
 Remote Data
 ~~~~~~~~~~~
