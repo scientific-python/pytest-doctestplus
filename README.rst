@@ -140,9 +140,24 @@ Skipping Tests
 ~~~~~~~~~~~~~~
 
 Doctest provides the ``+SKIP`` directive for skipping statements that should
-not be executed when testing documentation. However, it is often useful to be
-able to skip docstrings associated with particular functions, methods, classes,
-or even entire files.
+not be executed when testing documentation.
+
+.. code-block:: python
+
+    >>> open('file.txt') # doctest: +SKIP
+
+In Sphinx ``.rst`` documentation, whole code example blocks can be skipped with the
+directive
+
+.. code-block:: rst
+
+    .. doctest-skip::
+    
+        >>> import asdf
+        >>> asdf.open('file.asdf')
+
+However, it is often useful to be able to skip docstrings associated with
+particular functions, methods, classes, or even entire files.
 
 Skip Unconditionally
 ^^^^^^^^^^^^^^^^^^^^
@@ -189,6 +204,16 @@ Having this module-level variable will require ``scipy`` to be importable
 in order to run the doctests for functions ``func1`` and ``func2`` in that
 module.
 
+Similarly, in Sphinx ``.rst`` documentation, whole code example blocks can be
+conditionally skipped if a dependency is not available.
+
+.. code-block:: rst
+
+    .. doctest-requires:: asdf
+    
+        >>> import asdf
+        >>> asdf.open('file.asdf')
+
 Remote Data
 ~~~~~~~~~~~
 
@@ -200,12 +225,12 @@ be enabled using the ``--remote-data`` command line option to ``pytest``. See
 the `pytest-remotedata plugin documentation`__ for more details.
 
 The following example illustrates how a doctest that uses remote data should be
-marked::
+marked:
 
-    .. code-block:: python
-
-        >>> from urlib.request import urlopen
-        >>> url = urlopen('http://astropy.org') # doctest: +REMOTE_DATA
+.. code-block:: python
+    
+    >>> from urlib.request import urlopen
+    >>> url = urlopen('http://astropy.org') # doctest: +REMOTE_DATA
 
 The ``+REMOTE_DATA`` directive indicates that the marked statement should only
 be executed if the ``--remote-data`` option is given. By default, all
