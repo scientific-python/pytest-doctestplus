@@ -225,12 +225,12 @@ be enabled using the ``--remote-data`` command line option to ``pytest``. See
 the `pytest-remotedata plugin documentation`__ for more details.
 
 The following example illustrates how a doctest that uses remote data should be
-marked::
+marked:
 
-    .. code-block:: python
-
-        >>> from urlib.request import urlopen
-        >>> url = urlopen('http://astropy.org') # doctest: +REMOTE_DATA
+.. code-block:: python
+    
+    >>> from urlib.request import urlopen
+    >>> url = urlopen('http://astropy.org') # doctest: +REMOTE_DATA
 
 The ``+REMOTE_DATA`` directive indicates that the marked statement should only
 be executed if the ``--remote-data`` option is given. By default, all
