@@ -140,7 +140,23 @@ Skipping Tests
 ~~~~~~~~~~~~~~
 
 Doctest provides the ``+SKIP`` directive for skipping statements that should
-not be executed when testing documentation. However, it is often useful to be
+not be executed when testing documentation.
+
+.. code-block:: python
+
+    >>> open('file.txt') # doctest: +SKIP
+
+And in `.rst` documentation, whole code example blocks can be skipped with the
+directive
+
+.. code-block:: rst
+
+    .. doctest-skip::
+    
+        >>> import asdf
+        >>> asdf.open('file.asdf')
+
+However, it is often useful to be
 able to skip docstrings associated with particular functions, methods, classes,
 or even entire files.
 
