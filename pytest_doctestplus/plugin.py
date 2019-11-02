@@ -412,7 +412,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                 import importlib.util
                 try:
                     module = importlib.util.find_spec(mod)
-                except ModuleNotFoundError:
+                except ImportError:
                     module = None
 
             if module is None:
