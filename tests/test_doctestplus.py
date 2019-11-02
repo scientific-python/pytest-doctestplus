@@ -167,6 +167,7 @@ def test_float_cmp_and_ellipsis(testdir):
     # whitespace is normalized by default
     p = testdir.makepyfile(
         """
+        from __future__ import print_function
         def f():
             '''
             >>> for char in ['A', 'B', 'C', 'D', 'E']:
@@ -181,6 +182,7 @@ def test_float_cmp_and_ellipsis(testdir):
 
     p = testdir.makepyfile(
         """
+        from __future__ import print_function
         def f():
             '''
             >>> for char in ['A', 'B', 'C', 'D', 'E']:
@@ -196,6 +198,7 @@ def test_float_cmp_and_ellipsis(testdir):
 
     p = testdir.makepyfile(
         """
+        from __future__ import print_function
         def f():
             '''
             >>> for char in ['A', 'B', 'C', 'D', 'E']:
@@ -212,6 +215,7 @@ def test_float_cmp_and_ellipsis(testdir):
 
     p = testdir.makepyfile(
         """
+        from __future__ import print_function
         def f():
             '''
             >>> for char in ['A', 'B', 'C', 'D', 'E']:
