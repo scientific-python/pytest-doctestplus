@@ -7,7 +7,6 @@ import six
 
 import doctest
 import fnmatch
-import importlib.util
 import os
 import re
 import sys
@@ -410,6 +409,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                 except ImportError:
                     module = None
             else:
+                import importlib.util
                 try:
                     module = importlib.util.find_spec(mod)
                 except ModuleNotFoundError:
