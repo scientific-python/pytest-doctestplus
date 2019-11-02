@@ -91,6 +91,120 @@ class OutputChecker(doctest.OutputChecker):
 
         return want, got
 
+    def find_numbers(self, text):
+        """
+        Find float strings in text.
+        >>> OutputChecker().find_numbers("1.1 foo abr 2.22")
+        ['1.1', '2.22']
+        """
+        matches = self.num_want_rgx.finditer(text)
+        return [match.group(1) for match in matches]
+
+    def equal_floats(self, a, b):
+        """
+        Compare float strings.
+        >>> OutputChecker().equal_floats('1.1', '1.10000000001')
+        True
+        >>> OutputChecker().equal_floats('1.1', '1.11')
+        False
+        """
+        a, b = float(a), float(b)
+        return isclose(a, b, rtol=self.rtol, atol=self.atol)
+
+    def startswith(self, arr, prefix):
+        """
+        Check if array of str/floats starts with floats in prefix.
+        >>> OutputChecker().startswith(['1', '2', '3'], ['1', '2.00000000001'])
+        True
+        >>> OutputChecker().startswith(['1', '2', '3'], ['1', '2.1'])
+        False
+        """
+        if len(prefix) == 0:
+            return True
+        if len(arr) < len(prefix):
+            return False
+        for a, b in zip(arr, prefix):
+            if not self.equal_floats(a, b):
+                return False
+        return True
+
+    def endswith(self, arr, postfix):
+        """
+        Check if array of str/floats ends with floats in postfix.
+        >>> OutputChecker().endswith(['1', '2', '3'], ['2', '3.00000000001'])
+        True
+        >>> OutputChecker().endswith(['1', '2', '3'], ['2', '3.1'])
+        False
+        """
+        return self.startswith(arr[::-1], postfix[::-1])
+
+    def find(self, arr, suffix, start, end):
+        """
+        Search for floats from suffix in arr.
+        >>> OutputChecker().find(['1', '2', '3', '4'], ['2', '3.00000000001'], 0, 4)
+        1
+        >>> OutputChecker().find(['1', '2', '3', '4'], ['2', '3.1'], 0, 4)
+        -1
+        """
+        if len(suffix) == 0:
+            return start
+        arr = arr[start:end]
+        for i, a in enumerate(arr):
+            # if current floats match...
+            if self.equal_floats(a, suffix[0]):
+                # ... then compare the rest of numbers from suffix
+                if self.startswith(arr[i:], suffix):
+                    return start + i
+        return -1
+
+    def partial_match(self, arr, chunks):
+        """
+        Check that each chunk in chunks is inside provided array of strings/floats.
+        This is essentially list-with-floats equivalent of ellipsis matching.
+        >>> OutputChecker().partial_match(
+        ...   ['1', '2', '3', '4'],
+        ...   [['1', '2'], ['4']],
+        ... )
+        True
+        >>> OutputChecker().partial_match(
+        ...   ['1', '2', '3', '4'],
+        ...   [['1', '2'], []],
+        ... )
+        True
+        >>> OutputChecker().partial_match(
+        ...   ['1', '2', '3', '4'],
+        ...   [['1', '2'], ['5']],
+        ... )
+        False
+        """
+        assert len(chunks) >= 2
+        startpos, endpos = 0, len(arr)
+        chunk = chunks[0]
+        if chunk:  # starts with exact match
+            if self.startswith(arr, chunk):
+                startpos = len(chunk)
+                del chunks[0]
+            else:
+                return False
+        chunk = chunks[-1]
+        if chunk:  # ends with exact match
+            if self.endswith(arr, chunk):
+                endpos -= len(chunk)
+                del chunks[-1]
+            else:
+                return False
+
+        if startpos > endpos:
+            return False
+
+        for chunk in chunks:
+            startpos = self.find(arr, chunk, startpos, endpos)
+            if startpos < 0:
+                return False
+            startpos += len(chunk)
+
+        return True
+
     def normalize_floats(self, want, got, flags):
         """
         Alternative to the built-in check_output that also handles parsing
@@ -101,38 +215,6 @@ class OutputChecker(doctest.OutputChecker):
         FLOAT_CMP is enabled, it totally takes over for check_output.
         """
 
-        # Handle the common case first, for efficiency:
-        # if they're string-identical, always return true.
-        if got == want:
-            return True
-
-        # TODO parse integers as well ?
-        # Parse floats and compare them. If some of the parsed floats contain
-        # ellipses, skip the comparison.
-        matches = self.num_got_rgx.finditer(got)
-        numbers_got = [match.group(1) for match in matches]  # list of strs
-        matches = self.num_want_rgx.finditer(want)
-        numbers_want = [match.group(1) for match in matches]  # list of strs
-        if len(numbers_got) != len(numbers_want):
-            return False
-        if len(numbers_got) > 0:
-            nw_ = []
-            for ng, nw in zip(numbers_got, numbers_want):
-                if '...' in nw:
-                    nw_.append(ng)
-                    continue
-                else:
-                    nw_.append(nw)
-
-                if not isclose(ng, nw, rtol=self.rtol, atol=self.atol):
-                    return False
-
-            # replace all floats in the "got" string by those from "wanted".
-            # TODO: can this be done more elegantly? Used to replace all with
-            # '{}' and then format, but this is problematic if the string
-            # contains other curly braces (e.g., from a dict).
-            got = self.num_got_rgx.sub(lambda x: nw_.pop(0), got)
-
         # <BLANKLINE> can be used as a special sequence to signify a
         # blank line, unless the DONT_ACCEPT_BLANKLINE flag is used.
         if not (flags & doctest.DONT_ACCEPT_BLANKLINE):
@@ -142,8 +224,6 @@ class OutputChecker(doctest.OutputChecker):
             # If a line in got contains only spaces, then remove the
             # spaces.
             got = re.sub(r'(?m)^\s*?$', '', got)
-            if got == want:
-                return True
 
         # This flag causes doctest to ignore any differences in the
         # contents of whitespace strings. Note that this can be used
@@ -151,17 +231,43 @@ class OutputChecker(doctest.OutputChecker):
         if flags & doctest.NORMALIZE_WHITESPACE:
             got = ' '.join(got.split())
             want = ' '.join(want.split())
-            if got == want:
-                return True
 
-        # The ELLIPSIS flag says to let the sequence "..." in `want`
-        # match any substring in `got`.
+        # Handle the common case first, for efficiency:
+        # if they're string-identical, always return true.
+        if got == want:
+            return True
+
+        got_ = self.num_got_rgx.sub('0.0', got)
+        want_ = self.num_got_rgx.sub('0.0', want)
+        # fail if strings with ellipsis and normalize floats are not equal
         if flags & doctest.ELLIPSIS:
-            if doctest._ellipsis_match(want, got):
-                return True
+            if not doctest._ellipsis_match(want_, got_):
+                return False
+        else:
+            if not got_ == want_:
+                return False
 
-        # We didn't find any match; return false.
-        return False
+        # at this point we made sure that non-float parts of strings are equivalent
+        # so now we need to compare each number
+
+        numbers_got = self.find_numbers(got)
+        numbers_want_chunks = [
+            self.find_numbers(chunk)
+            for chunk in want.split(doctest.ELLIPSIS_MARKER)
+        ]
+        if flags & doctest.ELLIPSIS and len(numbers_want_chunks) >= 2:
+            return self.partial_match(numbers_got, numbers_want_chunks)
+
+        # TODO parse integers as well ?
+        # Parse floats and compare them.
+        numbers_want = [f for chunk in numbers_want_chunks for f in chunk]  # flatten array
+        if len(numbers_got) != len(numbers_want):
+            return False
+        for ng, nw in zip(numbers_got, numbers_want):
+            if not self.equal_floats(ng, nw):
+                return False
+
+        return True
 
     def check_output(self, want, got, flags):
         if (flags & IGNORE_OUTPUT or (six.PY2 and flags & IGNORE_OUTPUT_2) or
@@ -193,9 +299,7 @@ try:
     import numpy
 
     def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
-        a, b = float(a), float(b)
         return numpy.isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
 except ImportError:
     def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
-        a, b = float(a), float(b)
         return abs(a - b) <= atol + rtol * abs(b) or (equal_nan and math.isnan(a) and math.isnan(b))
