@@ -257,7 +257,10 @@ def pytest_configure(config):
                         match = matches[0]
 
                     if match:
-                        required = re.split(r'\s*,?\s*', match.group(1))
+                        # sys - ok
+                        # sys, sys - ok
+                        # sys,sys - not ok
+                        required = re.split(r'\s*,?\s+', match.group(1))
                 elif isinstance(entry, doctest.Example):
                     if (skip_all or skip_next or
                         not DocTestFinderPlus.check_required_modules(required)):

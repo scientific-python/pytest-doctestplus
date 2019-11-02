@@ -201,3 +201,45 @@ def test_allow_bytes_unicode(testdir):
     )
     reprec = testdir.inline_run(p, "--doctest-plus")
     reprec.assertoutcome(passed=1)
+
+
+def test_requires(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    # should be ignored
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-requires:: foobar
+
+            >>> import foobar
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+
+    # should run as expected
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-requires:: sys
+
+            >>> import sys
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+
+    # testing this in case if doctest-requires just ignores everything
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-requires:: sys
+
+            >>> import sys
+            >>> assert 0
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(failed=1)
