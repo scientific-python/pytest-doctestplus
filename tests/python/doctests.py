@@ -8,6 +8,7 @@ __doctest_skip__ = [
 
 __doctest_requires__ = {
     'depends_on_foobar': ['foobar'],
+    'depends_on_foobar_submodule': ['foobar.baz'],
     'depends_on_two_modules': ['os', 'foobar'],
 }
 
@@ -50,6 +51,16 @@ def depends_on_foobar():
     """
 
 
+def depends_on_foobar_submodule():
+    """
+    This test will cause a failure if __doctest_requires__ is not working.
+
+    >>> import foobar.baz
+    >>> foobar.baz.bar('baz')
+    42
+    """
+
+
 def depends_on_two_modules():
     """
     This test will cause a failure if __doctest_requires__ is not working.
@@ -80,7 +91,7 @@ class ClassWithSomeBadDocTests(object):
 
 
 class ClassWithAllBadDocTests(object):
-    def this_test_fails():
+    def this_test_fails(self):
         """
         This test will cause a failure if __doctest_skip__ is not working.
 
@@ -88,7 +99,7 @@ class ClassWithAllBadDocTests(object):
         5
         """
 
-    def this_test_also_fails():
+    def this_test_also_fails(self):
         """
         This test will cause a failure if __doctest_skip__ is not working.
 
