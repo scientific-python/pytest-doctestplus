@@ -256,7 +256,8 @@ def pytest_configure(config):
                         match = matches[0]
 
                     if match:
-                        required = re.split(r'\s*,?\s*', match.group(1))
+                        # 'a a' or 'a,a' or 'a, a'-> [a, a]
+                        required = re.split(r'\s*[,\s]\s*', match.group(1))
                 elif isinstance(entry, doctest.Example):
                     if (skip_all or skip_next or
                         not DocTestFinderPlus.check_required_modules(required)):
