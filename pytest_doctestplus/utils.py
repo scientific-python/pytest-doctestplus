@@ -49,7 +49,7 @@ class ModuleChecker:
         match = re.match(r'([A-Za-z0-9-_]+)([^A-Za-z0-9-_]+)([\d.]+$)', module)
         if not match:
             return False
-        package, cmp, version = match[1], match[2], match[3]
+        package, cmp, version = match.groups()
         package = package.lower()
 
         if package in self.packages:
