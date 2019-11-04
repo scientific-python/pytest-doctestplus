@@ -12,10 +12,9 @@ import re
 import sys
 import warnings
 
-from distutils.version import LooseVersion
-
 import pytest
 
+from pytest_doctestplus.utils import ModuleChecker
 from .output_checker import OutputChecker, FIX
 
 comment_characters = {'txt': '#',
@@ -395,32 +394,26 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
     # Caches the results of import attempts
     _import_cache = {}
+    _module_checker = ModuleChecker()
 
     @classmethod
     def check_required_modules(cls, mods):
+        """
+        Check that modules in :attr:`mods` list are available.
+        :param mods: list of module names. Modules can have specified versions
+          (eg 'numpy>=1.15')
+        :return: True if all modules are available.
+        """
         for mod in mods:
             if mod in cls._import_cache:
                 if not cls._import_cache[mod]:
                     return False
 
-            if LooseVersion(sys.version) < LooseVersion('3.4'):
-                import imp
-                try:
-                    module = imp.find_module(mod)
-                except ImportError:
-                    module = None
+            if cls._module_checker.check(mod):
+                cls._import_cache[mod] = True
             else:
-                import importlib.util
-                try:
-                    module = importlib.util.find_spec(mod)
-                except ImportError:
-                    module = None
-
-            if module is None:
                 cls._import_cache[mod] = False
                 return False
-            else:
-                cls._import_cache[mod] = True
         return True
 
     def find(self, obj, name=None, module=None, globs=None,

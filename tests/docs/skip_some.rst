@@ -64,3 +64,19 @@ run:
     >>> import foobar
     >>> foobar.baz(42)
     1
+
+
+Package version
+===============
+
+Code in doctest should run only if version condition is satisfied:
+
+.. doctest-requires:: numpy<=0.1
+
+    >>> import numpy
+    >>> assert 0
+
+
+.. doctest-requires:: pytest>=1.0 pytest>=2.0
+
+    >>> import pytest

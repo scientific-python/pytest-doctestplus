@@ -360,7 +360,7 @@ def test_requires(testdir):
     )
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
 
-    # testing this in case if doctest-requires just ignores everything
+    # testing this in case if doctest-requires just ignores everything and pass unconditionally
     p = testdir.makefile(
         '.rst',
         """
@@ -370,3 +370,25 @@ def test_requires(testdir):
         """
     )
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(failed=1)
+
+    # package with version is available
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-requires:: sys pytest>=1.0
+            >>> import sys, pytest
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+
+    # package with version is not available
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-requires:: sys pytest<1.0 glob
+            >>> import sys, pytest, glob
+            >>> assert 0
+        """
+    )
+    # passed because 'pytest<1.0' was not satisfied and 'assert 0' was not evaluated
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
