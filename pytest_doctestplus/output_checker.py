@@ -18,6 +18,7 @@ from six.moves import zip
 
 FIX = doctest.register_optionflag('FIX')
 FLOAT_CMP = doctest.register_optionflag('FLOAT_CMP')
+IGNORE_TRAILING_WHITESPACE = doctest.register_optionflag('IGNORE_TRAILING_WHITESPACE')
 IGNORE_OUTPUT = doctest.register_optionflag('IGNORE_OUTPUT')
 IGNORE_OUTPUT_2 = doctest.register_optionflag('IGNORE_OUTPUT_2')
 IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
@@ -280,6 +281,13 @@ class OutputChecker(doctest.OutputChecker):
         if flags & FLOAT_CMP:
             return self.normalize_floats(want, got, flags)
 
+        # This flag causes doctest to ignore trailing whitespace
+        # on each line of compared strings.
+        if flags & IGNORE_TRAILING_WHITESPACE:
+            got = remove_trailing_whitespace(got)
+            want = remove_trailing_whitespace(want)
+            return got == want
+
         # Can't use super here because doctest.OutputChecker is not a
         # new-style class.
         return self._original_output_checker.check_output(
@@ -293,6 +301,10 @@ class OutputChecker(doctest.OutputChecker):
         # new-style class.
         return self._original_output_checker.output_difference(
             self, want, got, flags)
+
+
+def remove_trailing_whitespace(text):
+    return '\n'.join([line.rstrip() for line in text.splitlines()])
 
 
 try:

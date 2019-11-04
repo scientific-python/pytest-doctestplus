@@ -132,6 +132,7 @@ This flag can be enabled globally by adding it to ``setup.cfg`` as in
 
     doctest_optionflags =
         NORMALIZE_WHITESPACE
+        IGNORE_TRAILING_WHITESPACE
         ELLIPSIS
         FLOAT_CMP
 

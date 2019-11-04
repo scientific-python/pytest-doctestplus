@@ -53,7 +53,8 @@ def pytest_addoption(parser):
     parser.addini("text_file_format", "changing default format for docs")
 
     parser.addini("doctest_optionflags", "option flags for doctests",
-                  type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],)
+                  default=["ELLIPSIS", "NORMALIZE_WHITESPACE", "IGNORE_TRAILING_WHITESPACE"],
+                  type="args",)
 
     parser.addini("doctest_plus", "enable running doctests with additional "
                   "features not found in the normal doctest plugin")

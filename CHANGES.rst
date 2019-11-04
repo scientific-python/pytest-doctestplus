@@ -1,7 +1,7 @@
 0.5.0 (unreleased)
 ==================
 
-- No changes yet.
+- Add ``IGNORE_TRAILING_WHITESPACE`` flag. [#70]
 
 
 0.4.0 (2019-09-17)
