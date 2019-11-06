@@ -398,11 +398,17 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
     @classmethod
     def check_required_modules(cls, mods):
-        """
-        Check that modules in :attr:`mods` list are available.
-        :param mods: list of module names. Modules can have specified versions
-          (eg 'numpy>=1.15')
-        :return: True if all modules are available.
+        """Check that modules in `mods` list are available.
+
+        Parameters
+        ----------
+        mods : list of str
+            List of modules. Modules can have specified versions (eg 'numpy>=1.15')
+
+        Returns
+        -------
+        bool
+            True if all modules in list are available.
         """
         for mod in mods:
             if mod in cls._import_cache:
