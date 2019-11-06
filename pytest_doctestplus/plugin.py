@@ -12,10 +12,9 @@ import re
 import sys
 import warnings
 
-from distutils.version import LooseVersion
-
 import pytest
 
+from pytest_doctestplus.utils import ModuleChecker
 from .output_checker import OutputChecker, FIX
 
 comment_characters = {'txt': '#',
@@ -256,7 +255,8 @@ def pytest_configure(config):
                         match = matches[0]
 
                     if match:
-                        required = re.split(r'\s*,?\s*', match.group(1))
+                        # 'a a' or 'a,a' or 'a, a'-> [a, a]
+                        required = re.split(r'\s*[,\s]\s*', match.group(1))
                 elif isinstance(entry, doctest.Example):
                     if (skip_all or skip_next or
                         not DocTestFinderPlus.check_required_modules(required)):
@@ -394,32 +394,32 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
     # Caches the results of import attempts
     _import_cache = {}
+    _module_checker = ModuleChecker()
 
     @classmethod
     def check_required_modules(cls, mods):
+        """Check that modules in `mods` list are available.
+
+        Parameters
+        ----------
+        mods : list of str
+            List of modules. Modules can have specified versions (eg 'numpy>=1.15')
+
+        Returns
+        -------
+        bool
+            True if all modules in list are available.
+        """
         for mod in mods:
             if mod in cls._import_cache:
                 if not cls._import_cache[mod]:
                     return False
 
-            if LooseVersion(sys.version) < LooseVersion('3.4'):
-                import imp
-                try:
-                    module = imp.find_module(mod)
-                except ImportError:
-                    module = None
+            if cls._module_checker.check(mod):
+                cls._import_cache[mod] = True
             else:
-                import importlib.util
-                try:
-                    module = importlib.util.find_spec(mod)
-                except ImportError:
-                    module = None
-
-            if module is None:
                 cls._import_cache[mod] = False
                 return False
-            else:
-                cls._import_cache[mod] = True
         return True
 
     def find(self, obj, name=None, module=None, globs=None,
