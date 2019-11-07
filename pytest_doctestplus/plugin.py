@@ -15,7 +15,8 @@ import warnings
 import pytest
 
 from pytest_doctestplus.utils import ModuleChecker
-from .output_checker import OutputChecker, FIX
+from .output_checker import OutputChecker, FIX, REMOTE_DATA
+
 
 comment_characters = {'txt': '#',
                       'tex': '%',
@@ -48,6 +49,9 @@ def pytest_addoption(parser):
     parser.addoption("--text-file-format", action="store",
                      help=("Text file format for narrative documentation. "
                            "Options accepted are 'txt', 'tex', and 'rst'"))
+
+    parser.addoption("--doctest-only", action="store_true",
+                     help="Test only doctests. Implies usage of doctest-plus.")
 
     parser.addini("text_file_format", "changing default format for docs")
 
@@ -83,23 +87,20 @@ def get_optionflags(parent):
 
 
 def pytest_configure(config):
+    doctest_plugin = config.pluginmanager.getplugin('doctest')
+    run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
+    use_doctest_plus = config.getini('doctest_plus') or config.option.doctest_plus or config.option.doctest_only
+    if doctest_plugin is None or run_regular_doctest or not use_doctest_plus:
+        return
 
     # We monkey-patch in our replacement doctest OutputChecker.  Not
     # great, but there isn't really an API to replace the checker when
     # using doctest.testfile, unfortunately.
+    doctest.OutputChecker = OutputChecker
     OutputChecker.rtol = max(float(config.getini("doctest_plus_rtol")),
                              float(config.getoption("doctest_plus_rtol")))
     OutputChecker.atol = max(float(config.getini("doctest_plus_atol")),
                              float(config.getoption("doctest_plus_atol")))
-    doctest.OutputChecker = OutputChecker
-
-    REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
-
-    doctest_plugin = config.pluginmanager.getplugin('doctest')
-    run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
-    if (doctest_plugin is None or run_regular_doctest or not
-            (config.getini('doctest_plus') or config.option.doctest_plus)):
-        return
 
     class DocTestModulePlus(doctest_plugin.DoctestModule):
         # pytest 2.4.0 defines "collect".  Prior to that, it defined
@@ -143,7 +144,6 @@ def pytest_configure(config):
                         test.name, self, runner, test)
 
     class DocTestTextfilePlus(doctest_plugin.DoctestItem, pytest.Module):
-
         # Some pytest plugins such as hypothesis try and access the 'obj'
         # attribute, and by default this returns an error for this class
         # so we override it here to avoid any issues.
@@ -157,7 +157,7 @@ def pytest_configure(config):
 
             options = get_optionflags(self) | FIX
 
-            failed, tot = doctest.testfile(
+            doctest.testfile(
                 str(self.fspath), module_relative=False,
                 optionflags=options, parser=DocTestParserPlus(),
                 extraglobs=dict(getfixture=fixture_request.getfixturevalue),
@@ -258,21 +258,23 @@ def pytest_configure(config):
                         # 'a a' or 'a,a' or 'a, a'-> [a, a]
                         required = re.split(r'\s*[,\s]\s*', match.group(1))
                 elif isinstance(entry, doctest.Example):
-                    if (skip_all or skip_next or
-                        not DocTestFinderPlus.check_required_modules(required)):
+                    has_required_modules = DocTestFinderPlus.check_required_modules(required)
+                    if skip_all or skip_next or not has_required_modules:
                         entry.options[doctest.SKIP] = True
 
-                    if (config.getoption('remote_data', 'none') != 'any' and
-                        entry.options.get(REMOTE_DATA)):
+                    if config.getoption('remote_data', 'none') != 'any' and entry.options.get(REMOTE_DATA):
                         entry.options[doctest.SKIP] = True
-
             return result
 
     config.pluginmanager.register(
-        DoctestPlus(DocTestModulePlus, DocTestTextfilePlus,
-                    config.getini('doctest_rst') or config.option.doctest_rst,
-                    config.option.text_file_format or config.getini('text_file_format')),
-        'doctestplus')
+        DoctestPlus(
+            DocTestModulePlus,
+            DocTestTextfilePlus,
+            run_rst_doctests=config.getini('doctest_rst') or config.option.doctest_rst,
+            text_file_format=config.option.text_file_format or config.getini('text_file_format')
+        ),
+        'doctestplus',
+    )
     # Remove the doctest_plugin, or we'll end up testing the .rst files twice.
     config.pluginmanager.unregister(doctest_plugin)
 
@@ -299,14 +301,21 @@ class DoctestPlus(object):
         self._ignore_paths = []
 
     def pytest_ignore_collect(self, path, config):
-        """Skip paths that match any of the doctest_norecursedirs patterns."""
-        collect_ignore = config._getconftest_pathlist("collect_ignore",
-                                                      path=path.dirpath())
+        """
+        Skip paths that match any of the doctest_norecursedirs patterns or
+        if doctest_only is True then skip all regular test files (eg test_*.py).
+        """
+        collect_ignore = config._getconftest_pathlist("collect_ignore", path=path.dirpath())
 
         # The collect_ignore conftest.py variable should cause all test
         # runners to ignore this file and all subfiles and subdirectories
         if collect_ignore is not None and path in collect_ignore:
             return True
+
+        if config.option.doctest_only:
+            for pattern in config.getini('python_files'):
+                if path.check(fnmatch=pattern):
+                    return True
 
         for pattern in config.getini("doctest_norecursedirs"):
             if path.check(fnmatch=pattern):
@@ -422,12 +431,9 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                 return False
         return True
 
-    def find(self, obj, name=None, module=None, globs=None,
-             extraglobs=None):
-        tests = doctest.DocTestFinder.find(self, obj, name, module, globs,
-                                           extraglobs)
-        if (hasattr(obj, '__doctest_skip__') or
-                hasattr(obj, '__doctest_requires__')):
+    def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
+        tests = doctest.DocTestFinder.find(self, obj, name, module, globs, extraglobs)
+        if hasattr(obj, '__doctest_skip__') or hasattr(obj, '__doctest_requires__'):
             if name is None and hasattr(obj, '__name__'):
                 name = obj.__name__
             else:
@@ -449,8 +455,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                     if not isinstance(pats, tuple):
                         pats = (pats,)
                     for pat in pats:
-                        if not fnmatch.fnmatch(test.name,
-                                               '.'.join((name, pat))):
+                        if not fnmatch.fnmatch(test.name, '.'.join((name, pat))):
                             continue
                         if not self.check_required_modules(mods):
                             return False

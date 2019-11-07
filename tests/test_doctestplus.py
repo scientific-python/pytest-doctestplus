@@ -1,5 +1,3 @@
-import pytest
-
 import doctest
 from pytest_doctestplus.output_checker import OutputChecker, FLOAT_CMP
 
@@ -392,3 +390,27 @@ def test_requires(testdir):
     )
     # passed because 'pytest<1.0' was not satisfied and 'assert 0' was not evaluated
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+
+
+def test_doctest_only(testdir, makepyfile, maketestfile, makerstfile):
+    # regular python files with doctests
+    makepyfile(p1='>>> 1 + 1\n2')
+    makepyfile(p2='>>> 1 + 1\n3')
+    # regular test files
+    maketestfile(test_1='foo')
+    maketestfile(test_2='bar')
+    # rst files
+    makerstfile(r1='>>> 1 + 1\n2')
+    makerstfile(r3='>>> 1 + 1\n3')
+    makerstfile(r2='>>> 1 + 2\n3')
+
+    # regular tests
+    testdir.inline_run().assertoutcome(passed=2)
+    # regular + doctests
+    testdir.inline_run("--doctest-plus").assertoutcome(passed=3, failed=1)
+    # regular + doctests + doctest in rst files
+    testdir.inline_run("--doctest-plus", "--doctest-rst").assertoutcome(passed=5, failed=2)
+    # only doctests in python files, implicit usage of doctest-plus
+    testdir.inline_run("--doctest-only").assertoutcome(passed=1, failed=1)
+    # only doctests in python files
+    testdir.inline_run("--doctest-only", "--doctest-rst").assertoutcome(passed=3, failed=2)
