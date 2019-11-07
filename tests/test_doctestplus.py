@@ -448,3 +448,63 @@ def test_ignore_warnings_rst(testdir):
     reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
                                 "--text-file-format=rst", "-W error")
     reprec.assertoutcome(failed=0, passed=1)
+
+
+def test_doctest_glob(testdir):
+    testdir.makefile(
+        '.rst',
+        foo_1=">>> 1 + 1\n2",
+    )
+    testdir.makefile(
+        '.rst',
+        foo_2=">>> 1 + 1\n2",
+    )
+    testdir.makefile(
+        '.txt',
+        foo_3=">>> 1 + 1\n2",
+    )
+    testdir.makefile(
+        '.rst',
+        bar_2=">>> 1 + 1\n2",
+    )
+
+    testdir.inline_run().assertoutcome(passed=0)
+    testdir.inline_run('--doctest-plus').assertoutcome(passed=0)
+    testdir.inline_run('--doctest-plus', '--doctest-rst').assertoutcome(passed=3)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--text-file-format', 'txt'
+    ).assertoutcome(passed=1)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', '*.rst'
+    ).assertoutcome(passed=3)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', '*.rst', '--doctest-glob', '*.txt'
+    ).assertoutcome(passed=4)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', 'foo_*.rst'
+    ).assertoutcome(passed=2)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', 'foo_*.txt'
+    ).assertoutcome(passed=1)
+
+
+def test_text_file_comments(testdir):
+    testdir.makefile(
+        '.rst',
+        foo_1=".. >>> 1 + 1\n3",
+    )
+    testdir.makefile(
+        '.tex',
+        foo_2="% >>> 1 + 1\n3",
+    )
+    testdir.makefile(
+        '.txt',
+        foo_3="# >>> 1 + 1\n3",
+    )
+
+    testdir.inline_run(
+        '--doctest-plus',
+        '--doctest-glob', '*.rst',
+        '--doctest-glob', '*.tex',
+        '--doctest-glob', '*.txt'
+    ).assertoutcome(passed=3)

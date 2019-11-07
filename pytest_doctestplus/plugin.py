@@ -23,10 +23,11 @@ import pytest
 from pytest_doctestplus.utils import ModuleChecker
 from .output_checker import OutputChecker, FIX, IGNORE_WARNINGS
 
-comment_characters = {'txt': '#',
-                      'tex': '%',
-                      'rst': r'\.\.'
-                      }
+comment_characters = {
+    '.txt': '#',
+    '.tex': '%',
+    '.rst': r'\.\.'
+}
 
 
 # For the IGNORE_WARNINGS option, we create a context manager that doesn't
@@ -61,7 +62,11 @@ def pytest_addoption(parser):
                      "plugin")
 
     parser.addoption("--doctest-rst", action="store_true",
-                     help="enable running doctests in .rst documentation")
+                     help="DEPRECATED, use doctest-glob. Enable running doctests in .rst documentation.")
+
+    parser.addoption("--text-file-format", action="store",
+                     help=("Text file format for narrative documentation. "
+                           "Options accepted are 'txt', 'tex', and 'rst'"))
 
     # Defaults to `atol` parameter from `numpy.allclose`.
     parser.addoption("--doctest-plus-atol", action="store",
@@ -73,11 +78,7 @@ def pytest_addoption(parser):
                      help="set the relative tolerance for float comparison",
                      default=1e-05)
 
-    parser.addoption("--text-file-format", action="store",
-                     help=("Text file format for narrative documentation. "
-                           "Options accepted are 'txt', 'tex', and 'rst'"))
-
-    parser.addini("text_file_format", "changing default format for docs")
+    parser.addini("text_file_format", "DEPRECATED, use doctest-glob. Default format for docs.")
 
     parser.addini("doctest_optionflags", "option flags for doctests",
                   type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],)
@@ -128,6 +129,14 @@ def pytest_configure(config):
     if (doctest_plugin is None or run_regular_doctest or not
             (config.getini('doctest_plus') or config.option.doctest_plus)):
         return
+
+    use_rst = config.getini('doctest_rst') or config.option.doctest_rst
+    file_ext = config.option.text_file_format or config.getini('text_file_format') or 'rst'
+    if use_rst:
+        config.option.doctestglob.append('*.{}'.format(file_ext))
+
+    # print(config.option.doctestglob)
+    # exit(1)
 
     class DocTestModulePlus(doctest_plugin.DoctestModule):
         # pytest 2.4.0 defines "collect".  Prior to that, it defined
@@ -247,15 +256,13 @@ def pytest_configure(config):
             skip_next = False
             skip_all = False
 
-            file_format = config.option.text_file_format or config.getini('text_file_format')
-
-            if file_format in comment_characters:
-                comment_char = comment_characters[file_format]
-            else:
+            ext = os.path.splitext(name)[1] if name else '.rst'
+            if ext not in comment_characters:
                 warnings.warn("file format '{}' is not recognized, assuming "
                               "'{}' as the comment character."
-                              .format(file_format, comment_characters['rst']))
-                comment_char = comment_characters['rst']
+                              .format(ext, comment_characters['rst']))
+                ext = '.rst'
+            comment_char = comment_characters[ext]
 
             ignore_warnings_context_needed = False
 
@@ -330,16 +337,14 @@ def pytest_configure(config):
 
     config.pluginmanager.register(
         DoctestPlus(DocTestModulePlus, DocTestTextfilePlus,
-                    config.getini('doctest_rst') or config.option.doctest_rst,
-                    config.option.text_file_format or config.getini('text_file_format')),
+                    config.option.doctestglob),
         'doctestplus')
     # Remove the doctest_plugin, or we'll end up testing the .rst files twice.
     config.pluginmanager.unregister(doctest_plugin)
 
 
 class DoctestPlus(object):
-    def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls,
-                 run_rst_doctests, text_file_format):
+    def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
         """
         doctest_module_item_cls should be a class inheriting
         `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
@@ -350,11 +355,7 @@ class DoctestPlus(object):
         """
         self._doctest_module_item_cls = doctest_module_item_cls
         self._doctest_textfile_item_cls = doctest_textfile_item_cls
-        self._run_rst_doctests = run_rst_doctests
-        if text_file_format:
-            self._text_file_ext = '.{}'.format(text_file_format)
-        else:
-            self._text_file_ext = '.rst'
+        self._file_globs = file_globs
         # Directories to ignore when adding doctests
         self._ignore_paths = []
 
@@ -419,7 +420,7 @@ class DoctestPlus(object):
 
             # Don't override the built-in doctest plugin
             return self._doctest_module_item_cls(path, parent)
-        elif self._run_rst_doctests and path.ext == self._text_file_ext:
+        elif any([path.check(fnmatch=pat) for pat in self._file_globs]):
             # Ignore generated .rst files
             parts = str(path).split(os.path.sep)
 
