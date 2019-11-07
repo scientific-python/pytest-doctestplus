@@ -534,3 +534,62 @@ def test_text_file_comment_chars(testdir):
         '--doctest-glob', '*.tex',
         '--doctest-glob', '*.txt'
     ).assertoutcome(passed=2)
+
+
+def test_ignore_option(testdir):
+    testdir.makepyfile(foo="""
+        def f():
+            '''
+            >>> 1+1
+            2
+            '''
+            pass
+    """)
+    testdir.makepyfile(bar="""
+        def f():
+            '''
+            >>> 1+1
+            2
+            '''
+            pass
+    """)
+    testdir.makefile('.rst', foo='>>> 1+1\n2')
+
+    testdir.inline_run('--doctest-plus').assertoutcome(passed=2)
+    testdir.inline_run('--doctest-plus', '--doctest-rst').assertoutcome(passed=3)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore', '.'
+    ).assertoutcome(passed=0)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
+    ).assertoutcome(passed=2)
+
+
+def test_ignore_glob_option(testdir):
+    testdir.makepyfile(foo="""
+        def f():
+            '''
+            >>> 1+1
+            2
+            '''
+            pass
+    """)
+    testdir.makepyfile(bar="""
+        def f():
+            '''
+            >>> 1+1
+            2
+            '''
+            pass
+    """)
+    testdir.makefile('.rst', foo='>>> 1+1\n2')
+
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore-glob', 'foo*'
+    ).assertoutcome(passed=1)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore-glob', 'bar*'
+    ).assertoutcome(passed=2)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore-glob', '*.rst'
+    ).assertoutcome(passed=2)
