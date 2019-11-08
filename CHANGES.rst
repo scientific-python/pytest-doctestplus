@@ -1,7 +1,10 @@
 0.5.0 (unreleased)
 ==================
 
-- No changes yet.
+- Make comment character configurable via ini variable
+  text_file_comment_chars [#48]
+
+- Allow to use doctest-glob option instead of doctest-rst and text-file-format [#9]
 
 
 0.4.0 (2019-09-17)

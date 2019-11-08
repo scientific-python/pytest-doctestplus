@@ -102,6 +102,11 @@ def pytest_addoption(parser):
                   "set the relative tolerance for float comparison",
                   default=1e-05)
 
+    parser.addini('text_file_comment_chars',
+                  help='list of pairs in format file_extension=comment_chars, eg: .rst=..',
+                  type='linelist',
+                  default=[])
+
 
 def get_optionflags(parent):
     optionflags_str = parent.config.getini('doctest_optionflags')
@@ -135,8 +140,10 @@ def pytest_configure(config):
     if use_rst:
         config.option.doctestglob.append('*.{}'.format(file_ext))
 
-    # print(config.option.doctestglob)
-    # exit(1)
+    # override default comment characters
+    ext_comment_pairs = [pair.split('=') for pair in config.getini('text_file_comment_chars')]
+    for ext, chars in ext_comment_pairs:
+        comment_characters[ext] = chars
 
     class DocTestModulePlus(doctest_plugin.DoctestModule):
         # pytest 2.4.0 defines "collect".  Prior to that, it defined

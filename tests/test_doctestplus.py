@@ -508,3 +508,29 @@ def test_text_file_comments(testdir):
         '--doctest-glob', '*.tex',
         '--doctest-glob', '*.txt'
     ).assertoutcome(passed=3)
+
+
+def test_text_file_comment_chars(testdir):
+    # override default comment chars
+    testdir.makeini(
+        """
+        [pytest]
+        text_file_extensions =
+            .rst=#
+            .tex=#
+    """
+    )
+    testdir.makefile(
+        '.rst',
+        foo_1="# >>> 1 + 1\n3",
+    )
+    testdir.makefile(
+        '.tex',
+        foo_2="# >>> 1 + 1\n3",
+    )
+    testdir.inline_run(
+        '--doctest-plus',
+        '--doctest-glob', '*.rst',
+        '--doctest-glob', '*.tex',
+        '--doctest-glob', '*.txt'
+    ).assertoutcome(passed=2)
