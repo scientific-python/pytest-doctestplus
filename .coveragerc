@@ -1,0 +1,5 @@
+[run]
+source = pytest_doctestplus
+
+[report]
+fail_under = 90
