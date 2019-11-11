@@ -139,12 +139,12 @@ Ignoring warnings
 ~~~~~~~~~~~~~~~~~
 
 If code in a doctest emits a warning and you want to make sure that warning is silenced,
-you can make use of the ``IGNORE_WARNING`` flag. For example:
+you can make use of the ``IGNORE_WARNINGS`` flag. For example:
 
 .. code-block:: python
 
   >>> import numpy as np
-  >>> np.mean([])  # doctest: +IGNORE_WARNING
+  >>> np.mean([])  # doctest: +IGNORE_WARNINGS
   np.nan
 
 Skipping Tests

@@ -16,7 +16,7 @@ from textwrap import indent
 import pytest
 
 from pytest_doctestplus.utils import ModuleChecker
-from .output_checker import OutputChecker, FIX, IGNORE_WARNING
+from .output_checker import OutputChecker, FIX, IGNORE_WARNINGS
 
 comment_characters = {'txt': '#',
                       'tex': '%',
@@ -24,11 +24,11 @@ comment_characters = {'txt': '#',
                       }
 
 
-# For the IGNORE_WARNING option, we create a context manager that doesn't
+# For the IGNORE_WARNINGS option, we create a context manager that doesn't
 # require us to add any imports to the example list and contains everything
 # that is needed to silence warnings.
 
-IGNORE_WARNING_CONTEXT = """
+IGNORE_WARNINGS_CONTEXT = """
 class _doctestplus_ignore_all_warnings(object):
 
     def __init__(self):
@@ -159,24 +159,24 @@ def pytest_configure(config):
                 if test.examples:  # skip empty doctests
                     if config.getoption('remote_data', 'none') != 'any':
 
-                        ignore_warning_context_needed = False
+                        ignore_warnings_context_needed = False
 
                         for example in test.examples:
 
                             # If warnings are to be ignored we need to catch them by
                             # wrapping the source in a context manager.
-                            if example.options.get(IGNORE_WARNING, False):
+                            if example.options.get(IGNORE_WARNINGS, False):
                                 example.source = ("with _doctestplus_ignore_all_warnings():\n"
                                                 + indent(example.source, '    '))
-                                ignore_warning_context_needed = True
+                                ignore_warnings_context_needed = True
 
                             if example.options.get(REMOTE_DATA):
                                 example.options[doctest.SKIP] = True
 
                         # We insert the definition of the context manager to ignore
                         # warnings at the start of the file if needed.
-                        if ignore_warning_context_needed:
-                            test.examples.insert(0, doctest.Example(source=IGNORE_WARNING_CONTEXT, want=''))
+                        if ignore_warnings_context_needed:
+                            test.examples.insert(0, doctest.Example(source=IGNORE_WARNINGS_CONTEXT, want=''))
 
                     yield doctest_plugin.DoctestItem(
                         test.name, self, runner, test)
@@ -252,7 +252,7 @@ def pytest_configure(config):
                               .format(file_format, comment_characters['rst']))
                 comment_char = comment_characters['rst']
 
-            ignore_warning_context_needed = False
+            ignore_warnings_context_needed = False
 
             for entry in result:
 
@@ -303,10 +303,10 @@ def pytest_configure(config):
 
                     # If warnings are to be ignored we need to catch them by
                     # wrapping the source in a context manager.
-                    if entry.options.get(IGNORE_WARNING, False):
+                    if entry.options.get(IGNORE_WARNINGS, False):
                         entry.source = ("with _doctestplus_ignore_all_warnings():\n"
                                         + indent(entry.source, '    '))
-                        ignore_warning_context_needed = True
+                        ignore_warnings_context_needed = True
 
                     if (skip_all or skip_next or
                         not DocTestFinderPlus.check_required_modules(required)):
@@ -318,8 +318,8 @@ def pytest_configure(config):
 
             # We insert the definition of the context manager to ignore
             # warnings at the start of the file if needed.
-            if ignore_warning_context_needed:
-                result.insert(0, doctest.Example(source=IGNORE_WARNING_CONTEXT, want=''))
+            if ignore_warnings_context_needed:
+                result.insert(0, doctest.Example(source=IGNORE_WARNINGS_CONTEXT, want=''))
 
             return result
 

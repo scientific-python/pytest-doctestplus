@@ -394,9 +394,9 @@ def test_requires(testdir):
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
 
 
-def test_ignore_warning_module(testdir):
+def test_ignore_warnings_module(testdir):
 
-    # First check that we get a warning if we don't add the IGNORE_WARNING
+    # First check that we get a warning if we don't add the IGNORE_WARNINGS
     # directive
     p = testdir.makepyfile(
         """
@@ -410,13 +410,13 @@ def test_ignore_warning_module(testdir):
     reprec = testdir.inline_run(p, "--doctest-plus", "-W error")
     reprec.assertoutcome(failed=1, passed=0)
 
-    # Now try with the IGNORE_WARNING directive
+    # Now try with the IGNORE_WARNINGS directive
     p = testdir.makepyfile(
         """
         def myfunc():
             '''
             >>> import warnings
-            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNING
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
             '''
             pass
         """)
@@ -424,9 +424,9 @@ def test_ignore_warning_module(testdir):
     reprec.assertoutcome(failed=0, passed=1)
 
 
-def test_ignore_warning_rst(testdir):
+def test_ignore_warnings_rst(testdir):
 
-    # First check that we get a warning if we don't add the IGNORE_WARNING
+    # First check that we get a warning if we don't add the IGNORE_WARNINGS
     # directive
     p = testdir.makefile(".rst",
         """
@@ -438,12 +438,12 @@ def test_ignore_warning_rst(testdir):
                                 "--text-file-format=rst", "-W error")
     reprec.assertoutcome(failed=1, passed=0)
 
-    # Now try with the IGNORE_WARNING directive
+    # Now try with the IGNORE_WARNINGS directive
     p = testdir.makefile(".rst",
         """
         ::
             >>> import warnings
-            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNING
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
         """)
     reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
                                 "--text-file-format=rst", "-W error")
