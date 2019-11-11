@@ -135,6 +135,17 @@ This flag can be enabled globally by adding it to ``setup.cfg`` as in
         ELLIPSIS
         FLOAT_CMP
 
+Ignoring warnings
+~~~~~~~~~~~~~~~~~
+
+If code in a doctest emits a warning and you want to make sure that warning is silenced,
+you can make use of the ``IGNORE_WARNING`` flag. For example:
+
+.. code-block:: python
+
+  >>> import numpy as np
+  >>> np.mean([])  # doctest: +IGNORE_WARNING
+  np.nan
 
 Skipping Tests
 ~~~~~~~~~~~~~~
@@ -152,7 +163,7 @@ directive
 .. code-block:: rst
 
     .. doctest-skip::
-    
+
         >>> import asdf
         >>> asdf.open('file.asdf')
 
@@ -210,7 +221,7 @@ conditionally skipped if a dependency is not available.
 .. code-block:: rst
 
     .. doctest-requires:: asdf
-    
+
         >>> import asdf
         >>> asdf.open('file.asdf')
 
@@ -228,7 +239,7 @@ The following example illustrates how a doctest that uses remote data should be
 marked:
 
 .. code-block:: python
-    
+
     >>> from urlib.request import urlopen
     >>> url = urlopen('http://astropy.org') # doctest: +REMOTE_DATA
 
