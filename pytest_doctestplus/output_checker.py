@@ -21,6 +21,7 @@ FLOAT_CMP = doctest.register_optionflag('FLOAT_CMP')
 IGNORE_OUTPUT = doctest.register_optionflag('IGNORE_OUTPUT')
 IGNORE_OUTPUT_2 = doctest.register_optionflag('IGNORE_OUTPUT_2')
 IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
+IGNORE_WARNING = doctest.register_optionflag('IGNORE_WARNING')
 
 # These might appear in some doctests and are used in the default pytest
 # doctest plugin. This plugin doesn't actually implement these flags but this
