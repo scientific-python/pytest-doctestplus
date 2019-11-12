@@ -89,17 +89,6 @@ def pytest_addoption(parser):
                   "Default format for docs. "
                   "This is no longer recommended, use --doctest-glob instead.")
 
-    # add ignore-glob option for old versions of pytest
-    if LooseVersion('4.3.0') > LooseVersion(pytest.__version__):
-        parser.addoption(
-            "--ignore-glob",
-            action="append",
-            metavar="path",
-            help="ignore path pattern during collection (multi-allowed).",
-        )
-
-    parser.addini("text_file_format", "changing default format for docs")
-
     parser.addini("doctest_optionflags", "option flags for doctests",
                   type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],)
 
