@@ -62,11 +62,17 @@ def pytest_addoption(parser):
                      "plugin")
 
     parser.addoption("--doctest-rst", action="store_true",
-                     help="DEPRECATED, use doctest-glob. Enable running doctests in .rst documentation.")
+                     help=(
+                         "Enable running doctests in .rst documentation. "
+                         "This is no longer recommended, use --doctest-glob instead."
+                     ))
 
     parser.addoption("--text-file-format", action="store",
-                     help=("Text file format for narrative documentation. "
-                           "Options accepted are 'txt', 'tex', and 'rst'"))
+                     help=(
+                        "Text file format for narrative documentation. "
+                        "Options accepted are 'txt', 'tex', and 'rst'. "
+                        "This is no longer recommended, use --doctest-glob instead."
+                     ))
 
     # Defaults to `atol` parameter from `numpy.allclose`.
     parser.addoption("--doctest-plus-atol", action="store",
@@ -78,7 +84,9 @@ def pytest_addoption(parser):
                      help="set the relative tolerance for float comparison",
                      default=1e-05)
 
-    parser.addini("text_file_format", "DEPRECATED, use doctest-glob. Default format for docs.")
+    parser.addini("text_file_format",
+                  "Default format for docs. "
+                  "This is no longer recommended, use --doctest-glob instead.")
 
     parser.addini("doctest_optionflags", "option flags for doctests",
                   type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],)
