@@ -11,7 +11,12 @@ import os
 import re
 import sys
 import warnings
-from textwrap import indent
+
+try:
+    from textwrap import indent
+except ImportError:  # PY2
+    def indent(text, prefix):
+        return '\n'.join([prefix + line for line in text.splitlines()])
 
 import pytest
 
