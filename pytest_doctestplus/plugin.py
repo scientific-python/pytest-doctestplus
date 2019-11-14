@@ -3,14 +3,13 @@
 This plugin provides advanced doctest support and enables the testing of .rst
 files.
 """
-import six
-
 import doctest
 import fnmatch
 import os
 import re
 import sys
 import warnings
+from distutils.version import LooseVersion
 
 try:
     from textwrap import indent
@@ -19,9 +18,11 @@ except ImportError:  # PY2
         return '\n'.join([prefix + line for line in text.splitlines()])
 
 import pytest
+import six
 
 from pytest_doctestplus.utils import ModuleChecker
-from .output_checker import OutputChecker, FIX, IGNORE_WARNINGS
+from .output_checker import FIX, IGNORE_WARNINGS, OutputChecker
+
 
 comment_characters = {
     '.txt': '#',
@@ -58,8 +59,8 @@ def pytest_addoption(parser):
 
     parser.addoption("--doctest-plus", action="store_true",
                      help="enable running doctests with additional "
-                     "features not found in the normal doctest "
-                     "plugin")
+                          "features not found in the normal doctest "
+                          "plugin")
 
     parser.addoption("--doctest-rst", action="store_true",
                      help=(
@@ -92,7 +93,7 @@ def pytest_addoption(parser):
                   type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],)
 
     parser.addini("doctest_plus", "enable running doctests with additional "
-                  "features not found in the normal doctest plugin")
+                                  "features not found in the normal doctest plugin")
 
     parser.addini("doctest_norecursedirs",
                   "like the norecursedirs option but applies only to doctest "
@@ -125,7 +126,6 @@ def get_optionflags(parent):
 
 
 def pytest_configure(config):
-
     # We monkey-patch in our replacement doctest OutputChecker.  Not
     # great, but there isn't really an API to replace the checker when
     # using doctest.testfile, unfortunately.
@@ -383,6 +383,18 @@ class DoctestPlus(object):
         # runners to ignore this file and all subfiles and subdirectories
         if collect_ignore is not None and path in collect_ignore:
             return True
+
+        def get_list_opt(name):
+            return getattr(config.option, name, None) or []
+
+        for ignore_path in get_list_opt('ignore'):
+            ignore_path = os.path.abspath(ignore_path)
+            if str(path).startswith(ignore_path):
+                return True
+
+        for pattern in get_list_opt('ignore_glob'):
+            if path.check(fnmatch=pattern):
+                return True
 
         for pattern in config.getini("doctest_norecursedirs"):
             if path.check(fnmatch=pattern):
