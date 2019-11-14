@@ -6,6 +6,8 @@
 
 - Allow to use doctest-glob option instead of doctest-rst and text-file-format [#9]
 
+- Add ``--doctest-only`` option. [#14]
+
 
 0.4.0 (2019-09-17)
 ==================

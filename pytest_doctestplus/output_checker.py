@@ -18,6 +18,7 @@ from six.moves import zip
 
 FIX = doctest.register_optionflag('FIX')
 FLOAT_CMP = doctest.register_optionflag('FLOAT_CMP')
+REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
 IGNORE_OUTPUT = doctest.register_optionflag('IGNORE_OUTPUT')
 IGNORE_OUTPUT_2 = doctest.register_optionflag('IGNORE_OUTPUT_2')
 IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
@@ -41,6 +42,8 @@ class OutputChecker(doctest.OutputChecker):
       string representation.  This naturally supports complex numbers as well
       (simply by comparing their real and imaginary parts separately).
     """
+    rtol = 1e-05
+    atol = 1e-08
 
     _original_output_checker = doctest.OutputChecker
 
