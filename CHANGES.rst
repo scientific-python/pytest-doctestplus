@@ -1,13 +1,29 @@
 0.5.0 (unreleased)
 ==================
 
-- Make comment character configurable via ini variable
-  text_file_comment_chars [#48]
+- No longer require Numpy. [#69]
 
-- Allow to use doctest-glob option instead of doctest-rst and text-file-format [#9]
+- Fixed a bug that caused ``__doctest_requires__`` to not work correctly
+  with submodules. [#73]
 
-- Add ``--doctest-only`` option. [#14]
+- Fixed a limitation that meant that ``ELLIPSIS`` and ``FLOAT_CMP`` could not
+  be used at the same time. [#75]
 
+- Fixed a bug that caused ``.. doctest-requires::`` to not work correctly. [#78]
+
+- Fixed a FutureWarning related to split() with regular expressions. [#78]
+
+- Make it possible to specify versions in ``.. doctest-requires::``. [#78]
+
+- Allow to use doctest-glob option instead of doctest-rst and text-file-format [#80]
+
+- Make comment character configurable via ini variable text_file_comment_chars [#80]
+
+- Respect ``ignore`` and ``ignore-glob`` options from pytest. [#82]
+
+- Add ``--doctest-only`` option. [#83]
+
+- Added an ``IGNORE_WARNINGS`` option for ``# doctest:`` [#84]
 
 0.4.0 (2019-09-17)
 ==================
