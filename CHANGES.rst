@@ -1,4 +1,4 @@
-0.5.0 (unreleased)
+0.5.0 (2019-11-15)
 ==================
 
 - No longer require Numpy. [#69]
