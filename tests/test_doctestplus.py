@@ -7,7 +7,7 @@ import doctest
 from pytest_doctestplus.output_checker import OutputChecker, FLOAT_CMP
 
 
-pytest_plugins = ['pytester']
+pytest_plugins = ["pytester"]
 
 
 def test_ignored_whitespace(testdir):
@@ -110,12 +110,15 @@ def test_float_cmp_list(testdir):
 
 
 def test_float_cmp_global(testdir):
-    testdir.makeini("""
+    testdir.makeini(
+        """
         [pytest]
         doctest_optionflags = FLOAT_CMP
         doctestplus = enabled
-    """)
-    p = testdir.makepyfile("""
+    """
+    )
+    p = testdir.makepyfile(
+        """
         def f():
             '''
             >>> x = 1/3.
@@ -123,10 +126,12 @@ def test_float_cmp_global(testdir):
             0.333333
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
 
-    p = testdir.makepyfile("""
+    p = testdir.makepyfile(
+        """
         def f():
             '''
             >>> x = 2/7.
@@ -134,10 +139,12 @@ def test_float_cmp_global(testdir):
             0.285714
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
 
-    p = testdir.makepyfile("""
+    p = testdir.makepyfile(
+        """
         def f():
             '''
             >>> x = 1/13.
@@ -145,10 +152,12 @@ def test_float_cmp_global(testdir):
             0.076923
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
 
-    p = testdir.makepyfile("""
+    p = testdir.makepyfile(
+        """
         def f():
             '''
             >>> x = 1/13.
@@ -156,7 +165,8 @@ def test_float_cmp_global(testdir):
             0.07692
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(failed=1)  # not close enough
 
 
@@ -166,7 +176,8 @@ def test_float_cmp_and_ellipsis(testdir):
         [pytest]
         doctest_optionflags = FLOAT_CMP ELLIPSIS
         doctestplus = enabled
-    """)
+    """
+    )
     # whitespace is normalized by default
     p = testdir.makepyfile(
         """
@@ -180,7 +191,8 @@ def test_float_cmp_and_ellipsis(testdir):
             ...
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
 
     p = testdir.makepyfile(
@@ -196,7 +208,8 @@ def test_float_cmp_and_ellipsis(testdir):
             E 69.0
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
 
     p = testdir.makepyfile(
@@ -213,7 +226,8 @@ def test_float_cmp_and_ellipsis(testdir):
             E 69.0
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(passed=1)
 
     p = testdir.makepyfile(
@@ -228,7 +242,8 @@ def test_float_cmp_and_ellipsis(testdir):
             E 70.0
             '''
             pass
-    """)
+    """
+    )
     testdir.inline_run(p, "--doctest-plus").assertoutcome(failed=1)
 
 
@@ -267,7 +282,9 @@ class TestFloats:
         assert c.normalize_floats(want, got, flags=FLOAT_CMP)
 
         want = "A 65.0\nB   66.0  "
-        assert c.normalize_floats(want, got, flags=FLOAT_CMP | doctest.NORMALIZE_WHITESPACE)
+        assert c.normalize_floats(
+            want, got, flags=FLOAT_CMP | doctest.NORMALIZE_WHITESPACE
+        )
 
         want = "A 65.0\nB 66.01"
         assert not c.normalize_floats(want, got, flags=FLOAT_CMP)
@@ -277,14 +294,16 @@ class TestFloats:
         got = "\nA 65.0\nB 66.0"
         want = "<BLANKLINE>\nA 65.0\nB 66.0"
         assert c.normalize_floats(want, got, flags=FLOAT_CMP)
-        assert not c.normalize_floats(want, got, flags=FLOAT_CMP | doctest.DONT_ACCEPT_BLANKLINE)
+        assert not c.normalize_floats(
+            want, got, flags=FLOAT_CMP | doctest.DONT_ACCEPT_BLANKLINE
+        )
 
     def test_normalize_with_ellipsis(self):
         c = OutputChecker()
         got = []
-        for char in ['A', 'B', 'C', 'D', 'E']:
-            got.append('%s %s' % (char, float(ord(char))))
-        got = '\n'.join(got)
+        for char in ["A", "B", "C", "D", "E"]:
+            got.append("%s %s" % (char, float(ord(char))))
+        got = "\n".join(got)
 
         want = "A 65.0\nB 66.0\n...G 70.0"
         assert not c.normalize_floats(want, got, flags=doctest.ELLIPSIS | FLOAT_CMP)
@@ -302,37 +321,19 @@ class TestFloats:
     def test_partial_match(self):
         c = OutputChecker()
 
-        assert not c.partial_match(
-            ['1', '2', '3', '4'],
-            [['2'], []],
+        assert not c.partial_match(["1", "2", "3", "4"], [["2"], []],)
+        assert c.partial_match(["1", "2", "3", "4"], [[], ["2"], []],)
+        assert c.partial_match(["1", "2", "3", "4"], [["1", "2"], []],)
+        assert c.partial_match(["1", "2", "3", "4"], [["1", "2"], ["4"]],)
+        assert c.partial_match(["1", "2", "3", "4", "5"], [["1", "2"], ["4", "5"]],)
+        assert c.partial_match(
+            ["1", "2", "3", "4", "5", "6"], [["1", "2"], ["4"], ["6"]],
         )
         assert c.partial_match(
-            ['1', '2', '3', '4'],
-            [[], ['2'], []],
-        )
-        assert c.partial_match(
-            ['1', '2', '3', '4'],
-            [['1', '2'], []],
-        )
-        assert c.partial_match(
-            ['1', '2', '3', '4'],
-            [['1', '2'], ['4']],
-        )
-        assert c.partial_match(
-            ['1', '2', '3', '4', '5'],
-            [['1', '2'], ['4', '5']],
-        )
-        assert c.partial_match(
-            ['1', '2', '3', '4', '5', '6'],
-            [['1', '2'], ['4'], ['6']],
-        )
-        assert c.partial_match(
-            [str(i) for i in range(20)],
-            [[], ['1', '2'], ['4'], ['6'], []],
+            [str(i) for i in range(20)], [[], ["1", "2"], ["4"], ["6"], []],
         )
         assert not c.partial_match(
-            [str(i) for i in range(20)],
-            [[], ['1', '2'], ['7'], ['6'], []],
+            [str(i) for i in range(20)], [[], ["1", "2"], ["7"], ["6"], []],
         )
 
 
@@ -341,60 +342,62 @@ def test_requires(testdir):
         """
         [pytest]
         doctestplus = enabled
-    """)
+    """
+    )
 
     # should be ignored
     p = testdir.makefile(
-        '.rst',
+        ".rst",
         """
         .. doctest-requires:: foobar
             >>> import foobar
-        """
+        """,
     )
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+    testdir.inline_run(p, "--doctest-plus", "--doctest-rst").assertoutcome(passed=1)
 
     # should run as expected
     p = testdir.makefile(
-        '.rst',
+        ".rst",
         """
         .. doctest-requires:: sys
             >>> import sys
-        """
+        """,
     )
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+    testdir.inline_run(p, "--doctest-plus", "--doctest-rst").assertoutcome(passed=1)
 
-    # testing this in case if doctest-requires just ignores everything and pass unconditionally
+    # testing this in case if doctest-requires just ignores everything
+    # and pass unconditionally
     p = testdir.makefile(
-        '.rst',
+        ".rst",
         """
         .. doctest-requires:: sys glob, re,math
             >>> import sys
             >>> assert 0
-        """
+        """,
     )
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(failed=1)
+    testdir.inline_run(p, "--doctest-plus", "--doctest-rst").assertoutcome(failed=1)
 
     # package with version is available
     p = testdir.makefile(
-        '.rst',
+        ".rst",
         """
         .. doctest-requires:: sys pytest>=1.0
             >>> import sys, pytest
-        """
+        """,
     )
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+    testdir.inline_run(p, "--doctest-plus", "--doctest-rst").assertoutcome(passed=1)
 
     # package with version is not available
     p = testdir.makefile(
-        '.rst',
+        ".rst",
         """
         .. doctest-requires:: sys pytest<1.0 glob
             >>> import sys, pytest, glob
             >>> assert 0
-        """
+        """,
     )
     # passed because 'pytest<1.0' was not satisfied and 'assert 0' was not evaluated
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+    testdir.inline_run(p, "--doctest-plus", "--doctest-rst").assertoutcome(passed=1)
 
 
 def test_ignore_warnings_module(testdir):
@@ -409,7 +412,8 @@ def test_ignore_warnings_module(testdir):
             >>> warnings.warn('A warning occurred', UserWarning)
             '''
             pass
-        """)
+        """
+    )
     reprec = testdir.inline_run(p, "--doctest-plus", "-W error")
     reprec.assertoutcome(failed=1, passed=0)
 
@@ -419,10 +423,13 @@ def test_ignore_warnings_module(testdir):
         def myfunc():
             '''
             >>> import warnings
-            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
+            >>> warnings.warn(  # doctest: +IGNORE_WARNINGS
+            ...   'A warning occurred', UserWarning
+            ... )
             '''
             pass
-        """)
+        """
+    )
     reprec = testdir.inline_run(p, "--doctest-plus", "-W error")
     reprec.assertoutcome(failed=0, passed=1)
 
@@ -431,85 +438,89 @@ def test_ignore_warnings_rst(testdir):
 
     # First check that we get a warning if we don't add the IGNORE_WARNINGS
     # directive
-    p = testdir.makefile(".rst",
+    p = testdir.makefile(
+        ".rst",
         """
         ::
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)
-        """)
-    reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
-                                "--text-file-format=rst", "-W error")
+        """,
+    )
+    reprec = testdir.inline_run(
+        p, "--doctest-plus", "--doctest-rst", "--text-file-format=rst", "-W error"
+    )
     reprec.assertoutcome(failed=1, passed=0)
 
     # Now try with the IGNORE_WARNINGS directive
-    p = testdir.makefile(".rst",
+    p = testdir.makefile(
+        ".rst",
         """
         ::
             >>> import warnings
-            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
-        """)
-    reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
-                                "--text-file-format=rst", "-W error")
+            >>> warnings.warn(
+            ...   'A warning occurred', UserWarning
+            ... )  # doctest: +IGNORE_WARNINGS
+        """,
+    )
+    reprec = testdir.inline_run(
+        p, "--doctest-plus", "--doctest-rst", "--text-file-format=rst", "-W error"
+    )
     reprec.assertoutcome(failed=0, passed=1)
 
 
 def test_doctest_glob(testdir):
     testdir.makefile(
-        '.rst',
-        foo_1=">>> 1 + 1\n2",
+        ".rst", foo_1=">>> 1 + 1\n2",
     )
     testdir.makefile(
-        '.rst',
-        foo_2=">>> 1 + 1\n2",
+        ".rst", foo_2=">>> 1 + 1\n2",
     )
     testdir.makefile(
-        '.txt',
-        foo_3=">>> 1 + 1\n2",
+        ".txt", foo_3=">>> 1 + 1\n2",
     )
     testdir.makefile(
-        '.rst',
-        bar_2=">>> 1 + 1\n2",
+        ".rst", bar_2=">>> 1 + 1\n2",
     )
 
     testdir.inline_run().assertoutcome(passed=0)
-    testdir.inline_run('--doctest-plus').assertoutcome(passed=0)
-    testdir.inline_run('--doctest-plus', '--doctest-rst').assertoutcome(passed=3)
+    testdir.inline_run("--doctest-plus").assertoutcome(passed=0)
+    testdir.inline_run("--doctest-plus", "--doctest-rst").assertoutcome(passed=3)
     testdir.inline_run(
-        '--doctest-plus', '--doctest-rst', '--text-file-format', 'txt'
+        "--doctest-plus", "--doctest-rst", "--text-file-format", "txt"
     ).assertoutcome(passed=1)
+    testdir.inline_run("--doctest-plus", "--doctest-glob", "*.rst").assertoutcome(
+        passed=3
+    )
     testdir.inline_run(
-        '--doctest-plus', '--doctest-glob', '*.rst'
-    ).assertoutcome(passed=3)
-    testdir.inline_run(
-        '--doctest-plus', '--doctest-glob', '*.rst', '--doctest-glob', '*.txt'
+        "--doctest-plus", "--doctest-glob", "*.rst", "--doctest-glob", "*.txt"
     ).assertoutcome(passed=4)
-    testdir.inline_run(
-        '--doctest-plus', '--doctest-glob', 'foo_*.rst'
-    ).assertoutcome(passed=2)
-    testdir.inline_run(
-        '--doctest-plus', '--doctest-glob', 'foo_*.txt'
-    ).assertoutcome(passed=1)
+    testdir.inline_run("--doctest-plus", "--doctest-glob", "foo_*.rst").assertoutcome(
+        passed=2
+    )
+    testdir.inline_run("--doctest-plus", "--doctest-glob", "foo_*.txt").assertoutcome(
+        passed=1
+    )
 
 
 def test_text_file_comments(testdir):
     testdir.makefile(
-        '.rst',
-        foo_1=".. >>> 1 + 1\n3",
+        ".rst", foo_1=".. >>> 1 + 1\n3",
     )
     testdir.makefile(
-        '.tex',
-        foo_2="% >>> 1 + 1\n3",
+        ".tex", foo_2="% >>> 1 + 1\n3",
     )
     testdir.makefile(
-        '.txt',
-        foo_3="# >>> 1 + 1\n3",
+        ".txt", foo_3="# >>> 1 + 1\n3",
     )
 
     testdir.inline_run(
-        '--doctest-plus',
-        '--doctest-glob', '*.rst',
-        '--doctest-glob', '*.tex',
-        '--doctest-glob', '*.txt'
+        "--doctest-plus",
+        "--doctest-glob",
+        "*.rst",
+        "--doctest-glob",
+        "*.tex",
+        "--doctest-glob",
+        "*.txt",
     ).assertoutcome(passed=3)
 
 
@@ -524,99 +535,111 @@ def test_text_file_comment_chars(testdir):
     """
     )
     testdir.makefile(
-        '.rst',
-        foo_1="# >>> 1 + 1\n3",
+        ".rst", foo_1="# >>> 1 + 1\n3",
     )
     testdir.makefile(
-        '.tex',
-        foo_2="# >>> 1 + 1\n3",
+        ".tex", foo_2="# >>> 1 + 1\n3",
     )
     testdir.inline_run(
-        '--doctest-plus',
-        '--doctest-glob', '*.rst',
-        '--doctest-glob', '*.tex',
-        '--doctest-glob', '*.txt'
+        "--doctest-plus",
+        "--doctest-glob",
+        "*.rst",
+        "--doctest-glob",
+        "*.tex",
+        "--doctest-glob",
+        "*.txt",
     ).assertoutcome(passed=2)
 
 
 def test_ignore_option(testdir):
-    testdir.makepyfile(foo="""
+    testdir.makepyfile(
+        foo="""
         def f():
             '''
             >>> 1+1
             2
             '''
             pass
-    """)
-    testdir.makepyfile(bar="""
+    """
+    )
+    testdir.makepyfile(
+        bar="""
         def f():
             '''
             >>> 1+1
             2
             '''
             pass
-    """)
-    testdir.makefile('.rst', foo='>>> 1+1\n2')
+    """
+    )
+    testdir.makefile(".rst", foo=">>> 1+1\n2")
 
-    testdir.inline_run('--doctest-plus').assertoutcome(passed=2)
-    testdir.inline_run('--doctest-plus', '--doctest-rst').assertoutcome(passed=3)
+    testdir.inline_run("--doctest-plus").assertoutcome(passed=2)
+    testdir.inline_run("--doctest-plus", "--doctest-rst").assertoutcome(passed=3)
     testdir.inline_run(
-        '--doctest-plus', '--doctest-rst', '--ignore', '.'
+        "--doctest-plus", "--doctest-rst", "--ignore", "."
     ).assertoutcome(passed=0)
     testdir.inline_run(
-        '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
+        "--doctest-plus", "--doctest-rst", "--ignore", "bar.py"
     ).assertoutcome(passed=2)
 
 
-if LooseVersion('4.3.0') <= LooseVersion(pytest.__version__):
+if LooseVersion("4.3.0") <= LooseVersion(pytest.__version__):
+
     def test_ignore_glob_option(testdir):
-        testdir.makepyfile(foo="""
+        testdir.makepyfile(
+            foo="""
             def f():
                 '''
                 >>> 1+1
                 2
                 '''
                 pass
-        """)
-        testdir.makepyfile(bar="""
+        """
+        )
+        testdir.makepyfile(
+            bar="""
             def f():
                 '''
                 >>> 1+1
                 2
                 '''
                 pass
-        """)
-        testdir.makefile('.rst', foo='>>> 1+1\n2')
+        """
+        )
+        testdir.makefile(".rst", foo=">>> 1+1\n2")
 
         testdir.inline_run(
-            '--doctest-plus', '--doctest-rst', '--ignore-glob', 'foo*'
+            "--doctest-plus", "--doctest-rst", "--ignore-glob", "foo*"
         ).assertoutcome(passed=1)
         testdir.inline_run(
-            '--doctest-plus', '--doctest-rst', '--ignore-glob', 'bar*'
+            "--doctest-plus", "--doctest-rst", "--ignore-glob", "bar*"
         ).assertoutcome(passed=2)
         testdir.inline_run(
-            '--doctest-plus', '--doctest-rst', '--ignore-glob', '*.rst'
+            "--doctest-plus", "--doctest-rst", "--ignore-glob", "*.rst"
         ).assertoutcome(passed=2)
 
 
 def test_doctest_only(testdir, makepyfile, maketestfile, makerstfile):
     # regular python files with doctests
-    makepyfile(p1='>>> 1 + 1\n2')
-    makepyfile(p2='>>> 1 + 1\n3')
+    makepyfile(p1=">>> 1 + 1\n2")
+    makepyfile(p2=">>> 1 + 1\n3")
     # regular test files
-    maketestfile(test_1='foo')
-    maketestfile(test_2='bar')
+    maketestfile(test_1="foo")
+    maketestfile(test_2="bar")
     # rst files
-    makerstfile(r1='>>> 1 + 1\n2')
-    makerstfile(r3='>>> 1 + 1\n3')
-    makerstfile(r2='>>> 1 + 2\n3')
+    makerstfile(r1=">>> 1 + 1\n2")
+    makerstfile(r3=">>> 1 + 1\n3")
+    makerstfile(r2=">>> 1 + 2\n3")
 
     # regular tests
     testdir.inline_run().assertoutcome(passed=2)
     # regular + doctests
     testdir.inline_run("--doctest-plus").assertoutcome(passed=3, failed=1)
     # regular + doctests + doctest in rst files
-    testdir.inline_run("--doctest-plus", "--doctest-rst").assertoutcome(passed=5, failed=2)
+    testdir.inline_run("--doctest-plus", "--doctest-rst").assertoutcome(
+        passed=5, failed=2
+    )
     # only doctests in python files, implicit usage of doctest-plus
     testdir.inline_run("--doctest-only").assertoutcome(passed=1, failed=1)
     # only doctests in python files

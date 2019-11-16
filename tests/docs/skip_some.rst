@@ -51,7 +51,7 @@ available:
 
 .. doctest-requires:: sys
 
-    >>> import sys 
+    >>> import sys
 
 Bad Imports
 ===========

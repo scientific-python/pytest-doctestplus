@@ -1,7 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 # Skip all tests in this file since they'll all fail
-__doctest_skip__ = ['*']
+__doctest_skip__ = ["*"]
 
 
 def bad_doctest():

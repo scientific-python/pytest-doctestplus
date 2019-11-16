@@ -3,32 +3,32 @@ Implements a replacement for `doctest.OutputChecker` that handles certain
 normalizations of Python expression output.  See the docstring on
 `OutputChecker` for more details.
 """
-
-import doctest
-import re
-import math
-
-import six
-from six.moves import zip
-
 # Much of this code, particularly the parts of floating point handling, is
 # borrowed from the SymPy project with permission.  See
 # licenses/SYMPY_LICENSE.rst for the full SymPy license.
 
 
-FIX = doctest.register_optionflag('FIX')
-FLOAT_CMP = doctest.register_optionflag('FLOAT_CMP')
-REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
-IGNORE_OUTPUT = doctest.register_optionflag('IGNORE_OUTPUT')
-IGNORE_OUTPUT_2 = doctest.register_optionflag('IGNORE_OUTPUT_2')
-IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
-IGNORE_WARNINGS = doctest.register_optionflag('IGNORE_WARNINGS')
+import doctest
+import math
+import re
+
+import six
+from six.moves import zip
+
+
+FIX = doctest.register_optionflag("FIX")
+FLOAT_CMP = doctest.register_optionflag("FLOAT_CMP")
+REMOTE_DATA = doctest.register_optionflag("REMOTE_DATA")
+IGNORE_OUTPUT = doctest.register_optionflag("IGNORE_OUTPUT")
+IGNORE_OUTPUT_2 = doctest.register_optionflag("IGNORE_OUTPUT_2")
+IGNORE_OUTPUT_3 = doctest.register_optionflag("IGNORE_OUTPUT_3")
+IGNORE_WARNINGS = doctest.register_optionflag("IGNORE_WARNINGS")
 
 # These might appear in some doctests and are used in the default pytest
 # doctest plugin. This plugin doesn't actually implement these flags but this
 # allows them to appear in docstrings.
-ALLOW_BYTES = doctest.register_optionflag('ALLOW_BYTES')
-ALLOW_UNICODE = doctest.register_optionflag('ALLOW_UNICODE')
+ALLOW_BYTES = doctest.register_optionflag("ALLOW_BYTES")
+ALLOW_UNICODE = doctest.register_optionflag("ALLOW_UNICODE")
 
 
 class OutputChecker(doctest.OutputChecker):
@@ -42,56 +42,54 @@ class OutputChecker(doctest.OutputChecker):
       string representation.  This naturally supports complex numbers as well
       (simply by comparing their real and imaginary parts separately).
     """
+
     rtol = 1e-05
     atol = 1e-08
 
     _original_output_checker = doctest.OutputChecker
 
-    _str_literal_re = re.compile(
-        r"(\W|^)[uU]([rR]?[\'\"])", re.UNICODE)
-    _byteorder_re = re.compile(
-        r"([\'\"])[|<>]([biufcSaUV][0-9]+)([\'\"])", re.UNICODE)
-    _fix_32bit_re = re.compile(
-        r"([\'\"])([iu])[48]([\'\"])", re.UNICODE)
-    _long_int_re = re.compile(
-        r"([0-9]+)L", re.UNICODE)
+    _str_literal_re = re.compile(r"(\W|^)[uU]([rR]?[\'\"])", re.UNICODE)
+    _byteorder_re = re.compile(r"([\'\"])[|<>]([biufcSaUV][0-9]+)([\'\"])", re.UNICODE)
+    _fix_32bit_re = re.compile(r"([\'\"])([iu])[48]([\'\"])", re.UNICODE)
+    _long_int_re = re.compile(r"([0-9]+)L", re.UNICODE)
 
     def __init__(self):
         # NOTE OutputChecker is an old-style class with no __init__ method,
         # so we can't call the base class version of __init__ here
+        exp = r"(?:e[+-]?\d+)"
 
-        exp = r'(?:e[+-]?\d+)'
-
-        got_floats = (r'\s*([+-]?\d+\.\d*{0}?|'
-                      r'[+-]?\.\d+{0}?|'
-                      r'[+-]?\d+{0}|'
-                      r'nan|'
-                      r'[+-]?inf)').format(exp)
+        got_floats = (
+            r"\s*([+-]?\d+\.\d*{0}?|"
+            r"[+-]?\.\d+{0}?|"
+            r"[+-]?\d+{0}|"
+            r"nan|"
+            r"[+-]?inf)"
+        ).format(exp)
 
         # floats in the 'want' string may contain ellipses
-        want_floats = got_floats + r'(\.{3})?'
+        want_floats = got_floats + r"(\.{3})?"
 
-        front_sep = r'\s|[*+-,<=(\[]'
-        back_sep = front_sep + r'|[>j)\]]'
+        front_sep = r"\s|[*+-,<=(\[]"
+        back_sep = front_sep + r"|[>j)\]]"
 
-        fbeg = r'^{}(?={}|$)'.format(got_floats, back_sep)
-        fmidend = r'(?<={}){}(?={}|$)'.format(front_sep, got_floats, back_sep)
-        self.num_got_rgx = re.compile(r'({}|{})'.format(fbeg, fmidend))
+        fbeg = r"^{}(?={}|$)".format(got_floats, back_sep)
+        fmidend = r"(?<={}){}(?={}|$)".format(front_sep, got_floats, back_sep)
+        self.num_got_rgx = re.compile(r"({}|{})".format(fbeg, fmidend))
 
-        fbeg = r'^{}(?={}|$)'.format(want_floats, back_sep)
-        fmidend = r'(?<={}){}(?={}|$)'.format(front_sep, want_floats, back_sep)
-        self.num_want_rgx = re.compile(r'({}|{})'.format(fbeg, fmidend))
+        fbeg = r"^{}(?={}|$)".format(want_floats, back_sep)
+        fmidend = r"(?<={}){}(?={}|$)".format(front_sep, want_floats, back_sep)
+        self.num_want_rgx = re.compile(r"({}|{})".format(fbeg, fmidend))
 
     def do_fixes(self, want, got):
-        want = re.sub(self._str_literal_re, r'\1\2', want)
-        want = re.sub(self._byteorder_re, r'\1\2\3', want)
-        want = re.sub(self._fix_32bit_re, r'\1\2\3', want)
-        want = re.sub(self._long_int_re, r'\1', want)
+        want = re.sub(self._str_literal_re, r"\1\2", want)
+        want = re.sub(self._byteorder_re, r"\1\2\3", want)
+        want = re.sub(self._fix_32bit_re, r"\1\2\3", want)
+        want = re.sub(self._long_int_re, r"\1", want)
 
-        got = re.sub(self._str_literal_re, r'\1\2', got)
-        got = re.sub(self._byteorder_re, r'\1\2\3', got)
-        got = re.sub(self._fix_32bit_re, r'\1\2\3', got)
-        got = re.sub(self._long_int_re, r'\1', got)
+        got = re.sub(self._str_literal_re, r"\1\2", got)
+        got = re.sub(self._byteorder_re, r"\1\2\3", got)
+        got = re.sub(self._fix_32bit_re, r"\1\2\3", got)
+        got = re.sub(self._long_int_re, r"\1", got)
 
         return want, got
 
@@ -218,31 +216,31 @@ class OutputChecker(doctest.OutputChecker):
         This requires rewriting enough of the basic check_output that, when
         FLOAT_CMP is enabled, it totally takes over for check_output.
         """
-
         # <BLANKLINE> can be used as a special sequence to signify a
         # blank line, unless the DONT_ACCEPT_BLANKLINE flag is used.
         if not (flags & doctest.DONT_ACCEPT_BLANKLINE):
             # Replace <BLANKLINE> in want with a blank line.
-            want = re.sub(r'(?m)^{}\s*?$'.format(re.escape(doctest.BLANKLINE_MARKER)),
-                          '', want)
+            want = re.sub(
+                r"(?m)^{}\s*?$".format(re.escape(doctest.BLANKLINE_MARKER)), "", want
+            )
             # If a line in got contains only spaces, then remove the
             # spaces.
-            got = re.sub(r'(?m)^\s*?$', '', got)
+            got = re.sub(r"(?m)^\s*?$", "", got)
 
         # This flag causes doctest to ignore any differences in the
         # contents of whitespace strings. Note that this can be used
         # in conjunction with the ELLIPSIS flag.
         if flags & doctest.NORMALIZE_WHITESPACE:
-            got = ' '.join(got.split())
-            want = ' '.join(want.split())
+            got = " ".join(got.split())
+            want = " ".join(want.split())
 
         # Handle the common case first, for efficiency:
         # if they're string-identical, always return true.
         if got == want:
             return True
 
-        got_ = self.num_got_rgx.sub('0.0', got)
-        want_ = self.num_got_rgx.sub('0.0', want)
+        got_ = self.num_got_rgx.sub("0.0", got)
+        want_ = self.num_got_rgx.sub("0.0", want)
         # fail if strings with ellipsis and normalize floats are not equal
         if flags & doctest.ELLIPSIS:
             if not doctest._ellipsis_match(want_, got_):
@@ -256,15 +254,14 @@ class OutputChecker(doctest.OutputChecker):
 
         numbers_got = self.find_numbers(got)
         numbers_want_chunks = [
-            self.find_numbers(chunk)
-            for chunk in want.split(doctest.ELLIPSIS_MARKER)
+            self.find_numbers(chunk) for chunk in want.split(doctest.ELLIPSIS_MARKER)
         ]
         if flags & doctest.ELLIPSIS and len(numbers_want_chunks) >= 2:
             return self.partial_match(numbers_got, numbers_want_chunks)
 
         # TODO parse integers as well ?
         # Parse floats and compare them.
-        numbers_want = [f for chunk in numbers_want_chunks for f in chunk]  # flatten array
+        numbers_want = [f for chunk in numbers_want_chunks for f in chunk]
         if len(numbers_got) != len(numbers_want):
             return False
         for ng, nw in zip(numbers_got, numbers_want):
@@ -274,8 +271,11 @@ class OutputChecker(doctest.OutputChecker):
         return True
 
     def check_output(self, want, got, flags):
-        if (flags & IGNORE_OUTPUT or (six.PY2 and flags & IGNORE_OUTPUT_2) or
-                (not six.PY2 and flags & IGNORE_OUTPUT_3)):
+        if (
+            flags & IGNORE_OUTPUT
+            or (six.PY2 and flags & IGNORE_OUTPUT_2)
+            or (not six.PY2 and flags & IGNORE_OUTPUT_3)
+        ):
             return True
 
         if flags & FIX:
@@ -286,8 +286,7 @@ class OutputChecker(doctest.OutputChecker):
 
         # Can't use super here because doctest.OutputChecker is not a
         # new-style class.
-        return self._original_output_checker.check_output(
-            self, want, got, flags)
+        return self._original_output_checker.check_output(self, want, got, flags)
 
     def output_difference(self, want, got, flags):
         if flags & FIX:
@@ -295,8 +294,7 @@ class OutputChecker(doctest.OutputChecker):
 
         # Can't use super here because doctest.OutputChecker is not a
         # new-style class.
-        return self._original_output_checker.output_difference(
-            self, want, got, flags)
+        return self._original_output_checker.output_difference(self, want, got, flags)
 
 
 try:
@@ -304,6 +302,11 @@ try:
 
     def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
         return numpy.isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
+
+
 except ImportError:
+
     def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
-        return abs(a - b) <= atol + rtol * abs(b) or (equal_nan and math.isnan(a) and math.isnan(b))
+        return abs(a - b) <= atol + rtol * abs(b) or (
+            equal_nan and math.isnan(a) and math.isnan(b)
+        )
