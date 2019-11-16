@@ -13,25 +13,15 @@ import warnings
 import pytest
 import six
 
-from pytest_doctestplus.utils import ModuleChecker
 from .output_checker import FIX, IGNORE_WARNINGS, OutputChecker, REMOTE_DATA
-
-
-try:
-    from textwrap import indent
-except ImportError:  # PY2
-
-    def indent(text, prefix):
-        return "\n".join([prefix + line for line in text.splitlines()])
+from .utils import ModuleChecker, indent
 
 
 comment_characters = {".txt": "#", ".tex": "%", ".rst": r"\.\."}
 
-
 # For the IGNORE_WARNINGS option, we create a context manager that doesn't
 # require us to add any imports to the example list and contains everything
 # that is needed to silence warnings.
-
 IGNORE_WARNINGS_CONTEXT = """
 class _doctestplus_ignore_all_warnings(object):
 

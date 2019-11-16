@@ -1,4 +1,5 @@
 import logging
+import math
 import operator
 import re
 import subprocess
@@ -101,3 +102,23 @@ class ModuleChecker:
         """
         mods = self.find_module(module) or self.find_distribution(module)
         return bool(mods)
+
+
+try:
+    from textwrap import indent
+except ImportError:  # PY2
+
+    def indent(text, prefix):
+        return "\n".join([prefix + line for line in text.splitlines()])
+
+
+try:
+    import numpy
+
+    isclose = numpy.isclose
+except ImportError:
+
+    def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
+        return abs(a - b) <= atol + rtol * abs(b) or (
+            equal_nan and math.isnan(a) and math.isnan(b)
+        )

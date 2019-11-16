@@ -9,11 +9,12 @@ normalizations of Python expression output.  See the docstring on
 
 
 import doctest
-import math
 import re
 
 import six
 from six.moves import zip
+
+from pytest_doctestplus.utils import isclose
 
 
 FIX = doctest.register_optionflag("FIX")
@@ -295,18 +296,3 @@ class OutputChecker(doctest.OutputChecker):
         # Can't use super here because doctest.OutputChecker is not a
         # new-style class.
         return self._original_output_checker.output_difference(self, want, got, flags)
-
-
-try:
-    import numpy
-
-    def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
-        return numpy.isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)
-
-
-except ImportError:
-
-    def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
-        return abs(a - b) <= atol + rtol * abs(b) or (
-            equal_nan and math.isnan(a) and math.isnan(b)
-        )
