@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ModuleChecker:
     def __init__(self):
-        if LooseVersion(sys.version) < LooseVersion("3.4"):
+        if LooseVersion(sys.version) < LooseVersion("3.4"):  # pragma: no cover
             import imp
 
             self._find_module = imp.find_module
@@ -106,13 +106,13 @@ class ModuleChecker:
 
 try:
     from textwrap import indent
-except ImportError:  # PY2
+except ImportError:  # pragma: no cover
 
     def indent(text, prefix):
         return "\n".join([prefix + line for line in text.splitlines()])
 
 
-try:
+try:  # pragma: no cover
     import numpy
 
     isclose = numpy.isclose
