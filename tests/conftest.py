@@ -4,11 +4,11 @@ from uuid import uuid4
 import pytest
 
 
-pytest_plugins = ["pytester"]
+pytest_plugins = ['pytester']
 
 
 def rand_id():
-    return str(uuid4()).replace("-", "_")
+    return str(uuid4()).replace('-', '_')
 
 
 class DoctestFileMaker:
@@ -39,13 +39,13 @@ class DoctestFileMaker:
         -------
 
         """
-        filename = kwargs.pop("filename", None)
+        filename = kwargs.pop('filename', None)
         if not filename:
-            filename = "script_{}".format(rand_id())
+            filename = 'script_{}'.format(rand_id())
 
         # add default function name for each provided docstring
         for docstring in args:
-            func_name = "func_{}".format(rand_id())
+            func_name = 'func_{}'.format(rand_id())
             kwargs[func_name] = docstring
 
         # join lines if docstring is iterable
@@ -54,36 +54,34 @@ class DoctestFileMaker:
                 kwargs[func_name] = "\n".join(docstring)
 
         # generate content based on file extension
-        if ext == ".py":
-            chunks = ["from __future__ import print_function"]
+        if ext == '.py':
+            chunks = ['from __future__ import print_function']
         else:
             chunks = []
         for func_name, docstring in kwargs.items():
-            if ext == ".py":
+            if ext == '.py':
                 chunk = self._make_func_with_doctest(func_name, docstring)
             else:
                 chunk = docstring
             chunks.append(chunk)
-        content = "\n".join(chunks)
+        content = '\n'.join(chunks)
 
         # make file in temp dir
         return self.testdir.makefile(ext, **{filename: content})
 
     def makepyfile(self, *args, **kwargs):
-        return self.makefile(".py", *args, **kwargs)
+        return self.makefile('.py', *args, **kwargs)
 
     def makerstfile(self, *args, **kwargs):
-        return self.makefile(".rst", *args, **kwargs)
+        return self.makefile('.rst', *args, **kwargs)
 
     def _make_func_with_doctest(self, func_name, docstring):
-        template = textwrap.dedent(
-            r"""
+        template = textwrap.dedent("""\
             def {}():
                 r'''
             {}
                 '''
-        """
-        )
+        """)
         return template.format(func_name, docstring)
 
     def test(self, *options, **kwargs):
@@ -91,7 +89,7 @@ class DoctestFileMaker:
         Shortcut for testdir.inline_run(...).assertoutcome(...)
         with "--doctest-plus" always in the list of arguments.
         """
-        out = self.testdir.inline_run("--doctest-plus", *options)
+        out = self.testdir.inline_run('--doctest-plus', *options)
         out.assertoutcome(**kwargs)
         return out
 

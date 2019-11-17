@@ -1,16 +1,12 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
-__doctest_skip__ = [
-    "skip_this_test",
-    "ClassWithSomeBadDocTests.this_test_fails",
-    "ClassWithAllBadDocTests.*",
-]
+__doctest_skip__ = ['skip_this_test',
+                    'ClassWithSomeBadDocTests.this_test_fails',
+                    'ClassWithAllBadDocTests.*']
 
-__doctest_requires__ = {
-    "depends_on_foobar": ["foobar"],
-    "depends_on_foobar_submodule": ["foobar.baz"],
-    "depends_on_two_modules": ["os", "foobar"],
-}
+__doctest_requires__ = {'depends_on_foobar': ['foobar'],
+                        'depends_on_foobar_submodule': ['foobar.baz'],
+                        'depends_on_two_modules': ['os', 'foobar']}
 
 
 def this_test_works():

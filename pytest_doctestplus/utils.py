@@ -14,35 +14,30 @@ class ModuleChecker:
     def __init__(self):
         if LooseVersion(sys.version) < LooseVersion("3.4"):  # pragma: no cover
             import imp
-
             self._find_module = imp.find_module
             self._find_distribution = self._check_distribution
             self.packages = self.get_packages()
         else:
             import importlib.util
             import pkg_resources
-
             self._find_module = importlib.util.find_spec
             self._find_distribution = pkg_resources.require
             self.packages = {}
 
     def get_packages(self):
-        packages = (
-            subprocess.check_output([sys.executable, "-m", "pip", "freeze"])
-            .decode()
-            .splitlines()
-        )
-        packages = [package.split("==") for package in packages if "==" in package]
+        packages = (subprocess
+                    .check_output([sys.executable, '-m', 'pip', 'freeze'])
+                    .decode()
+                    .splitlines())
+        packages = [package.split('==') for package in packages if '==' in package]
         return {name.lower(): version for name, version in packages}
 
     def compare_versions(self, v1, v2, op):
-        op_map = {
-            "<": operator.lt,
-            "<=": operator.le,
-            ">": operator.gt,
-            ">=": operator.ge,
-            "==": operator.eq,
-        }
+        op_map = {'<': operator.lt,
+                  '<=': operator.le,
+                  '>': operator.gt,
+                  '>=': operator.ge,
+                  '==': operator.eq}
         if op not in op_map:
             return False
         op = op_map[op]
@@ -54,7 +49,7 @@ class ModuleChecker:
         But unlike pkg_resources.require it just checks whether package is
         installed and has required version.
         """
-        match = re.match(r"([A-Za-z0-9-_]+)([^A-Za-z0-9-_]+)([\d.]+$)", module)
+        match = re.match(r'([A-Za-z0-9-_]+)([^A-Za-z0-9-_]+)([\d.]+$)', module)
         if not match:
             return False
         package, cmp, version = match.groups()
@@ -65,16 +60,11 @@ class ModuleChecker:
             if self.compare_versions(installed_version, version, cmp):
                 return True
             else:
-                logger.warning(
-                    "{} {} is installed. Version {}{} is required".format(
-                        package, installed_version, cmp, version
-                    )
-                )
+                logger.warning("{} {} is installed. Version {}{} is "
+                               "required".format(package, installed_version, cmp, version))
                 return False
-        logger.warning(
-            "The '{}' distribution was not found and is required "
-            "by the application".format(package)
-        )
+        logger.warning("The '{}' distribution was not found and is required "
+                       "by the application".format(package))
         return False
 
     def find_module(self, module):
@@ -107,18 +97,14 @@ class ModuleChecker:
 try:
     from textwrap import indent
 except ImportError:  # pragma: no cover
-
     def indent(text, prefix):
-        return "\n".join([prefix + line for line in text.splitlines()])
+        return '\n'.join([prefix + line for line in text.splitlines()])
 
 
 try:  # pragma: no cover
     import numpy
-
     isclose = numpy.isclose
 except ImportError:
-
     def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=True):
-        return abs(a - b) <= atol + rtol * abs(b) or (
-            equal_nan and math.isnan(a) and math.isnan(b)
-        )
+        return (abs(a - b) <= atol + rtol * abs(b)
+                or (equal_nan and math.isnan(a) and math.isnan(b)))

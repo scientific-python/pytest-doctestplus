@@ -6,49 +6,39 @@ import pytest
 
 
 def test_ignored_whitespace(testdir, docdir):
-    testdir.makeini(
-        """
+    testdir.makeini("""\
         [pytest]
         doctest_optionflags = ELLIPSIS NORMALIZE_WHITESPACE
         doctestplus = enabled
-    """
-    )
-    p = docdir.makepyfile(
-        """
+    """)
+    p = docdir.makepyfile("""\
         >>> a = "foo    "
         >>> print(a)
         foo
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
 
 def test_non_ignored_whitespace(testdir, docdir):
-    testdir.makeini(
-        """
+    testdir.makeini("""\
         [pytest]
         doctest_optionflags = ELLIPSIS
         doctestplus = enabled
-    """
-    )
-    p = docdir.makepyfile(
-        """
+    """)
+    p = docdir.makepyfile("""\
         >>> a = "foo    "
         >>> print(a)
         foo
-    """
-    )
+    """)
     docdir.test(p, failed=1)
 
 
 def test_float_cmp(testdir, docdir):
-    testdir.makeini(
-        """
+    testdir.makeini("""\
         [pytest]
         doctest_optionflags = ELLIPSIS
         doctestplus = enabled
-    """
-    )
+    """)
     p = docdir.makepyfile(
         foo="""
             >>> x = 1/3.
@@ -65,102 +55,81 @@ def test_float_cmp(testdir, docdir):
 
 
 def test_float_cmp_list(testdir, docdir):
-    testdir.makeini(
-        """
+    testdir.makeini("""\
         [pytest]
         doctest_optionflags = ELLIPSIS
         doctestplus = enabled
-    """
-    )
-    p = docdir.makepyfile(
-        """
+    """)
+    p = docdir.makepyfile("""\
         >>> x = [1/3., 2/3.]
         >>> x    # doctest: +FLOAT_CMP
         [0.333333, 0.666666]
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
 
 def test_float_cmp_global(testdir, docdir):
-    testdir.makeini(
-        """
+    testdir.makeini("""\
         [pytest]
         doctest_optionflags = FLOAT_CMP
         doctestplus = enabled
-    """
-    )
-    p = docdir.makepyfile(
-        """
+    """)
+    p = docdir.makepyfile("""\
         >>> x = 1/3.
         >>> x
         0.333333
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> x = 2/7.
         >>> x
         0.285714
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> x = 1/13.
         >>> x
         0.076923
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> x = 1/13.
         >>> x
         0.07692
-    """
-    )
+    """)
     docdir.test(p, failed=1)
 
 
 def test_float_cmp_and_ellipsis(testdir, docdir):
-    testdir.makeini(
-        """
+    testdir.makeini("""\
         [pytest]
         doctest_optionflags = FLOAT_CMP ELLIPSIS
         doctestplus = enabled
-    """
-    )
+    """)
     # whitespace is normalized by default
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> for char in ['A', 'B', 'C', 'D', 'E']:
         ...     print(char, float(ord(char)))
         A 65.0
         B 66.0
         ...
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> for char in ['A', 'B', 'C', 'D', 'E']:
         ...     print(char, float(ord(char)))
         A 65.0
         B 66.0
         ...
         E 69.0
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> for char in ['A', 'B', 'C', 'D', 'E']:
         ...     print(char, float(ord(char)))
         A 65.0
@@ -168,19 +137,16 @@ def test_float_cmp_and_ellipsis(testdir, docdir):
         C 67.0
         ...
         E 69.0
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> for char in ['A', 'B', 'C', 'D', 'E']:
         ...     print(char, float(ord(char)))
         A 65.0
         ...
         E 70.0
-    """
-    )
+    """)
     docdir.test(p, failed=1)
 
 
@@ -188,64 +154,52 @@ def test_allow_bytes_unicode(docdir):
     # These are dummy tests just to check tht doctest-plus can parse the
     # ALLOW_BYTES and ALLOW_UNICODE options. It doesn't actually implement
     # these options.
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> 1 # doctest: +ALLOW_BYTES
         1
         >>> 1 # doctest: +ALLOW_UNICODE
         1
-    """
-    )
+    """)
     docdir.test(p, passed=1)
 
 
 def test_requires(docdir):
     # should be ignored
-    p = docdir.makerstfile(
-        """
+    p = docdir.makerstfile("""\
         .. doctest-requires:: foobar
             >>> import foobar
-    """
-    )
+    """)
     docdir.test(p, "--doctest-rst", passed=1)
 
     # should run as expected
-    p = docdir.makerstfile(
-        """
+    p = docdir.makerstfile("""\
         .. doctest-requires:: sys
             >>> import sys
-    """
-    )
+    """)
     docdir.test(p, "--doctest-rst", passed=1)
 
     # testing this in case if doctest-requires just ignores everything
     # and pass unconditionally
-    p = docdir.makerstfile(
-        """
+    p = docdir.makerstfile("""\
         .. doctest-requires:: sys glob, re,math
             >>> import sys
             >>> assert 0
-    """
-    )
+    """)
     docdir.test(p, "--doctest-rst", failed=1)
 
     # package with version is available
-    p = docdir.makerstfile(
-        """
+    p = docdir.makerstfile("""\
         .. doctest-requires:: sys pytest>=1.0
             >>> import sys, pytest
-    """
-    )
+    """)
     docdir.test(p, "--doctest-rst", passed=1)
 
     # package with version is not available
-    p = docdir.makerstfile(
-        """
+    p = docdir.makerstfile("""\
         .. doctest-requires:: sys pytest<1.0 glob
             >>> import sys, pytest, glob
             >>> assert 0
-    """
-    )
+    """)
     # passed because 'pytest<1.0' was not satisfied and 'assert 0' was not evaluated
     docdir.test(p, "--doctest-rst", passed=1)
 
@@ -253,46 +207,38 @@ def test_requires(docdir):
 def test_ignore_warnings_module(docdir):
     # First check that we get a warning if we don't add the IGNORE_WARNINGS
     # directive
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> import warnings
         >>> warnings.warn('A warning occurred', UserWarning)
-    """
-    )
+    """)
     docdir.test(p, "-W error", failed=1)
 
     # Now try with the IGNORE_WARNINGS directive
-    p = docdir.makepyfile(
-        """
+    p = docdir.makepyfile("""\
         >>> import warnings
         >>> warnings.warn(  # doctest: +IGNORE_WARNINGS
         ...   'A warning occurred', UserWarning
         ... )
-    """
-    )
+    """)
     docdir.test(p, "-W error", passed=1)
 
 
 def test_ignore_warnings_rst(docdir):
     # First check that we get a warning if we don't add the IGNORE_WARNINGS
     # directive
-    p = docdir.makerstfile(
-        """
+    p = docdir.makerstfile("""\
         >>> import warnings
         >>> warnings.warn('A warning occurred', UserWarning)
-    """
-    )
+    """)
     docdir.test(p, "--doctest-rst", "--text-file-format=rst", "-W error", failed=1)
 
     # Now try with the IGNORE_WARNINGS directive
-    p = docdir.makerstfile(
-        """
+    p = docdir.makerstfile("""\
         >>> import warnings
         >>> warnings.warn(
         ...   'A warning occurred', UserWarning
         ... )  # doctest: +IGNORE_WARNINGS
-    """
-    )
+    """)
     docdir.test(p, "--doctest-rst", "--text-file-format=rst", "-W error", passed=1)
 
 
@@ -355,14 +301,12 @@ def test_text_file_comments(docdir):
 
 def test_text_file_comment_chars(testdir, docdir):
     # override default comment chars
-    testdir.makeini(
-        """
+    testdir.makeini("""\
         [pytest]
         text_file_extensions =
             .rst=#
             .tex=#
-    """
-    )
+    """)
     docdir.makefile(".rst", "# >>> 1 + 1\n3")
     docdir.makefile(".tex", "# >>> 1 + 1\n3")
     docdir.test("--doctest-glob", "*.rst", "--doctest-glob", "*.tex", passed=2)
@@ -397,7 +341,6 @@ def test_ignore_option(docdir):
 
 
 if LooseVersion("4.3.0") <= LooseVersion(pytest.__version__):
-
     def test_ignore_glob_option(docdir):
         docdir.makepyfile(
             """
