@@ -1,4 +1,5 @@
 from distutils.version import LooseVersion
+from textwrap import dedent
 
 import pytest
 
@@ -621,3 +622,32 @@ def test_doctest_only(testdir, makepyfile, maketestfile, makerstfile):
     # only doctests in python files
     testdir.inline_run("--doctest-only", "--doctest-rst").assertoutcome(passed=3, failed=2)
 
+
+def test_doctest_float_replacement(tmpdir):
+    test1 = dedent("""
+        This will demonstrate a doctest that fails due to a few extra decimal
+        places::
+
+            >>> 1.0 / 3.0
+            0.333333333333333311
+    """)
+
+    test2 = dedent("""
+        This is the same test, but it should pass with use of
+        +FLOAT_CMP::
+
+            >>> 1.0 / 3.0  # doctest: +FLOAT_CMP
+            0.333333333333333311
+    """)
+
+    test1_rst = tmpdir.join('test1.rst')
+    test2_rst = tmpdir.join('test2.rst')
+    test1_rst.write(test1)
+    test2_rst.write(test2)
+
+    with pytest.raises(doctest.DocTestFailure):
+        doctest.testfile(str(test1_rst), module_relative=False,
+                         raise_on_error=True, verbose=False, encoding='utf-8')
+
+    doctest.testfile(str(test2_rst), module_relative=False,
+                     raise_on_error=True, verbose=False, encoding='utf-8')
