@@ -16,6 +16,7 @@ env:
         - PYTEST_VERSION=4
         - PYTEST_COMMAND='pytest'
         - CONDA_DEPENDENCIES='six'
+        - DEBUG=True
 
     jobs:
         - PYTHON_VERSION=2.7 PYTEST_COMMAND='py.test'
