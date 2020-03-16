@@ -272,7 +272,7 @@ def pytest_configure(config):
             if ext not in comment_characters:
                 warnings.warn("file format '{}' is not recognized, assuming "
                               "'{}' as the comment character."
-                              .format(ext, comment_characters['rst']))
+                              .format(ext, comment_characters['.rst']))
                 ext = '.rst'
             comment_char = comment_characters[ext]
 
