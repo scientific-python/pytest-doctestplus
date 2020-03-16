@@ -55,8 +55,8 @@ class _doctestplus_ignore_all_warnings(object):
 def _docdir(request):
     """Run doctests in isolated tmpdir so outputs do not end up in repo"""
     # Trigger ONLY for doctestplus
-    doctest_plugin = request.config.pluginmanager.getplugin("doctestplus")
-    if isinstance(request.node, doctest_plugin._doctest_textfile_item_cls):
+    doctest_plugin = request.config.pluginmanager.getplugin("pytest_doctestplus")
+    if isinstance(request.node, doctest_plugin.DocTestTextfilePlus):
         # Don't apply this fixture to io.rst.  It reads files and doesn't write
         if "io.rst" not in request.node.name:
             tmpdir = request.getfixturevalue('tmpdir')
