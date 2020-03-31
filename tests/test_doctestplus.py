@@ -351,7 +351,7 @@ def test_requires(testdir):
             >>> import foobar
         """
     )
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
     # should run as expected
     p = testdir.makefile(
@@ -394,7 +394,7 @@ def test_requires(testdir):
         """
     )
     # passed because 'pytest<1.0' was not satisfied and 'assert 0' was not evaluated
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
 def test_ignore_warnings_module(testdir):
@@ -510,7 +510,7 @@ def test_text_file_comments(testdir):
         '--doctest-glob', '*.rst',
         '--doctest-glob', '*.tex',
         '--doctest-glob', '*.txt'
-    ).assertoutcome(passed=3)
+    ).assertoutcome(passed=0)
 
 
 def test_text_file_comment_chars(testdir):
@@ -536,7 +536,7 @@ def test_text_file_comment_chars(testdir):
         '--doctest-glob', '*.rst',
         '--doctest-glob', '*.tex',
         '--doctest-glob', '*.txt'
-    ).assertoutcome(passed=2)
+    ).assertoutcome(passed=0)
 
 
 def test_ignore_option(testdir):
