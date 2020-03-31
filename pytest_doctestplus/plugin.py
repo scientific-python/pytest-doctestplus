@@ -204,9 +204,14 @@ def pytest_configure(config):
                         if ignore_warnings_context_needed:
                             test.examples.insert(0, doctest.Example(source=IGNORE_WARNINGS_CONTEXT, want=''))
 
-                    yield doctest_plugin.DoctestItem.from_parent(
-                        self, name=test.name, runner=runner, dtest=test
-                    )
+                    try:
+                        yield doctest_plugin.DoctestItem.from_parent(
+                            self, name=test.name, runner=runner, dtest=test
+                        )
+                    except AttributeError:
+                        # pytest < 5.4
+                        yield doctest_plugin.DoctestItem(
+                            test.name, self, runner, test)
 
     class DocTestTextfilePlus(pytest.Module):
 
@@ -225,9 +230,13 @@ def pytest_configure(config):
             parser = DocTestParserPlus()
             test = parser.get_doctest(text, globs, name, filename, 0)
             if test.examples:
-                yield doctest_plugin.DoctestItem.from_parent(
-                    self, name=test.name, runner=runner, dtest=test
-                )
+                try:
+                    yield doctest_plugin.DoctestItem.from_parent(
+                        self, name=test.name, runner=runner, dtest=test
+                    )
+                except AttributeError:
+                    # pytest < 5.4
+                    yield doctest_plugin.DoctestItem(test.name, self, runner, test)
 
     class DocTestParserPlus(doctest.DocTestParser):
         """
@@ -442,7 +451,12 @@ class DoctestPlus(object):
                 return None
 
             # Don't override the built-in doctest plugin
-            return self._doctest_module_item_cls.from_parent(parent, fspath=path)
+            try:
+                return self._doctest_module_item_cls.from_parent(parent, fspath=path)
+            except AttributeError:
+                # pytest < 5.4
+                return self._doctest_module_item_cls(path, parent)
+
         elif any([path.check(fnmatch=pat) for pat in self._file_globs]):
             # Ignore generated .rst files
             parts = str(path).split(os.path.sep)
@@ -468,7 +482,11 @@ class DoctestPlus(object):
 
             # TODO: Get better names on these items when they are
             # displayed in py.test output
-            return self._doctest_textfile_item_cls.from_parent(parent, fspath=path)
+            try:
+                return self._doctest_textfile_item_cls.from_parent(parent, fspath=path)
+            except AttributeError:
+                # pytest < 5.4
+                return self._doctest_textfile_item_cls(path, parent)
 
 
 class DocTestFinderPlus(doctest.DocTestFinder):
