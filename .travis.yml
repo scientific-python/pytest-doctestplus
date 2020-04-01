@@ -21,6 +21,7 @@ env:
         - PYTEST_VERSION=4
         - PYTEST_COMMAND='pytest'
         - CONDA_DEPENDENCIES='six'
+        - PY_IGNORE_IMPORTMISMATCH=1
 
     matrix:
         - PYTHON_VERSION=2.7 PYTEST_COMMAND='py.test'
