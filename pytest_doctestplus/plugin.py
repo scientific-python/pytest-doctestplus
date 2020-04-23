@@ -11,7 +11,6 @@ import sys
 import warnings
 
 import pytest
-import six
 
 from pytest_doctestplus.utils import ModuleChecker
 from .output_checker import FIX, IGNORE_WARNINGS, OutputChecker, REMOTE_DATA
@@ -278,7 +277,7 @@ def pytest_configure(config):
 
             for entry in result:
 
-                if isinstance(entry, six.string_types) and entry:
+                if isinstance(entry, str) and entry:
                     required = []
                     skip_next = False
                     lines = entry.strip().splitlines()
@@ -544,7 +543,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                         return False
 
                 reqs = getattr(obj, '__doctest_requires__', {})
-                for pats, mods in six.iteritems(reqs):
+                for pats, mods in reqs.items():
                     if not isinstance(pats, tuple):
                         pats = (pats,)
                     for pat in pats:

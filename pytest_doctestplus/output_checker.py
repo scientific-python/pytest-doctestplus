@@ -8,8 +8,6 @@ import doctest
 import re
 import math
 
-import six
-from six.moves import zip
 
 # Much of this code, particularly the parts of floating point handling, is
 # borrowed from the SymPy project with permission.  See
@@ -20,7 +18,6 @@ FIX = doctest.register_optionflag('FIX')
 FLOAT_CMP = doctest.register_optionflag('FLOAT_CMP')
 REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
 IGNORE_OUTPUT = doctest.register_optionflag('IGNORE_OUTPUT')
-IGNORE_OUTPUT_2 = doctest.register_optionflag('IGNORE_OUTPUT_2')
 IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
 IGNORE_WARNINGS = doctest.register_optionflag('IGNORE_WARNINGS')
 
@@ -274,8 +271,7 @@ class OutputChecker(doctest.OutputChecker):
         return True
 
     def check_output(self, want, got, flags):
-        if (flags & IGNORE_OUTPUT or (six.PY2 and flags & IGNORE_OUTPUT_2) or
-                (not six.PY2 and flags & IGNORE_OUTPUT_3)):
+        if ((flags & IGNORE_OUTPUT) or (flags & IGNORE_OUTPUT_3)):
             return True
 
         if flags & FIX:
