@@ -7,50 +7,41 @@ os:
     - linux
     - windows
 
-stage: All tests
-
-# Use Travis' container-based architecture
-sudo: false
-
 env:
     global:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
         - PYTHON_VERSION=3.6
-        - PYTEST_VERSION=4
         - PYTEST_COMMAND='pytest'
         - CONDA_DEPENDENCIES='six'
         - PY_IGNORE_IMPORTMISMATCH=1
 
-    matrix:
-        - PYTHON_VERSION=2.7 PYTEST_COMMAND='py.test'
+    jobs:
         - PYTHON_VERSION=3.5 NUMPY_VERSION=1.15
         - PYTHON_VERSION=3.6
-        - PYTHON_VERSION=3.7 PYTEST_VERSION=3.8
-        - PYTHON_VERSION=3.7 PYTEST_VERSION=3.9
+        - PYTHON_VERSION=3.7 PYTEST_VERSION=4
+        - PYTHON_VERSION=3.7 PYTEST_VERSION='<5.4'
 
 stages:
     # only run 2 jobs initially
     - name: Initial tests
     - name: All tests
 
-matrix:
+jobs:
     include:
         - os: linux
           env: PYTHON_VERSION=3.7 NUMPY_VERSION=stable
           stage: Initial tests
 
-        - os: linux
-          env: PYTHON_VERSION=2.7
-          stage: Initial tests
-
         # Try a run on OSX with latest versions of python and pytest
         - os: osx
+          stage: All tests
           env: PYTHON_VERSION=3.7
 
         # Try a run against latest pytest
-        - env: PYTHON_VERSION=3.8 PYTEST_VERSION=5
+        - stage: All tests
+          env: PYTHON_VERSION=3.8 PYTEST_VERSION=5
 
 install:
     - git clone git://github.com/astropy/ci-helpers.git
