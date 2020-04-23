@@ -24,9 +24,9 @@ env:
         - PYTHON_VERSION=3.7 PYTEST_VERSION='<5.4'
 
 stages:
-    # only run 2 jobs initially
+    # only run 2 jobs initially. Using "test" as it cannot be adjusted for the root jobs above.
     - name: Initial tests
-    - name: All tests
+    - name: test
 
 jobs:
     include:
@@ -36,11 +36,11 @@ jobs:
 
         # Try a run on OSX with latest versions of python and pytest
         - os: osx
-          stage: All tests
+          stage: test
           env: PYTHON_VERSION=3.7
 
         # Try a run against latest pytest
-        - stage: All tests
+        - stage: test
           env: PYTHON_VERSION=3.8 PYTEST_VERSION=5
 
 install:
