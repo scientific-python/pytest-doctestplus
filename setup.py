@@ -40,8 +40,8 @@ setup(
         'Topic :: Utilities',
     ],
     keywords=['doctest', 'rst', 'pytest', 'py.test'],
-    install_requires=['six', 'pytest>=3.0', 'pip'],
-    python_requires='>=2.7',
+    install_requires=['pytest>=4.0', 'pip'],
+    python_requires='>=3.6',
     entry_points={
         'pytest11': [
             'pytest_doctestplus = pytest_doctestplus.plugin',

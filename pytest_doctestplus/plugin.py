@@ -11,7 +11,6 @@ import sys
 import warnings
 
 import pytest
-import six
 
 from pytest_doctestplus.utils import ModuleChecker
 from .output_checker import FIX, IGNORE_WARNINGS, OutputChecker, REMOTE_DATA
@@ -164,17 +163,15 @@ def pytest_configure(config):
             if self.fspath.basename == "setup.py":
                 return
             elif self.fspath.basename == "conftest.py":
-                try:
-                    module = self.config._conftest.importconftest(self.fspath)
-                except AttributeError:  # pytest >= 2.8.0
-                    module = self.config.pluginmanager._importconftest(self.fspath)
+                module = self.config.pluginmanager._importconftest(self.fspath)
             else:
                 try:
                     module = self.fspath.pyimport()
-                    # Just ignore searching modules that can't be imported when
-                    # collecting doctests
                 except ImportError:
-                    return
+                    if self.config.getvalue("doctest_ignore_import_errors"):
+                        pytest.skip("unable to import module %r" % self.fspath)
+                    else:
+                        raise
 
             options = get_optionflags(self) | FIX
 
@@ -182,6 +179,7 @@ def pytest_configure(config):
             finder = DocTestFinderPlus()
             runner = doctest.DebugRunner(
                 verbose=False, optionflags=options, checker=OutputChecker())
+
             for test in finder.find(module):
                 if test.examples:  # skip empty doctests
                     if config.getoption('remote_data', 'none') != 'any':
@@ -194,7 +192,7 @@ def pytest_configure(config):
                             # wrapping the source in a context manager.
                             if example.options.get(IGNORE_WARNINGS, False):
                                 example.source = ("with _doctestplus_ignore_all_warnings():\n"
-                                                + indent(example.source, '    '))
+                                                  + indent(example.source, '    '))
                                 ignore_warnings_context_needed = True
 
                             if example.options.get(REMOTE_DATA):
@@ -205,40 +203,39 @@ def pytest_configure(config):
                         if ignore_warnings_context_needed:
                             test.examples.insert(0, doctest.Example(source=IGNORE_WARNINGS_CONTEXT, want=''))
 
-                    yield doctest_plugin.DoctestItem(
-                        test.name, self, runner, test)
+                    try:
+                        yield doctest_plugin.DoctestItem.from_parent(
+                            self, name=test.name, runner=runner, dtest=test
+                        )
+                    except AttributeError:
+                        # pytest < 5.4
+                        yield doctest_plugin.DoctestItem(
+                            test.name, self, runner, test)
 
-    class DocTestTextfilePlus(doctest_plugin.DoctestItem, pytest.Module):
-        # Some pytest plugins such as hypothesis try and access the 'obj'
-        # attribute, and by default this returns an error for this class
-        # so we override it here to avoid any issues.
-        def obj(self):
-            pass
+    class DocTestTextfilePlus(pytest.Module):
 
-        def runtest(self):
-            # satisfy `FixtureRequest` constructor...
-            self.funcargs = {}
-            fixture_request = doctest_plugin._setup_fixtures(self)
+        def collect(self):
+            encoding = self.config.getini("doctest_encoding")
+            text = self.fspath.read_text(encoding)
+            filename = str(self.fspath)
+            name = self.fspath.basename
+            globs = {"__name__": "__main__"}
 
-            options = get_optionflags(self) | FIX
+            optionflags = get_optionflags(self) | FIX
 
-            doctest.testfile(
-                str(self.fspath), module_relative=False,
-                optionflags=options, parser=DocTestParserPlus(),
-                extraglobs=dict(getfixture=fixture_request.getfixturevalue),
-                raise_on_error=True, verbose=False, encoding='utf-8')
+            runner = doctest.DebugRunner(
+                verbose=False, optionflags=optionflags, checker=OutputChecker())
 
-        def reportinfo(self):
-            """
-            Overwrite pytest's ``DoctestItem`` because
-            ``DocTestTextfilePlus`` does not have a ``dtest`` attribute
-            which is used by pytest>=3.2.0 to return the location of the
-            tests.
-
-            For details see `pytest-dev/pytest#2651
-            <https://github.com/pytest-dev/pytest/pull/2651>`_.
-            """
-            return self.fspath, None, "[doctest] %s" % self.name
+            parser = DocTestParserPlus()
+            test = parser.get_doctest(text, globs, name, filename, 0)
+            if test.examples:
+                try:
+                    yield doctest_plugin.DoctestItem.from_parent(
+                        self, name=test.name, runner=runner, dtest=test
+                    )
+                except AttributeError:
+                    # pytest < 5.4
+                    yield doctest_plugin.DoctestItem(test.name, self, runner, test)
 
     class DocTestParserPlus(doctest.DocTestParser):
         """
@@ -280,7 +277,7 @@ def pytest_configure(config):
 
             for entry in result:
 
-                if isinstance(entry, six.string_types) and entry:
+                if isinstance(entry, str) and entry:
                     required = []
                     skip_next = False
                     lines = entry.strip().splitlines()
@@ -453,7 +450,12 @@ class DoctestPlus(object):
                 return None
 
             # Don't override the built-in doctest plugin
-            return self._doctest_module_item_cls(path, parent)
+            try:
+                return self._doctest_module_item_cls.from_parent(parent, fspath=path)
+            except AttributeError:
+                # pytest < 5.4
+                return self._doctest_module_item_cls(path, parent)
+
         elif any([path.check(fnmatch=pat) for pat in self._file_globs]):
             # Ignore generated .rst files
             parts = str(path).split(os.path.sep)
@@ -479,7 +481,11 @@ class DoctestPlus(object):
 
             # TODO: Get better names on these items when they are
             # displayed in py.test output
-            return self._doctest_textfile_item_cls(path, parent)
+            try:
+                return self._doctest_textfile_item_cls.from_parent(parent, fspath=path)
+            except AttributeError:
+                # pytest < 5.4
+                return self._doctest_textfile_item_cls(path, parent)
 
 
 class DocTestFinderPlus(doctest.DocTestFinder):
@@ -537,7 +543,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                         return False
 
                 reqs = getattr(obj, '__doctest_requires__', {})
-                for pats, mods in six.iteritems(reqs):
+                for pats, mods in reqs.items():
                     if not isinstance(pats, tuple):
                         pats = (pats,)
                     for pat in pats:

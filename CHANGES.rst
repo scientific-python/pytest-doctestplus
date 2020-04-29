@@ -1,7 +1,12 @@
 0.6.0 (unreleased)
 ==================
 
-- No changes yet.
+- Drop support for ``python`` versions earlier than 3.6. [#103]
+
+- Drop support for ``pytest`` versions earlier than 4.0. [#103]
+
+- Fix compatibility with ``pytest`` 5.4. [#103]
+
 
 0.5.0 (2019-11-15)
 ==================
