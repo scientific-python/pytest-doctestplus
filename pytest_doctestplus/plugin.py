@@ -168,10 +168,12 @@ def pytest_configure(config):
                 try:
                     module = self.fspath.pyimport()
                 except ImportError:
-                    if self.config.getvalue("doctest_ignore_import_errors"):
-                        pytest.skip("unable to import module %r" % self.fspath)
-                    else:
-                        raise
+                    pytest.skip("unable to import module %r" % self.fspath)
+                    # NOT USED: While correct, this breaks existing behavior.
+                    # if self.config.getvalue("doctest_ignore_import_errors"):
+                    #     pytest.skip("unable to import module %r" % self.fspath)
+                    # else:
+                    #     raise
 
             options = get_optionflags(self) | FIX
 
