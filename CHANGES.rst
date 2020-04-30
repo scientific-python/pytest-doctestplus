@@ -1,4 +1,4 @@
-0.6.0 (unreleased)
+0.6.0 (2020-04-30)
 ==================
 
 - Drop support for ``python`` versions earlier than 3.6. [#103]
