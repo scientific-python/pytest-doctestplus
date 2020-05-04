@@ -1,7 +1,8 @@
 0.6.1 (unreleased)
 ==================
 
-- No changes yet.
+- Disabling the usage of the ``doctest_ignore_import_errors`` option to
+  ensure no behaviour changes compared to the 0.5.0 release. [#108]
 
 
 0.6.0 (2020-04-30)
