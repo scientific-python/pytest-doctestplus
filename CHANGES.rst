@@ -1,4 +1,4 @@
-0.6.1 (unreleased)
+0.6.1 (2020-05-04)
 ==================
 
 - Disabling the usage of the ``doctest_ignore_import_errors`` option to
