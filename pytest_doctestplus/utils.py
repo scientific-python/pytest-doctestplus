@@ -78,7 +78,6 @@ class ModuleChecker:
         try:
             return self._find_distribution(dist)
         except Exception as e:
-            logger.warning(e)
             return None
 
     def check(self, module):

@@ -1,3 +1,4 @@
+import os
 from distutils.version import LooseVersion
 from textwrap import dedent
 
@@ -653,7 +654,7 @@ def test_doctest_float_replacement(tmpdir):
                      raise_on_error=True, verbose=False, encoding='utf-8')
 
 
-def test_doctest_subpackage_requires(testdir):
+def test_doctest_subpackage_requires(testdir, caplog):
     testdir.makeini(
         """
         [pytest]
@@ -683,3 +684,5 @@ def test_doctest_subpackage_requires(testdir):
 
     reprec = testdir.inline_run(test, "--doctest-plus")
     reprec.assertoutcome(passed=1)
+    assert reprec.listoutcomes()[0][0].location[0] == os.path.join('test', 'a', 'testcode.py')
+    assert caplog.text == ''
