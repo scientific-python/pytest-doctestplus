@@ -658,9 +658,9 @@ def test_doctest_subpackage_requires(testdir):
         """
         [pytest]
         doctest_subpackage_requires =
-            test/a/*:pytest>1
-            test/b/*:pytest>1;averyfakepackage>99999.9
-            test/c/*:anotherfakepackage>=22000.1.2
+            test/a/*=pytest>1
+            test/b/*=pytest>1;averyfakepackage>99999.9
+            test/c/*=anotherfakepackage>=22000.1.2
     """
     )
     test = testdir.mkdir('test')
