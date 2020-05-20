@@ -416,8 +416,8 @@ class DoctestPlus(object):
 
         for option in config.getini("doctest_subpackage_requires"):
             subpackage_pattern, required = option.split('=', 1)
-            if path.check(fnmatch=subpackage_pattern):
-                required = required.split(';')
+            if path.check(fnmatch=subpackage_pattern.strip()):
+                required = required.strip().split(';')
                 if not DocTestFinderPlus.check_required_modules(required):
                     self._ignore_paths.append(path)
                     break

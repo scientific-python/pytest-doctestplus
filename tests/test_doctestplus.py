@@ -655,12 +655,16 @@ def test_doctest_float_replacement(tmpdir):
 
 
 def test_doctest_subpackage_requires(testdir, caplog):
+
+    # Note that each entry below has different whitespace around the = to
+    # make sure that all cases work properly.
+
     testdir.makeini(
         """
         [pytest]
         doctest_subpackage_requires =
             test/a/* = pytest>1
-            test/b/*=pytest>1;averyfakepackage>99999.9
+            test/b/*= pytest>1;averyfakepackage>99999.9
             test/c/*=anotherfakepackage>=22000.1.2
     """
     )
