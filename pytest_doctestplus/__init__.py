@@ -3,4 +3,4 @@
 This package contains pytest plugins that are used by the astropy test suite.
 """
 
-__version__ = '0.7.0'
+__version__ = '0.8.0.dev0'
