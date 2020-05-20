@@ -115,6 +115,12 @@ def pytest_addoption(parser):
                   type='linelist',
                   default=[])
 
+    parser.addini("doctest_subpackage_requires",
+                  "A list of paths to skip if requirements are not satisfied. Each item in the list "
+                  "should have the syntax path=req1;req2",
+                  type='linelist',
+                  default=[])
+
 
 def get_optionflags(parent):
     optionflags_str = parent.config.getini('doctest_optionflags')
@@ -168,12 +174,10 @@ def pytest_configure(config):
                 try:
                     module = self.fspath.pyimport()
                 except ImportError:
-                    pytest.skip("unable to import module %r" % self.fspath)
-                    # NOT USED: While correct, this breaks existing behavior.
-                    # if self.config.getvalue("doctest_ignore_import_errors"):
-                    #     pytest.skip("unable to import module %r" % self.fspath)
-                    # else:
-                    #     raise
+                    if self.config.getvalue("doctest_ignore_import_errors"):
+                        pytest.skip("unable to import module %r" % self.fspath)
+                    else:
+                        raise
 
             options = get_optionflags(self) | FIX
 
@@ -409,6 +413,14 @@ class DoctestPlus(object):
                 # avoid creating doctest nodes for them
                 self._ignore_paths.append(path)
                 break
+
+        for option in config.getini("doctest_subpackage_requires"):
+            subpackage_pattern, required = option.split('=', 1)
+            if path.check(fnmatch=subpackage_pattern.strip()):
+                required = required.strip().split(';')
+                if not DocTestFinderPlus.check_required_modules(required):
+                    self._ignore_paths.append(path)
+                    break
 
         return False
 

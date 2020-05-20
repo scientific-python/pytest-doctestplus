@@ -1,8 +1,8 @@
 0.7.0 (unreleased)
 ==================
 
-- No changes yet
-
+- Added a new ini option, ``doctest_subpackage_requires``, that can be used to skip
+  specific subpackages based on required packages. [#112]
 
 0.6.1 (2020-05-04)
 ==================
