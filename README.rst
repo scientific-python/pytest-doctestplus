@@ -228,11 +228,11 @@ conditionally skipped if a dependency is not available.
 Finally, it is possible to skip collecting doctests in entire subpackages by
 using the ``doctest_subpackage_requires`` in the ``[tool:pytest]`` section of
 the package's ``setup.cfg`` file. The syntax for this option is a list of
-``path:requirements``, e.g.::
+``path = requirements``, e.g.::
 
     doctest_subpackage_requires =
-        astropy/wcs/*=scipy>2.0;numpy>1.14
-        astropy/cosmology/*=scipy>1.0
+        astropy/wcs/* = scipy>2.0;numpy>1.14
+        astropy/cosmology/* = scipy>1.0
 
 Multiple requirements can be specified if separated by semicolons.
 

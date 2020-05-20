@@ -117,7 +117,7 @@ def pytest_addoption(parser):
 
     parser.addini("doctest_subpackage_requires",
                   "A list of paths to skip if requirements are not satisfied. Each item in the list "
-                  "should have the syntax path=req1;req2.",
+                  "should have the syntax path=req1;req2",
                   type='linelist',
                   default=[])
 
