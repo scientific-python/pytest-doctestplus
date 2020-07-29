@@ -44,7 +44,7 @@ jobs:
 install:
     - git clone git://github.com/astropy/ci-helpers.git
     - source ci-helpers/travis/setup_conda.sh
-    - python ./setup.py install
+    - python -m pip install .
 
 script:
    - $PYTEST_COMMAND --doctest-plus
