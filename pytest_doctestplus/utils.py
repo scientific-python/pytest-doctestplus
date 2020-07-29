@@ -1,3 +1,4 @@
+import importlib.util
 import logging
 import operator
 import re
@@ -5,22 +6,16 @@ import subprocess
 import sys
 from distutils.version import LooseVersion
 
+import pkg_resources
+
 logger = logging.getLogger(__name__)
 
 
 class ModuleChecker:
     def __init__(self):
-        if LooseVersion(sys.version) < LooseVersion('3.4'):
-            import imp
-            self._find_module = imp.find_module
-            self._find_distribution = self._check_distribution
-            self.packages = self.get_packages()
-        else:
-            import importlib.util
-            import pkg_resources
-            self._find_module = importlib.util.find_spec
-            self._find_distribution = pkg_resources.require
-            self.packages = {}
+        self._find_module = importlib.util.find_spec
+        self._find_distribution = pkg_resources.require
+        self.packages = {}
 
     def get_packages(self):
         packages = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']).decode().splitlines()
