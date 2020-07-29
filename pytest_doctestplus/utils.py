@@ -5,7 +5,7 @@ import operator
 import re
 import subprocess
 import sys
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 import pkg_resources
 
@@ -24,8 +24,6 @@ class ModuleChecker:
         ).decode()
         packages = {item['name'].lower(): item['version']
                     for item in json.loads(packages)}
-        import pprint
-        pprint.pprint(packages)
         return packages
 
     def compare_versions(self, v1, v2, op):
@@ -39,7 +37,7 @@ class ModuleChecker:
         if op not in op_map:
             return False
         op = op_map[op]
-        return op(LooseVersion(v1), LooseVersion(v2))
+        return op(Version(v1), Version(v2))
 
     def _check_distribution(self, module):
         """
