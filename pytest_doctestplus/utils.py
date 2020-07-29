@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import logging
 import operator
 import re
@@ -18,11 +19,14 @@ class ModuleChecker:
         self.packages = {}
 
     def get_packages(self):
-        packages = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']).decode().splitlines()
+        packages = subprocess.check_output(
+            [sys.executable, '-m', 'pip', 'list', '--format', 'json']
+        ).decode()
+        packages = {item['name'].lower(): item['version']
+                    for item in json.loads(packages)}
         import pprint
         pprint.pprint(packages)
-        packages = [package.split('==') for package in packages if '==' in package]
-        return {name.lower(): version for name, version in packages}
+        return packages
 
     def compare_versions(self, v1, v2, op):
         op_map = {
