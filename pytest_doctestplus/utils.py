@@ -19,6 +19,8 @@ class ModuleChecker:
 
     def get_packages(self):
         packages = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']).decode().splitlines()
+        import pprint
+        pprint.pprint(packages)
         packages = [package.split('==') for package in packages if '==' in package]
         return {name.lower(): version for name, version in packages}
 
