@@ -1,31 +1,30 @@
+import importlib.util
+import json
 import logging
 import operator
 import re
 import subprocess
 import sys
-from distutils.version import LooseVersion
+from packaging.version import Version
+
+import pkg_resources
 
 logger = logging.getLogger(__name__)
 
 
 class ModuleChecker:
     def __init__(self):
-        if LooseVersion(sys.version) < LooseVersion('3.4'):
-            import imp
-            self._find_module = imp.find_module
-            self._find_distribution = self._check_distribution
-            self.packages = self.get_packages()
-        else:
-            import importlib.util
-            import pkg_resources
-            self._find_module = importlib.util.find_spec
-            self._find_distribution = pkg_resources.require
-            self.packages = {}
+        self._find_module = importlib.util.find_spec
+        self._find_distribution = pkg_resources.require
+        self.packages = {}
 
     def get_packages(self):
-        packages = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze']).decode().splitlines()
-        packages = [package.split('==') for package in packages if '==' in package]
-        return {name.lower(): version for name, version in packages}
+        packages = subprocess.check_output(
+            [sys.executable, '-m', 'pip', 'list', '--format', 'json']
+        ).decode()
+        packages = {item['name'].lower(): item['version']
+                    for item in json.loads(packages)}
+        return packages
 
     def compare_versions(self, v1, v2, op):
         op_map = {
@@ -38,7 +37,7 @@ class ModuleChecker:
         if op not in op_map:
             return False
         op = op_map[op]
-        return op(LooseVersion(v1), LooseVersion(v2))
+        return op(Version(v1), Version(v2))
 
     def _check_distribution(self, module):
         """

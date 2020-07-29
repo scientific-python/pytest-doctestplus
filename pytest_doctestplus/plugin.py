@@ -10,6 +10,8 @@ import re
 import sys
 import warnings
 
+from packaging.version import Version
+
 import pytest
 
 from pytest_doctestplus.utils import ModuleChecker
@@ -20,6 +22,8 @@ try:
 except ImportError:  # PY2
     def indent(text, prefix):
         return '\n'.join([prefix + line for line in text.splitlines()])
+
+PYTEST_GT_5 = Version(pytest.__version__) > Version('5.9.9')
 
 comment_characters = {
     '.txt': '#',
@@ -169,7 +173,12 @@ def pytest_configure(config):
             if self.fspath.basename == "setup.py":
                 return
             elif self.fspath.basename == "conftest.py":
-                module = self.config.pluginmanager._importconftest(self.fspath)
+                if PYTEST_GT_5:
+                    module = self.config.pluginmanager._importconftest(
+                        self.fspath, self.config.getoption("importmode"))
+                else:
+                    module = self.config.pluginmanager._importconftest(
+                        self.fspath)
             else:
                 try:
                     module = self.fspath.pyimport()
