@@ -58,3 +58,5 @@ venv
 
 # PyCharm
 .idea
+
+pytest_doctestplus/version.py

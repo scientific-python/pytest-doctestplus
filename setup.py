@@ -1,10 +1,18 @@
 #!/usr/bin/env python
-# Licensed under a 3-clause BSD style license - see LICENSE.rst
-# -*- encoding: utf-8 -*-
 
-from setuptools import setup, find_packages
+import os
+import sys
+import setuptools
+from distutils.version import LooseVersion
+from setuptools import setup
 
+# Setuptools 30.3.0 or later is needed for setup.cfg options to be used
+if LooseVersion(setuptools.__version__) < LooseVersion('30.3.0'):
+    sys.stderr.write("ERROR: sphinx-automodapi requires setuptools 30.3.0 or "
+                     "later (found {0})".format(setuptools.__version__))
+    sys.exit(1)
 
+<<<<<<< HEAD
 def readme():
     with open('README.rst') as ff:
         return ff.read()
@@ -47,3 +55,6 @@ setup(
         ],
     },
 )
+=======
+setup(use_scm_version={'write_to': os.path.join('pytest_doctestplus', 'version.py')})
+>>>>>>> 686f1a9... Updated package infrastructure to use tox for testing and setuptools_scm for version numbers
