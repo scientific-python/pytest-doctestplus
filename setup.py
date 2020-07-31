@@ -12,10 +12,11 @@ def readme():
 
 setup(
     name='pytest-doctestplus',
-    version='0.8.0.dev0',
+    version='0.8.0',
     license='BSD',
     description='Pytest plugin with advanced doctest features.',
     long_description=readme(),
+    long_description_content_type='text/x-rst',
     author='The Astropy Developers',
     author_email='astropy.team@gmail.com',
     url='https://astropy.org',
