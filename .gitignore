@@ -58,3 +58,6 @@ venv
 
 # PyCharm
 .idea
+
+pytest_doctestplus/version.py
+pip-wheel-metadata/
