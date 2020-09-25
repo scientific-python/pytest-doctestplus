@@ -60,3 +60,4 @@ venv
 .idea
 
 pytest_doctestplus/version.py
+pip-wheel-metadata/
