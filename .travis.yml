@@ -15,7 +15,7 @@ notifications:
     on_failure: always
     secure: "sa4HE4SjSJfKxs/4wR8YfioggBEe9jDFZSeCDtWFAfzyP/BkVOTvXx1YV3nGbLzXo1zEJ371wB/NdBGFuxVrfeWeGLrT7NMiy5ji7dIGe+nRpcSA3nF1rgniLxx3dHSOj1PVarWvz9220N40mxSr9nyiIN2WuQ4erD2Ia2DLapwd7YJ9Hby8fY+lxLmSybLdjsCCpiK9pV1mZ0hiIX0KczkMrbcfA2ZX0CjIMJTZY5DnMD6XeOqCXv33ZUcMj2pFXq+pvt47HSUh97gp0BplOVuAx+P/Y9/hj1g6J+4iVVEThxO9rfN09zcLDS/d+JD4lAiaj2l+J9l7QJwNunMvpycn0F4W9vcLbC9OpIpwpttBZERbTiBAERcwkfeGdgp4f6Xkc4GStWYGZVgW78AkOltC+/BrUmsrQJI/74nJTEHL3eKNJbAHXQXbTsMFid3fjdsoYejo/ICRlJizSRmv7wkuQW8O4wxU41vhPkbbrFvvOV5IJh+cha6NTjVuU6ZEYjbGoKakKvmT8s8vK88nBGApaz5JTQ4Za05KFwluCuDtKo6z2EZXcH4OPc+lCKEPD3kxJMnd64wJVdSU1xDhC3yYLBWN5ZBmemuAorFPNZL9whxD1Xfnxl55jsVUKimweHktg1A6IxOjjRrwaEA0g3HP7H05hDe2b+D3O8v6+aA="
     if: type = cron
-    
+
 env:
     global:
         # The following versions are the 'default' for tests, unless
@@ -66,7 +66,7 @@ matrix:
 install:
     - if [[ $TRAVIS_OS_NAME == osx || $TRAVIS_OS_NAME == windows ]]; then
         git clone git://github.com/astropy/ci-helpers.git;
-        source ci-helpers/travis/setup_conda.sh;
+        source ci-helpers/travis/setup_python.sh;
       fi
 
 script:
