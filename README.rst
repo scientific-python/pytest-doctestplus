@@ -8,7 +8,7 @@ advanced doctest support and enables the testing of `reStructuredText`_
 been moved to a separate package in order to be of more general use.
 
 .. _pytest: https://pytest.org/en/latest/
-.. _astropy: https://astropy.org/en/latest/
+.. _astropy: https://astropy.org/
 .. _reStructuredText: https://en.wikipedia.org/wiki/ReStructuredText
 
 
@@ -49,7 +49,7 @@ repository::
 
     $ git clone https://github.com/astropy/pytest-doctestplus
     $ cd pytest-doctestplus
-    $ python ./setup.py install
+    $ pip install .
 
 In either case, the plugin will automatically be registered for use with
 ``pytest``.
