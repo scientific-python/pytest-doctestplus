@@ -1,0 +1,64 @@
+name: Run unit tests
+
+on:
+  pull_request:
+  push:
+    branches: [ master ]
+    tags:
+  workflow_dispatch:
+  schedule:
+    # Run every Sunday at 03:53 UTC
+    - cron: 53 3 * * 0
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: 3.6
+            toxenv: py36-test-pytest46
+          - os: windows-latest
+            python-version: 3.6
+            toxenv: py36-test-pytest50
+          - os: macos-latest
+            python-version: 3.7
+            toxenv: py37-test-pytest51
+          - os: ubuntu-latest
+            python-version: 3.7
+            toxenv: py37-test-pytest52
+          - os: windows-latest
+            python-version: 3.8
+            toxenv: py38-test-pytest53
+          - os: ubuntu-latest
+            python-version: 3.8
+            toxenv: py38-test-pytest60
+          - os: ubuntu-latest
+            python-version: 3.9
+            toxenv: py39-test-pytest61
+          - os: macos-latest
+            python-version: 3.8
+            toxenv: py38-test-pytestdev
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Tox
+      run: python -m pip install tox
+    - name: Run Tox
+      run: tox -v -e ${{ matrix.toxenv }}
+
+    # - name: Slack Notification
+    #   uses: 8398a7/action-slack@v3
+    #   with:
+    #     status: ${{ job.status }}
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+    #   if: always() # TODO: cron
