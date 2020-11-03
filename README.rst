@@ -264,9 +264,9 @@ __ pytest-remotedata_
 Development Status
 ------------------
 
-.. image:: https://travis-ci.com/astropy/pytest-doctestplus.svg
-    :target: https://travis-ci.com/astropy/pytest-doctestplus
-    :alt: Travis CI Status
+.. image:: https://github.com/astropy/pytest-doctestplus/workflows/Run%20unit%20tests/badge.svg
+    :target: https://github.com/astropy/pytest-doctestplus/actions
+    :alt: CI Status
 
 Questions, bug reports, and feature requests can be submitted on `github`_.
 
