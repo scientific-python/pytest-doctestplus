@@ -1,6 +1,8 @@
 0.9.0 (unreleased)
 ==================
 
+- Declare ``setuptools`` runtime dependency [#93]
+
 0.8.0 (2020-07-31)
 ==================
 
