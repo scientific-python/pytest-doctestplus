@@ -55,10 +55,13 @@ jobs:
     - name: Run Tox
       run: tox -v -e ${{ matrix.toxenv }}
 
+    - uses: technote-space/workflow-conclusion-action@v1
     - name: Slack Notification
       uses: 8398a7/action-slack@v3
+      if: env.WORKFLOW_CONCLUSION == 'failure'
       with:
         status: ${{ job.status }}
+        author_name: ${{ github.actor }}
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-      if: always() # TODO: cron
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
