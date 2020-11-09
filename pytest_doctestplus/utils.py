@@ -4,22 +4,19 @@ import pkg_resources
 
 
 class ModuleChecker:
-    def __init__(self):
-        self._find_module = importlib.util.find_spec
-        self._find_distribution = pkg_resources.require
 
     def find_module(self, module):
         """Search for modules specification."""
         try:
-            return self._find_module(module)
+            return importlib.util.find_spec(module)
         except ImportError:
             return None
 
     def find_distribution(self, dist):
         """Search for distribution with specified version (eg 'numpy>=1.15')."""
         try:
-            return self._find_distribution(dist)
-        except Exception as e:
+            return pkg_resources.require(dist)
+        except Exception:
             return None
 
     def check(self, module):
