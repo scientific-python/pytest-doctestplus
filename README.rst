@@ -151,8 +151,10 @@ Showing warnings
 ~~~~~~~~~~~~~~~~
 
 If code in a doctest emits a warning and you want to make sure that warning is
-shown, even if warnings are turned into errors by pytest, you can make use of
-the ``SHOW_WARNINGS`` flag. For example:
+shown, you can make use of the ``SHOW_WARNINGS`` flag. This is useful when
+warnings are turned into errors by pytest, and also because by default warnings
+are printed to stderr. This is the opposite from ``IGNORE_WARNINGS`` so
+obviously the two flags should not be used together. For example:
 
 .. code-block:: python
 
