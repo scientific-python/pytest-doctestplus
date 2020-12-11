@@ -10,12 +10,13 @@ import re
 import sys
 import warnings
 
+import pytest
 from packaging.version import Version
 
-import pytest
-
 from pytest_doctestplus.utils import ModuleChecker
-from .output_checker import FIX, IGNORE_WARNINGS, OutputChecker, REMOTE_DATA
+
+from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
+                             OutputChecker)
 
 try:
     from textwrap import indent
@@ -32,12 +33,12 @@ comment_characters = {
 }
 
 
-# For the IGNORE_WARNINGS option, we create a context manager that doesn't
-# require us to add any imports to the example list and contains everything
-# that is needed to silence warnings.
+# For the IGNORE_WARNINGS and SHOW_WARNINGS option, we create a context manager
+# that doesn't require us to add any imports to the example list and contains
+# everything that is needed to silence or print warnings.
 
 IGNORE_WARNINGS_CONTEXT = """
-class _doctestplus_ignore_all_warnings(object):
+class _doctestplus_ignore_all_warnings:
 
     def __init__(self):
         import warnings
@@ -51,6 +52,26 @@ class _doctestplus_ignore_all_warnings(object):
 
     def __exit__(self, *args, **kwargs):
         return self._cw.__exit__(*args, **kwargs)
+""".lstrip()
+
+
+SHOW_WARNINGS_CONTEXT = """
+class _doctestplus_show_all_warnings:
+
+    def __init__(self):
+        import warnings
+        self._cw = warnings.catch_warnings(record=True)
+
+    def __enter__(self, *args, **kwargs):
+        self.result = self._cw.__enter__(*args, **kwargs)
+        import warnings
+        warnings.simplefilter('always')
+        return self.result
+
+    def __exit__(self, *args, **kwargs):
+        self._cw.__exit__(*args, **kwargs)
+        for warn in self.result:
+            print(warn._category_name, warn.message)
 """.lstrip()
 
 
@@ -200,6 +221,7 @@ def pytest_configure(config):
                     if config.getoption('remote_data', 'none') != 'any':
 
                         ignore_warnings_context_needed = False
+                        show_warnings_context_needed = False
 
                         for example in test.examples:
 
@@ -210,13 +232,24 @@ def pytest_configure(config):
                                                   + indent(example.source, '    '))
                                 ignore_warnings_context_needed = True
 
+                            # Same for SHOW_WARNINGS
+                            if example.options.get(SHOW_WARNINGS, False):
+                                example.source = ("with _doctestplus_show_all_warnings():\n"
+                                                  + indent(example.source, '    '))
+                                show_warnings_context_needed = True
+
                             if example.options.get(REMOTE_DATA):
                                 example.options[doctest.SKIP] = True
 
                         # We insert the definition of the context manager to ignore
                         # warnings at the start of the file if needed.
                         if ignore_warnings_context_needed:
-                            test.examples.insert(0, doctest.Example(source=IGNORE_WARNINGS_CONTEXT, want=''))
+                            test.examples.insert(0, doctest.Example(
+                                source=IGNORE_WARNINGS_CONTEXT, want=''))
+
+                        if show_warnings_context_needed:
+                            test.examples.insert(0, doctest.Example(
+                                source=SHOW_WARNINGS_CONTEXT, want=''))
 
                     try:
                         yield doctest_plugin.DoctestItem.from_parent(
@@ -289,6 +322,7 @@ def pytest_configure(config):
             comment_char = comment_characters[ext]
 
             ignore_warnings_context_needed = False
+            show_warnings_context_needed = False
 
             for entry in result:
 
@@ -344,6 +378,12 @@ def pytest_configure(config):
                                         + indent(entry.source, '    '))
                         ignore_warnings_context_needed = True
 
+                    # Same to show warnings
+                    if entry.options.get(SHOW_WARNINGS, False):
+                        entry.source = ("with _doctestplus_show_all_warnings():\n"
+                                        + indent(entry.source, '    '))
+                        show_warnings_context_needed = True
+
                     has_required_modules = DocTestFinderPlus.check_required_modules(required)
                     if skip_all or skip_next or not has_required_modules:
                         entry.options[doctest.SKIP] = True
@@ -355,6 +395,9 @@ def pytest_configure(config):
             # warnings at the start of the file if needed.
             if ignore_warnings_context_needed:
                 result.insert(0, doctest.Example(source=IGNORE_WARNINGS_CONTEXT, want=''))
+
+            if show_warnings_context_needed:
+                result.insert(0, doctest.Example(source=SHOW_WARNINGS_CONTEXT, want=''))
 
             return result
 

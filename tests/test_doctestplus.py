@@ -454,6 +454,20 @@ def test_ignore_warnings_rst(testdir):
     reprec.assertoutcome(failed=0, passed=1)
 
 
+def test_show_warnings_rst(testdir):
+
+    p = testdir.makefile(".rst",
+        """
+        ::
+            >>> import warnings
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
+            UserWarning A warning occurred
+        """)
+    reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
+                                "--text-file-format=rst", "-W error")
+    reprec.assertoutcome(failed=0, passed=1)
+
+
 def test_doctest_glob(testdir):
     testdir.makefile(
         '.rst',
