@@ -71,7 +71,7 @@ class _doctestplus_show_all_warnings:
     def __exit__(self, *args, **kwargs):
         self._cw.__exit__(*args, **kwargs)
         for warn in self.result:
-            print(warn._category_name, warn.message)
+            print(f'{warn._category_name}: {warn.message}')
 """.lstrip()
 
 

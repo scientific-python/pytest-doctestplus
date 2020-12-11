@@ -461,7 +461,7 @@ def test_show_warnings_rst(testdir):
         ::
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
-            UserWarning A warning occurred
+            UserWarning: A warning occurred
         """)
     reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
                                 "--text-file-format=rst", "-W error")
