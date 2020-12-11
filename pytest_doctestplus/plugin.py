@@ -324,6 +324,8 @@ def pytest_configure(config):
              installed.
 
            - ``.. doctest-skip-all``: Skip all subsequent doctests.
+
+           - ``.. doctest-remote-data``: Skip the next doctest chunk if --remote-data is not passed.
         """
 
         def parse(self, s, name=None):
@@ -381,6 +383,24 @@ def pytest_configure(config):
                                  sys.platform == 'win32')):
                             skip_next = True
                             continue
+
+                    if config.getoption('remote_data', 'none') != 'any':
+                        matches = [re.match(
+                            r'{}\s+doctest-remote-data\s*::(\s+.*)?'.format(comment_char),
+                            last_line) for last_line in last_lines]
+
+                        if len(matches) > 1:
+                            match = matches[0] or matches[1]
+                        else:
+                            match = matches[0]
+
+                        if match:
+                            marker = match.group(1)
+                            if (marker is None or
+                                    (marker.strip() == 'win32' and
+                                    sys.platform == 'win32')):
+                                skip_next = True
+                                continue
 
                     matches = [re.match(
                         r'{}\s+doctest-requires\s*::\s+(.*)'.format(comment_char),
