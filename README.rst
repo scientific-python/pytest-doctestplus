@@ -147,6 +147,23 @@ you can make use of the ``IGNORE_WARNINGS`` flag. For example:
   >>> np.mean([])  # doctest: +IGNORE_WARNINGS
   np.nan
 
+Showing warnings
+~~~~~~~~~~~~~~~~
+
+If code in a doctest emits a warning and you want to make sure that warning is
+shown, you can make use of the ``SHOW_WARNINGS`` flag. This is useful when
+warnings are turned into errors by pytest, and also because by default warnings
+are printed to stderr. This is the opposite from ``IGNORE_WARNINGS`` so
+obviously the two flags should not be used together. For example:
+
+.. code-block:: python
+
+  >>> import numpy as np
+  >>> np.mean([])  # doctest: +SHOW_WARNINGS
+  RuntimeWarning: Mean of empty slice.
+  RuntimeWarning: invalid value encountered in double_scalars
+  np.nan
+
 Skipping Tests
 ~~~~~~~~~~~~~~
 

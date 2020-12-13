@@ -20,6 +20,7 @@ REMOTE_DATA = doctest.register_optionflag('REMOTE_DATA')
 IGNORE_OUTPUT = doctest.register_optionflag('IGNORE_OUTPUT')
 IGNORE_OUTPUT_3 = doctest.register_optionflag('IGNORE_OUTPUT_3')
 IGNORE_WARNINGS = doctest.register_optionflag('IGNORE_WARNINGS')
+SHOW_WARNINGS = doctest.register_optionflag('SHOW_WARNINGS')
 
 # These might appear in some doctests and are used in the default pytest
 # doctest plugin. This plugin doesn't actually implement these flags but this

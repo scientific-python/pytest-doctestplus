@@ -3,6 +3,8 @@
 
 - Declare ``setuptools`` runtime dependency [#93]
 
+- Add ``SHOW_WARNINGS`` flag to show warnings. [#136]
+
 0.8.0 (2020-07-31)
 ==================
 

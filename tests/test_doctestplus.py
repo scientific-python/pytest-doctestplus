@@ -454,6 +454,72 @@ def test_ignore_warnings_rst(testdir):
     reprec.assertoutcome(failed=0, passed=1)
 
 
+def test_show_warnings_module(testdir):
+
+    p = testdir.makepyfile(
+        """
+        def myfunc():
+            '''
+            >>> import warnings
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
+            UserWarning: A warning occurred
+            '''
+            pass
+        """)
+    reprec = testdir.inline_run(p, "--doctest-plus", "-W error")
+    reprec.assertoutcome(failed=0, passed=1)
+
+    # Make sure it fails if warning message is missing
+    p = testdir.makepyfile(
+        """
+        def myfunc():
+            '''
+            >>> import warnings
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
+            '''
+            pass
+        """)
+    reprec = testdir.inline_run(p, "--doctest-plus", "-W error")
+    reprec.assertoutcome(failed=1, passed=0)
+
+
+def test_show_warnings_rst(testdir):
+
+    p = testdir.makefile(".rst",
+        """
+        ::
+            >>> import warnings
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
+            UserWarning: A warning occurred
+        """)
+    reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
+                                "--text-file-format=rst", "-W error")
+    reprec.assertoutcome(failed=0, passed=1)
+
+    # Make sure it fails if warning message is missing
+    p = testdir.makefile(".rst",
+        """
+        ::
+            >>> import warnings
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
+        """)
+    reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
+                                "--text-file-format=rst", "-W error")
+    reprec.assertoutcome(failed=1, passed=0)
+
+    # Make sure it fails if warning message is missing
+    p = testdir.makefile(".rst",
+        """
+        ::
+            >>> import warnings
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
+            Warning: Another warning occurred
+        """)
+    reprec = testdir.inline_run(p, "--doctest-plus", "--doctest-rst",
+                                "--text-file-format=rst", "-W error")
+    reprec.assertoutcome(failed=1, passed=0)
+
+
 def test_doctest_glob(testdir):
     testdir.makefile(
         '.rst',
