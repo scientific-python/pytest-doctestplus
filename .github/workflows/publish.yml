@@ -30,6 +30,13 @@ jobs:
     - name: Check long_description
       run: python -m twine check dist/*
 
+    - name: Test package
+      run: |
+        cd ..
+        python -m venv testenv
+        testenv/bin/pip install pytest pytest-doctestplus/dist/*.whl
+        testenv/bin/pytest pytest-doctestplus/tests --doctest-plus --doctest-rst
+
     - name: Publish distribution 📦 to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
