@@ -278,6 +278,17 @@ statements marked with ``--remote-data`` will be skipped.
 .. _pytest-remotedata: https://github.com/astropy/pytest-remotedata
 __ pytest-remotedata_
 
+Sphinx Compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+To use the additional directives when building your documentation with sphinx
+you may want to enable the sphinx extension which registers these directives
+with sphinx. Doing so ensures that sphinx correctly ignores these directives,
+running the doctests with sphinx is not supported. To do this, add
+``'pytest_doctestplus.sphinx.doctestplus'`` to your ``extensions`` list in your
+``conf.py`` file.
+
+
 Development Status
 ------------------
 
