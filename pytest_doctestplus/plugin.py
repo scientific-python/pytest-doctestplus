@@ -192,7 +192,10 @@ def pytest_configure(config):
             if self.fspath.basename == "setup.py":
                 return
             elif self.fspath.basename == "conftest.py":
-                if PYTEST_GT_5:
+                if PYTEST_GT_6_2:
+                    module = self.config.pluginmanager._importconftest(
+                        Path(self.fspath), self.config.getoption("importmode"))
+                elif PYTEST_GT_5:
                     module = self.config.pluginmanager._importconftest(
                         self.fspath, self.config.getoption("importmode"))
                 else:
