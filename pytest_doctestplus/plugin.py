@@ -9,6 +9,8 @@ import os
 import re
 import sys
 import warnings
+from pathlib import Path
+from textwrap import indent
 
 import pytest
 from packaging.version import Version
@@ -18,13 +20,9 @@ from pytest_doctestplus.utils import ModuleChecker
 from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
                              OutputChecker)
 
-try:
-    from textwrap import indent
-except ImportError:  # PY2
-    def indent(text, prefix):
-        return '\n'.join([prefix + line for line in text.splitlines()])
-
-PYTEST_GT_5 = Version(pytest.__version__) > Version('5.9.9')
+_pytest_version = Version(pytest.__version__)
+PYTEST_GT_5 = _pytest_version > Version('5.9.9')
+PYTEST_GT_6_2 = _pytest_version > Version('6.2')
 
 comment_characters = {
     '.txt': '#',
@@ -194,7 +192,10 @@ def pytest_configure(config):
             if self.fspath.basename == "setup.py":
                 return
             elif self.fspath.basename == "conftest.py":
-                if PYTEST_GT_5:
+                if PYTEST_GT_6_2:
+                    module = self.config.pluginmanager._importconftest(
+                        Path(self.fspath), self.config.getoption("importmode"))
+                elif PYTEST_GT_5:
                     module = self.config.pluginmanager._importconftest(
                         self.fspath, self.config.getoption("importmode"))
                 else:
@@ -434,7 +435,11 @@ class DoctestPlus(object):
         Skip paths that match any of the doctest_norecursedirs patterns or
         if doctest_only is True then skip all regular test files (eg test_*.py).
         """
-        collect_ignore = config._getconftest_pathlist("collect_ignore", path=path.dirpath())
+        if PYTEST_GT_6_2:
+            dirpath = Path(path).parent
+        else:
+            dirpath = path.dirpath()
+        collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
 
         # The collect_ignore conftest.py variable should cause all test
         # runners to ignore this file and all subfiles and subdirectories
