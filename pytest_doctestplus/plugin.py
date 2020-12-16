@@ -22,7 +22,7 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
 
 _pytest_version = Version(pytest.__version__)
 PYTEST_GT_5 = _pytest_version > Version('5.9.9')
-PYTEST_GT_6_2 = _pytest_version > Version('6.2')
+PYTEST_GE_6_3 = _pytest_version >= Version('6.3')
 
 comment_characters = {
     '.txt': '#',
@@ -192,7 +192,7 @@ def pytest_configure(config):
             if self.fspath.basename == "setup.py":
                 return
             elif self.fspath.basename == "conftest.py":
-                if PYTEST_GT_6_2:
+                if PYTEST_GE_6_3:
                     module = self.config.pluginmanager._importconftest(
                         Path(self.fspath), self.config.getoption("importmode"))
                 elif PYTEST_GT_5:
@@ -435,7 +435,7 @@ class DoctestPlus(object):
         Skip paths that match any of the doctest_norecursedirs patterns or
         if doctest_only is True then skip all regular test files (eg test_*.py).
         """
-        if PYTEST_GT_6_2:
+        if PYTEST_GE_6_3:
             dirpath = Path(path).parent
         else:
             dirpath = path.dirpath()
