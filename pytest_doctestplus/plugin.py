@@ -22,7 +22,7 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
 
 _pytest_version = Version(pytest.__version__)
 PYTEST_GT_5 = _pytest_version > Version('5.9.9')
-PYTEST_GE_6_3 = _pytest_version >= Version('6.3')
+PYTEST_GE_6_3 = _pytest_version.is_devrelease or _pytest_version >= Version('6.3')
 
 comment_characters = {
     '.txt': '#',
