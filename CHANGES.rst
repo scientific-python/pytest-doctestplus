@@ -5,6 +5,10 @@
 
 - Add ``SHOW_WARNINGS`` flag to show warnings. [#136]
 
+- Add the doctestplus sphinx extension. [#113]
+
+- Compatibility with pytest>=6.3 [#140, #141]
+
 0.8.0 (2020-07-31)
 ==================
 
