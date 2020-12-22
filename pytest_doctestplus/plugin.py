@@ -325,7 +325,7 @@ def pytest_configure(config):
 
            - ``.. doctest-skip-all``: Skip all subsequent doctests.
 
-           - ``.. doctest-remote-data``: Skip the next doctest chunk if --remote-data is not passed.
+           - ``.. doctest-remote-data::``: Skip the next doctest chunk if --remote-data is not passed.
         """
 
         def parse(self, s, name=None):
@@ -385,6 +385,7 @@ def pytest_configure(config):
                             continue
 
                     if config.getoption('remote_data', 'none') != 'any':
+                        print(config.getoption('remote_data', 'none') != 'any')
                         matches = [re.match(
                             r'{}\s+doctest-remote-data\s*::(\s+.*)?'.format(comment_char),
                             last_line) for last_line in last_lines]

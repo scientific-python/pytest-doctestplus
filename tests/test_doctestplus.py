@@ -433,7 +433,7 @@ def test_ignore_warnings_rst(testdir):
     # First check that we get a warning if we don't add the IGNORE_WARNINGS
     # directive
     p = testdir.makefile(".rst",
-        """
+                         """
         ::
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)
@@ -444,7 +444,7 @@ def test_ignore_warnings_rst(testdir):
 
     # Now try with the IGNORE_WARNINGS directive
     p = testdir.makefile(".rst",
-        """
+                         """
         ::
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
@@ -486,7 +486,7 @@ def test_show_warnings_module(testdir):
 def test_show_warnings_rst(testdir):
 
     p = testdir.makefile(".rst",
-        """
+                         """
         ::
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
@@ -498,7 +498,7 @@ def test_show_warnings_rst(testdir):
 
     # Make sure it fails if warning message is missing
     p = testdir.makefile(".rst",
-        """
+                         """
         ::
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
@@ -509,7 +509,7 @@ def test_show_warnings_rst(testdir):
 
     # Make sure it fails if warning message is missing
     p = testdir.makefile(".rst",
-        """
+                         """
         ::
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +SHOW_WARNINGS
@@ -775,3 +775,34 @@ def test_doctest_skip(testdir):
         """
     )
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+
+def test_remote_data(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    # should be ignored
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-remote-data::
+            >>> 1 + 1
+            2
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+    # should run
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-remote-data::
+            >>> 1 + 1
+            2
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst',
+                       '--remote-data').assertoutcome(passed=1)
