@@ -13,6 +13,9 @@
 0.9.0 (2021-01-14)
 ==================
 
+- Added ``..doctest-remote-data::`` directive to control remote data 
+  access for a chunk of code [#137]
+
 - Declare ``setuptools`` runtime dependency [#93]
 
 - Add ``SHOW_WARNINGS`` flag to show warnings. [#136]

@@ -90,9 +90,9 @@ def pytest_addoption(parser):
 
     parser.addoption("--text-file-format", action="store",
                      help=(
-                        "Text file format for narrative documentation. "
-                        "Options accepted are 'txt', 'tex', and 'rst'. "
-                        "This is no longer recommended, use --doctest-glob instead."
+                         "Text file format for narrative documentation. "
+                         "Options accepted are 'txt', 'tex', and 'rst'. "
+                         "This is no longer recommended, use --doctest-glob instead."
                      ))
 
     # Defaults to `atol` parameter from `numpy.allclose`.
@@ -140,8 +140,8 @@ def pytest_addoption(parser):
                   default=[])
 
     parser.addini("doctest_subpackage_requires",
-                  "A list of paths to skip if requirements are not satisfied. Each item in the list "
-                  "should have the syntax path=req1;req2",
+                  "A list of paths to skip if requirements are not satisfied."
+                  "Each item in the list should have the syntax path=req1;req2",
                   type='linelist',
                   default=[])
 
@@ -157,7 +157,8 @@ def get_optionflags(parent):
 def pytest_configure(config):
     doctest_plugin = config.pluginmanager.getplugin('doctest')
     run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
-    use_doctest_plus = config.getini('doctest_plus') or config.option.doctest_plus or config.option.doctest_only
+    use_doctest_plus = config.getini(
+        'doctest_plus') or config.option.doctest_plus or config.option.doctest_only
     if doctest_plugin is None or run_regular_doctest or not use_doctest_plus:
         return
 
@@ -325,7 +326,8 @@ def pytest_configure(config):
 
            - ``.. doctest-skip-all``: Skip all subsequent doctests.
 
-           - ``.. doctest-remote-data::``: Skip the next doctest chunk if --remote-data is not passed.
+           - ``.. doctest-remote-data::``: Skip the next doctest chunk if
+             --remote-data is not passed.
         """
 
         def parse(self, s, name=None):
@@ -357,7 +359,8 @@ def pytest_configure(config):
                     required = []
                     skip_next = False
                     lines = entry.strip().splitlines()
-                    if any([re.match('{} doctest-skip-all'.format(comment_char), x.strip()) for x in lines]):
+                    if any([re.match(
+                            '{} doctest-skip-all'.format(comment_char), x.strip()) for x in lines]):
                         skip_all = True
                         continue
 
@@ -385,9 +388,8 @@ def pytest_configure(config):
                             continue
 
                     if config.getoption('remote_data', 'none') != 'any':
-                        print(config.getoption('remote_data', 'none') != 'any')
                         matches = [re.match(
-                            r'{}\s+doctest-remote-data\s*::(\s+.*)?'.format(comment_char),
+                            r'{}\s+doctest-remote-data\s*::'.format(comment_char),
                             last_line) for last_line in last_lines]
 
                         if len(matches) > 1:
@@ -396,12 +398,8 @@ def pytest_configure(config):
                             match = matches[0]
 
                         if match:
-                            marker = match.group(1)
-                            if (marker is None or
-                                    (marker.strip() == 'win32' and
-                                    sys.platform == 'win32')):
-                                skip_next = True
-                                continue
+                            skip_next = True
+                            continue
 
                     matches = [re.match(
                         r'{}\s+doctest-requires\s*::\s+(.*)'.format(comment_char),

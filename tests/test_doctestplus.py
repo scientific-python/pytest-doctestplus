@@ -777,32 +777,154 @@ def test_doctest_skip(testdir):
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
-def test_remote_data(testdir):
+def test_remote_data_on(testdir):
     testdir.makeini(
         """
         [pytest]
         doctestplus = enabled
     """)
 
-    # should be ignored
     p = testdir.makefile(
         '.rst',
         """
+        # This test should pass
         .. doctest-remote-data::
-            >>> 1 + 1
-            2
-        """
-    )
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
-    # should run
-    p = testdir.makefile(
-        '.rst',
-        """
-        .. doctest-remote-data::
             >>> 1 + 1
             2
         """
     )
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst',
                        '--remote-data').assertoutcome(passed=1)
+
+
+def test_remote_data_off(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        # This test should fail, but we skip it, thus the test should be skipped.
+        .. doctest-remote-data::
+
+            >>> from contextlib import closing
+            >>> from urllib.request import urlopen
+            >>> with closing(urlopen('https://www.astropy.org')) as remote:
+            ...     remote.read()    # doctest: +IGNORE_OUTPUT
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+
+def test_remote_data_float_cmp(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        #This test is skipped when remote data is not requested, and should
+        #fails when remote data is requested
+        .. doctest-remote-data::
+
+            >>> x = 1/3.
+            >>> x    # doctest: +FLOAT_CMP
+            0.333333
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+
+def test_remote_data_ignore_whitespace(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctest_optionflags = NORMALIZE_WHITESPACE
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        #This test should be skipped when remote data is not requested, and should
+        #pass when remote data is requested
+        .. doctest-remote-data::
+
+            >>> a = "foo         "
+            >>> print(a)
+            foo
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+
+def test_remote_data_ellipsis(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctest_optionflags = ELLIPSIS
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        #This test should be skipped when remote data is not requested, and should
+        #pass when remote data is requested
+        .. doctest-remote-data::
+
+            >>> a = "freedom at last"
+            >>> print(a)
+            freedom ...
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+
+def test_remote_data_requires(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        #This test should be skipped even if remote data is requested because
+        #the module required does not exist
+        .. doctest-remote-data::
+        .. doctest-requires:: does-not-exist
+
+            >>> 1 + 1
+            3
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+
+def test_remote_data_ignore_warnings(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        #This test should be skipped if remote data is not requested.
+        .. doctest-remote-data::
+
+            >>> import warnings
+            >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
