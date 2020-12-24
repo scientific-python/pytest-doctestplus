@@ -26,8 +26,9 @@ jobs:
     - name: List result
       run: ls -l dist
 
+    # Only twine>=3.3 has --strict
     - name: Check long_description
-      run: python -m twine check dist/*
+      run: python -m twine check --strict dist/*
 
     - name: Test package
       run: |
