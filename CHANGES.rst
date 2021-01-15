@@ -1,4 +1,4 @@
-0.9.0 (unreleased)
+0.9.0 (2021-01-14)
 ==================
 
 - Declare ``setuptools`` runtime dependency [#93]
