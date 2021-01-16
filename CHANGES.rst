@@ -1,6 +1,9 @@
 0.10.0 (unreleased)
 ===================
 
+- Fix wrong behavior with ``IGNORE_WARNINGS`` and ``SHOW_WARNINGS`` that could
+  make a block to pass instead of being skipped. [#148]
+
 0.9.0 (2021-01-14)
 ==================
 
