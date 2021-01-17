@@ -756,3 +756,22 @@ def test_doctest_subpackage_requires(testdir, caplog):
     reprec.assertoutcome(passed=1)
     assert reprec.listoutcomes()[0][0].location[0] == os.path.join('test', 'a', 'testcode.py')
     assert caplog.text == ''
+
+
+def test_doctest_skip(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-skip::
+
+            >>> import asdf
+            >>> asdf.open('file.asdf')  # doctest: +IGNORE_WARNINGS
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)

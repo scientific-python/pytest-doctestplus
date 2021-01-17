@@ -372,25 +372,26 @@ def pytest_configure(config):
                         required = re.split(r'\s*[,\s]\s*', match.group(1))
                 elif isinstance(entry, doctest.Example):
 
+                    has_required_modules = DocTestFinderPlus.check_required_modules(required)
+                    if skip_all or skip_next or not has_required_modules:
+                        entry.options[doctest.SKIP] = True
+
+                    elif (config.getoption('remote_data', 'none') != 'any'
+                            and entry.options.get(REMOTE_DATA)):
+                        entry.options[doctest.SKIP] = True
+
                     # If warnings are to be ignored we need to catch them by
                     # wrapping the source in a context manager.
-                    if entry.options.get(IGNORE_WARNINGS, False):
+                    elif entry.options.get(IGNORE_WARNINGS, False):
                         entry.source = ("with _doctestplus_ignore_all_warnings():\n"
                                         + indent(entry.source, '    '))
                         ignore_warnings_context_needed = True
 
                     # Same to show warnings
-                    if entry.options.get(SHOW_WARNINGS, False):
+                    elif entry.options.get(SHOW_WARNINGS, False):
                         entry.source = ("with _doctestplus_show_all_warnings():\n"
                                         + indent(entry.source, '    '))
                         show_warnings_context_needed = True
-
-                    has_required_modules = DocTestFinderPlus.check_required_modules(required)
-                    if skip_all or skip_next or not has_required_modules:
-                        entry.options[doctest.SKIP] = True
-
-                    if config.getoption('remote_data', 'none') != 'any' and entry.options.get(REMOTE_DATA):
-                        entry.options[doctest.SKIP] = True
 
             # We insert the definition of the context manager to ignore
             # warnings at the start of the file if needed.
