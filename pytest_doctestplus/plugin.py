@@ -392,12 +392,7 @@ def pytest_configure(config):
                             r'{}\s+doctest-remote-data\s*::'.format(comment_char),
                             last_line) for last_line in last_lines]
 
-                        if len(matches) > 1:
-                            match = matches[0] or matches[1]
-                        else:
-                            match = matches[0]
-
-                        if match:
+                        if any(matches):
                             skip_next = True
                             continue
 
