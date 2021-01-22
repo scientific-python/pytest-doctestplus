@@ -808,7 +808,7 @@ def test_remote_data_off(testdir):
     p = testdir.makefile(
         '.rst',
         """
-        # This test should fail, but we skip it, thus the test should be skipped.
+        # This test should be skipped when remote data is not requested.
         .. doctest-remote-data::
 
             >>> from contextlib import closing
@@ -830,8 +830,7 @@ def test_remote_data_float_cmp(testdir):
     p = testdir.makefile(
         '.rst',
         """
-        #This test is skipped when remote data is not requested, and should
-        #fails when remote data is requested
+        #This test is skipped when remote data is not requested
         .. doctest-remote-data::
 
             >>> x = 1/3.
@@ -898,7 +897,8 @@ def test_remote_data_requires(testdir):
     p = testdir.makefile(
         '.rst',
         """
-        #This test should be skipped even if remote data is requested because
+        #This test should be skipped when remote data is not requested.
+        #It should also be skipped instead of failing when remote data is requested because
         #the module required does not exist
         .. doctest-remote-data::
         .. doctest-requires:: does-not-exist
