@@ -1,6 +1,10 @@
 0.10.0 (unreleased)
 ===================
 
+- Fixed a bug where the command-line option ``--remote-data=any`` (associated
+  with the ``pytest-remotedata`` plugin) would cause ``IGNORE_WARNINGS`` and
+  ``SHOW_WARNINGS`` options to be ignored in module docstrings. [#152]
+
 - Fix wrong behavior with ``IGNORE_WARNINGS`` and ``SHOW_WARNINGS`` that could
   make a block to pass instead of being skipped. [#148]
 

@@ -219,38 +219,36 @@ def pytest_configure(config):
 
             for test in finder.find(module):
                 if test.examples:  # skip empty doctests
-                    if config.getoption('remote_data', 'none') != 'any':
+                    ignore_warnings_context_needed = False
+                    show_warnings_context_needed = False
 
-                        ignore_warnings_context_needed = False
-                        show_warnings_context_needed = False
+                    for example in test.examples:
+                        if (config.getoption('remote_data', 'none') != 'any'
+                                and example.options.get(REMOTE_DATA)):
+                            example.options[doctest.SKIP] = True
 
-                        for example in test.examples:
+                        # If warnings are to be ignored we need to catch them by
+                        # wrapping the source in a context manager.
+                        elif example.options.get(IGNORE_WARNINGS, False):
+                            example.source = ("with _doctestplus_ignore_all_warnings():\n"
+                                              + indent(example.source, '    '))
+                            ignore_warnings_context_needed = True
 
-                            # If warnings are to be ignored we need to catch them by
-                            # wrapping the source in a context manager.
-                            if example.options.get(IGNORE_WARNINGS, False):
-                                example.source = ("with _doctestplus_ignore_all_warnings():\n"
-                                                  + indent(example.source, '    '))
-                                ignore_warnings_context_needed = True
+                        # Same for SHOW_WARNINGS
+                        elif example.options.get(SHOW_WARNINGS, False):
+                            example.source = ("with _doctestplus_show_all_warnings():\n"
+                                              + indent(example.source, '    '))
+                            show_warnings_context_needed = True
 
-                            # Same for SHOW_WARNINGS
-                            if example.options.get(SHOW_WARNINGS, False):
-                                example.source = ("with _doctestplus_show_all_warnings():\n"
-                                                  + indent(example.source, '    '))
-                                show_warnings_context_needed = True
+                    # We insert the definition of the context manager to ignore
+                    # warnings at the start of the file if needed.
+                    if ignore_warnings_context_needed:
+                        test.examples.insert(0, doctest.Example(
+                            source=IGNORE_WARNINGS_CONTEXT, want=''))
 
-                            if example.options.get(REMOTE_DATA):
-                                example.options[doctest.SKIP] = True
-
-                        # We insert the definition of the context manager to ignore
-                        # warnings at the start of the file if needed.
-                        if ignore_warnings_context_needed:
-                            test.examples.insert(0, doctest.Example(
-                                source=IGNORE_WARNINGS_CONTEXT, want=''))
-
-                        if show_warnings_context_needed:
-                            test.examples.insert(0, doctest.Example(
-                                source=SHOW_WARNINGS_CONTEXT, want=''))
+                    if show_warnings_context_needed:
+                        test.examples.insert(0, doctest.Example(
+                            source=SHOW_WARNINGS_CONTEXT, want=''))
 
                     try:
                         yield doctest_plugin.DoctestItem.from_parent(
