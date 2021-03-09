@@ -187,21 +187,26 @@ def pytest_configure(config):
         # behavior (which doesn't do whitespace normalization or
         # handling __doctest_skip__) doesn't happen.
         def collect(self):
+            if PYTEST_GE_6_3:
+                path = self.path
+            else:
+                path = Path(self.fspath)
+
             # When running directly from pytest we need to make sure that we
             # don't accidentally import setup.py!
-            if self.fspath.basename == "setup.py":
+            if path.name == "setup.py":
                 return
-            elif self.fspath.basename == "conftest.py":
+            elif path.name == "conftest.py":
                 if PYTEST_GE_6_3:
                     module = self.config.pluginmanager._importconftest(
-                        Path(self.fspath), self.config.getoption("importmode"))
+                        path, self.config.getoption("importmode"))
                 elif PYTEST_GT_5:
                     module = self.config.pluginmanager._importconftest(
                         self.fspath, self.config.getoption("importmode"))
                 else:
                     module = self.config.pluginmanager._importconftest(
                         self.fspath)
-            else:
+            elif not PYTEST_GE_6_3:
                 try:
                     module = self.fspath.pyimport()
                 except ImportError:
@@ -209,6 +214,8 @@ def pytest_configure(config):
                         pytest.skip("unable to import module %r" % self.fspath)
                     else:
                         raise
+            else:
+                raise NotImplementedError("unable to parse %r" % path)
 
             options = get_optionflags(self) | FIX
 
