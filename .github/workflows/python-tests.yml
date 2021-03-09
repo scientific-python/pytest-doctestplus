@@ -3,7 +3,7 @@ name: Run unit tests
 on:
   pull_request:
   push:
-    branches: [ master ]
+    branches: [ main ]
     tags:
   workflow_dispatch:
   schedule:
