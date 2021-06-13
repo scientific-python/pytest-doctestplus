@@ -189,12 +189,19 @@ def pytest_configure(config):
         def collect(self):
             # When running directly from pytest we need to make sure that we
             # don't accidentally import setup.py!
-            if self.fspath.basename == "setup.py":
+            if PYTEST_GE_6_3:
+                fspath = self.path
+                filepath = self.path.name
+            else:
+                fspath = self.fspath
+                filepath = self.fspath.basename
+
+            if filepath == "setup.py":
                 return
-            elif self.fspath.basename == "conftest.py":
+            elif filepath == "conftest.py":
                 if PYTEST_GE_6_3:
                     module = self.config.pluginmanager._importconftest(
-                        Path(self.fspath), self.config.getoption("importmode"))
+                        self.path, self.config.getoption("importmode"))
                 elif PYTEST_GT_5:
                     module = self.config.pluginmanager._importconftest(
                         self.fspath, self.config.getoption("importmode"))
@@ -203,10 +210,10 @@ def pytest_configure(config):
                         self.fspath)
             else:
                 try:
-                    module = self.fspath.pyimport()
+                    module = fspath.pyimport()
                 except ImportError:
                     if self.config.getvalue("doctest_ignore_import_errors"):
-                        pytest.skip("unable to import module %r" % self.fspath)
+                        pytest.skip("unable to import module %r" % fspath)
                     else:
                         raise
 
@@ -262,10 +269,16 @@ def pytest_configure(config):
     class DocTestTextfilePlus(pytest.Module):
 
         def collect(self):
+            if PYTEST_GE_6_3:
+                fspath = self.path
+                filepath = self.path.name
+            else:
+                fspath = self.fspath
+                filepath = self.fspath.basename
+
             encoding = self.config.getini("doctest_encoding")
-            text = self.fspath.read_text(encoding)
-            filename = str(self.fspath)
-            name = self.fspath.basename
+            text = fspath.read_text(encoding)
+            filename = str(fspath)
             globs = {"__name__": "__main__"}
 
             optionflags = get_optionflags(self) | FIX
@@ -274,7 +287,7 @@ def pytest_configure(config):
                 verbose=False, optionflags=optionflags, checker=OutputChecker())
 
             parser = DocTestParserPlus()
-            test = parser.get_doctest(text, globs, name, filename, 0)
+            test = parser.get_doctest(text, globs, filepath, filename, 0)
             if test.examples:
                 try:
                     yield doctest_plugin.DoctestItem.from_parent(
