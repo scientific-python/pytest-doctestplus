@@ -438,7 +438,14 @@ class DoctestPlus(object):
             dirpath = Path(path).parent
         else:
             dirpath = path.dirpath()
-        collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
+
+        try:
+            collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
+        except TypeError:
+            # Pytest 7.0+
+            collect_ignore = config._getconftest_pathlist("collect_ignore",
+                                                          path=dirpath,
+                                                          rootpath=config.rootpath)
 
         # The collect_ignore conftest.py variable should cause all test
         # runners to ignore this file and all subfiles and subdirectories
