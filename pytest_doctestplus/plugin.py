@@ -14,7 +14,6 @@ from textwrap import indent
 
 import pytest
 from packaging.version import Version
-from _pytest.pathlib import import_path
 
 from pytest_doctestplus.utils import ModuleChecker
 
@@ -211,7 +210,15 @@ def pytest_configure(config):
                         self.fspath)
             else:
                 try:
-                    module = import_path(fspath)
+                    if PYTEST_GT_5:
+                        from _pytest.pathlib import import_path
+
+                    if PYTEST_GE_6_3:
+                        module = import_path(fspath, root=self.config.rootpath)
+                    elif PYTEST_GT_5:
+                        module = import_path(fspath)
+                    else:
+                        module = fspath.pyimport()
                 except ImportError:
                     if self.config.getvalue("doctest_ignore_import_errors"):
                         pytest.skip("unable to import module %r" % fspath)
