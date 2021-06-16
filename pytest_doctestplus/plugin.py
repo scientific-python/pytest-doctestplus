@@ -23,6 +23,7 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
 _pytest_version = Version(pytest.__version__)
 PYTEST_GT_5 = _pytest_version > Version('5.9.9')
 PYTEST_GE_6_3 = _pytest_version.is_devrelease or _pytest_version >= Version('6.3')
+PYTEST_GT_6_3 = _pytest_version.is_devrelease or _pytest_version > Version('6.3')
 
 comment_characters = {
     '.txt': '#',
@@ -199,7 +200,11 @@ def pytest_configure(config):
             if filepath == "setup.py":
                 return
             elif filepath == "conftest.py":
-                if PYTEST_GE_6_3:
+                if PYTEST_GT_6_3:
+                    module = self.config.pluginmanager._importconftest(
+                        self.path, self.config.getoption("importmode"),
+                        rootpath=self.config.rootpath)
+                elif PYTEST_GE_6_3:
                     module = self.config.pluginmanager._importconftest(
                         self.path, self.config.getoption("importmode"))
                 elif PYTEST_GT_5:
