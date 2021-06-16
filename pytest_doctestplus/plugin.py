@@ -23,6 +23,7 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
 _pytest_version = Version(pytest.__version__)
 PYTEST_GT_5 = _pytest_version > Version('5.9.9')
 PYTEST_GE_6_3 = _pytest_version.is_devrelease or _pytest_version >= Version('6.3')
+PYTEST_GT_6_3 = _pytest_version.is_devrelease or _pytest_version > Version('6.3')
 
 comment_characters = {
     '.txt': '#',
@@ -189,12 +190,23 @@ def pytest_configure(config):
         def collect(self):
             # When running directly from pytest we need to make sure that we
             # don't accidentally import setup.py!
-            if self.fspath.basename == "setup.py":
+            if PYTEST_GE_6_3:
+                fspath = self.path
+                filepath = self.path.name
+            else:
+                fspath = self.fspath
+                filepath = self.fspath.basename
+
+            if filepath == "setup.py":
                 return
-            elif self.fspath.basename == "conftest.py":
-                if PYTEST_GE_6_3:
+            elif filepath == "conftest.py":
+                if PYTEST_GT_6_3:
                     module = self.config.pluginmanager._importconftest(
-                        Path(self.fspath), self.config.getoption("importmode"))
+                        self.path, self.config.getoption("importmode"),
+                        rootpath=self.config.rootpath)
+                elif PYTEST_GE_6_3:
+                    module = self.config.pluginmanager._importconftest(
+                        self.path, self.config.getoption("importmode"))
                 elif PYTEST_GT_5:
                     module = self.config.pluginmanager._importconftest(
                         self.fspath, self.config.getoption("importmode"))
@@ -203,10 +215,18 @@ def pytest_configure(config):
                         self.fspath)
             else:
                 try:
-                    module = self.fspath.pyimport()
+                    if PYTEST_GT_5:
+                        from _pytest.pathlib import import_path
+
+                    if PYTEST_GE_6_3:
+                        module = import_path(fspath, root=self.config.rootpath)
+                    elif PYTEST_GT_5:
+                        module = import_path(fspath)
+                    else:
+                        module = fspath.pyimport()
                 except ImportError:
                     if self.config.getvalue("doctest_ignore_import_errors"):
-                        pytest.skip("unable to import module %r" % self.fspath)
+                        pytest.skip("unable to import module %r" % fspath)
                     else:
                         raise
 
@@ -262,10 +282,16 @@ def pytest_configure(config):
     class DocTestTextfilePlus(pytest.Module):
 
         def collect(self):
+            if PYTEST_GE_6_3:
+                fspath = self.path
+                filepath = self.path.name
+            else:
+                fspath = self.fspath
+                filepath = self.fspath.basename
+
             encoding = self.config.getini("doctest_encoding")
-            text = self.fspath.read_text(encoding)
-            filename = str(self.fspath)
-            name = self.fspath.basename
+            text = fspath.read_text(encoding)
+            filename = str(fspath)
             globs = {"__name__": "__main__"}
 
             optionflags = get_optionflags(self) | FIX
@@ -274,7 +300,7 @@ def pytest_configure(config):
                 verbose=False, optionflags=optionflags, checker=OutputChecker())
 
             parser = DocTestParserPlus()
-            test = parser.get_doctest(text, globs, name, filename, 0)
+            test = parser.get_doctest(text, globs, filepath, filename, 0)
             if test.examples:
                 try:
                     yield doctest_plugin.DoctestItem.from_parent(
@@ -438,7 +464,14 @@ class DoctestPlus(object):
             dirpath = Path(path).parent
         else:
             dirpath = path.dirpath()
-        collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
+
+        try:
+            collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
+        except TypeError:
+            # Pytest 7.0+
+            collect_ignore = config._getconftest_pathlist("collect_ignore",
+                                                          path=dirpath,
+                                                          rootpath=config.rootpath)
 
         # The collect_ignore conftest.py variable should cause all test
         # runners to ignore this file and all subfiles and subdirectories
