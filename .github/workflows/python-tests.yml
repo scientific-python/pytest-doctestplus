@@ -18,11 +18,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: 3.6
-            toxenv: py36-test-pytest46
+            python-version: 3.7
+            toxenv: py37-test-pytest46
           - os: windows-latest
-            python-version: 3.6
-            toxenv: py36-test-pytest50
+            python-version: 3.7
+            toxenv: py37-test-pytest50
           - os: macos-latest
             python-version: 3.7
             toxenv: py37-test-pytest51
