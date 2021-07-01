@@ -1,4 +1,4 @@
-0.10.0 (unreleased)
+0.10.0 (2021-07-01)
 ===================
 
 - Added ``..doctest-remote-data::`` directive to control remote data
