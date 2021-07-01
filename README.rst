@@ -273,7 +273,17 @@ marked:
 
 The ``+REMOTE_DATA`` directive indicates that the marked statement should only
 be executed if the ``--remote-data`` option is given. By default, all
-statements marked with ``--remote-data`` will be skipped.
+statements marked with the remote data directive will be skipped.
+
+Whole code example blocks can also be marked to control access to data from the internet
+this way:
+
+.. code-block:: python
+
+    .. doctest-remote-data::
+
+        >>> import requests
+        >>> r = requests.get('https://www.astropy.org')
 
 .. _pytest-remotedata: https://github.com/astropy/pytest-remotedata
 __ pytest-remotedata_

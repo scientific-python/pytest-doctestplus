@@ -1,6 +1,9 @@
 0.10.0 (unreleased)
 ===================
 
+- Added ``..doctest-remote-data::`` directive to control remote data
+  access for a chunk of code. [#137]
+
 - Drop support for ``python`` 3.6. [#159]
 
 - Fixed a bug where the command-line option ``--remote-data=any`` (associated
@@ -9,6 +12,7 @@
 
 - Fix wrong behavior with ``IGNORE_WARNINGS`` and ``SHOW_WARNINGS`` that could
   make a block to pass instead of being skipped. [#148]
+
 
 0.9.0 (2021-01-14)
 ==================

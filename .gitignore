@@ -59,5 +59,8 @@ venv
 # PyCharm
 .idea
 
+# VS code
+.vscode
+
 pytest_doctestplus/version.py
 pip-wheel-metadata/
