@@ -777,28 +777,8 @@ def test_doctest_skip(testdir):
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
-def test_remote_data_on(testdir):
-    testdir.makeini(
-        """
-        [pytest]
-        doctestplus = enabled
-    """)
-
-    p = testdir.makefile(
-        '.rst',
-        """
-        # This test should pass
-        .. doctest-remote-data::
-
-            >>> 1 + 1
-            2
-        """
-    )
-    testdir.inline_run(p, '--doctest-plus', '--doctest-rst',
-                       '--remote-data').assertoutcome(passed=1)
-
-
-def test_remote_data_off(testdir):
+# We repeat all testst including remote data with and without it opted in
+def test_remote_data_url(testdir):
     testdir.makeini(
         """
         [pytest]
@@ -817,6 +797,7 @@ def test_remote_data_off(testdir):
             ...     remote.read()    # doctest: +IGNORE_OUTPUT
         """
     )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst', '--remote-data').assertoutcome(passed=1)
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
@@ -838,6 +819,7 @@ def test_remote_data_float_cmp(testdir):
             0.333333
         """
     )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst', '--remote-data').assertoutcome(passed=1)
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
@@ -861,6 +843,7 @@ def test_remote_data_ignore_whitespace(testdir):
             foo
         """
     )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst', '--remote-data').assertoutcome(passed=1)
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
@@ -875,8 +858,8 @@ def test_remote_data_ellipsis(testdir):
     p = testdir.makefile(
         '.rst',
         """
-        #This test should be skipped when remote data is not requested, and should
-        #pass when remote data is requested
+        # This test should be skipped when remote data is not requested, and should
+        # pass when remote data is requested
         .. doctest-remote-data::
 
             >>> a = "freedom at last"
@@ -884,6 +867,7 @@ def test_remote_data_ellipsis(testdir):
             freedom ...
         """
     )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst', '--remote-data').assertoutcome(passed=1)
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
@@ -897,9 +881,9 @@ def test_remote_data_requires(testdir):
     p = testdir.makefile(
         '.rst',
         """
-        #This test should be skipped when remote data is not requested.
-        #It should also be skipped instead of failing when remote data is requested because
-        #the module required does not exist
+        # This test should be skipped when remote data is not requested.
+        # It should also be skipped instead of failing when remote data is requested because
+        # the module required does not exist
         .. doctest-remote-data::
         .. doctest-requires:: does-not-exist
 
@@ -907,6 +891,7 @@ def test_remote_data_requires(testdir):
             3
         """
     )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst', '--remote-data').assertoutcome(skipped=1)
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
@@ -920,11 +905,12 @@ def test_remote_data_ignore_warnings(testdir):
     p = testdir.makefile(
         '.rst',
         """
-        #This test should be skipped if remote data is not requested.
+        # This test should be skipped if remote data is not requested.
         .. doctest-remote-data::
 
             >>> import warnings
             >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
         """
     )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst', '--remote-data').assertoutcome(passed=1)
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
