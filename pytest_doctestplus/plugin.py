@@ -359,8 +359,8 @@ def pytest_configure(config):
                     required = []
                     skip_next = False
                     lines = entry.strip().splitlines()
-                    if any([re.match(
-                            '{} doctest-skip-all'.format(comment_char), x.strip()) for x in lines]):
+                    if any(re.match(
+                            '{} doctest-skip-all'.format(comment_char), x.strip()) for x in lines):
                         skip_all = True
                         continue
 
@@ -388,9 +388,9 @@ def pytest_configure(config):
                             continue
 
                     if config.getoption('remote_data', 'none') != 'any':
-                        matches = [re.match(
+                        matches = (re.match(
                             r'{}\s+doctest-remote-data\s*::'.format(comment_char),
-                            last_line) for last_line in last_lines]
+                            last_line) for last_line in last_lines)
 
                         if any(matches):
                             skip_next = True
