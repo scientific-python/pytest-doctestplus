@@ -1,3 +1,5 @@
+:orphan:
+
 .. doctest-skip-all
 
 Some Bad Test Cases

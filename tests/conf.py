@@ -28,6 +28,7 @@ author = 'Astropy Infrastructure Team'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'pytest_doctestplus.sphinx.doctestplus'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
