@@ -46,6 +46,7 @@ def setup(app):
     app.add_directive('doctest-skip', DoctestSkipDirective)
     app.add_directive('doctest-skip-all', DoctestSkipDirective)
     app.add_directive('doctest', DoctestSkipDirective, override=True)
+    app.add_directive('doctest-remote-data', DoctestSkipDirective)
     # Code blocks that use this directive will not appear in the generated
     # documentation. This is intended to hide boilerplate code that is only
     # useful for testing documentation using doctest, but does not actually
