@@ -1,5 +1,8 @@
-0.11.0 (unreleased)
+0.10.1 (2021-07-20)
 ===================
+
+- Fix the doctestplus sphinx extension to recognize the
+  ``doctest-remote-data`` directive. [#162]
 
 
 0.10.0 (2021-07-01)
