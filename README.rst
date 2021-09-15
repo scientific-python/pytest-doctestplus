@@ -101,6 +101,21 @@ of the directives that this plugin defines are described in the sections below.
 .. _doctest directives: https://docs.python.org/3/library/doctest.html#directives
 .. _documentation: https://docs.python.org/3/library/doctest.html#directives
 
+Sphinx Doctest Directives
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use ``testsetup`` and ``testcleanup`` in Sphinx RST to run code that is
+not visible in rendered document. However, due to how ``pytest-doctestplus``
+works, the code within needs to be prepended by ``>>>``. For example::
+
+  .. testsetup::
+
+      >>> x = 42
+
+  .. testcleanup::
+
+      >>> del x
+
 Floating Point Comparison
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

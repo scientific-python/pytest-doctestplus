@@ -52,6 +52,7 @@ def setup(app):
     # useful for testing documentation using doctest, but does not actually
     # belong in the documentation itself.
     app.add_directive('testsetup', DoctestOmitDirective, override=True)
+    app.add_directive('testcleanup', DoctestOmitDirective, override=True)
 
     return {'parallel_read_safe': True,
             'parallel_write_safe': True}
