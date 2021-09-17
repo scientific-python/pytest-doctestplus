@@ -8,6 +8,26 @@ if they run. Some are not. The intent of this file is to test the directives
 that are provided by the `--doctest-rst` option to make sure that the bad ones
 get skipped.
 
+.. This will not show in doc but it will run in doctestplus.
+
+.. testsetup::
+
+    >>> x = 42
+
+This code will show the value of ``x`` that is set within ``testsetup``::
+
+    >>> x
+    42
+
+.. testcleanup::
+
+    >>> x = x + 1
+
+This code will show the value of ``x`` that is set within ``testcleanup``::
+
+    >>> x
+    43
+
 Here's One That Works
 =====================
 
