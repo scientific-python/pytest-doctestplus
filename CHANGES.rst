@@ -1,7 +1,8 @@
-0.11.0 (unreleased)
+0.11.0 (2021-09-20)
 ===================
 
-
+- Added support for ``testcleanup`` and documented existing support for
+  ``testsetup``. [#165]
 
 0.10.1 (2021-07-20)
 ===================
