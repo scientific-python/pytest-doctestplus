@@ -2,6 +2,14 @@
 pytest-doctestplus
 ==================
 
+.. image:: https://zenodo.org/badge/104253824.svg
+   :target: https://zenodo.org/badge/latestdoi/104253824
+   :alt: Zenodo DOI
+
+.. image:: https://github.com/astropy/pytest-doctestplus/workflows/Run%20unit%20tests/badge.svg
+    :target: https://github.com/astropy/pytest-doctestplus/actions
+    :alt: CI Status
+
 This package contains a plugin for the `pytest`_ framework that provides
 advanced doctest support and enables the testing of `reStructuredText`_
 (".rst") files. It was originally part of the `astropy`_ core package, but has
@@ -316,10 +324,6 @@ running the doctests with sphinx is not supported. To do this, add
 
 Development Status
 ------------------
-
-.. image:: https://github.com/astropy/pytest-doctestplus/workflows/Run%20unit%20tests/badge.svg
-    :target: https://github.com/astropy/pytest-doctestplus/actions
-    :alt: CI Status
 
 Questions, bug reports, and feature requests can be submitted on `github`_.
 
