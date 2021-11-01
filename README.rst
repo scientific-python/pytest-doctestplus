@@ -96,7 +96,7 @@ This plugin respects the doctest options that are used by the built-in doctest
 plugin and are set in ``doctest_optionflags`` in ``setup.cfg``. By default,
 ``ELLIPSIS`` and ``NORMALIZE_WHITESPACE`` are used. For a description of all
 doctest settings, see the `doctest documentation
-<https://https://docs.python.org/3/library/doctest.html#option-flags>`_.
+<https://docs.python.org/3/library/doctest.html#option-flags>`_.
 
 Doctest Directives
 ~~~~~~~~~~~~~~~~~~
