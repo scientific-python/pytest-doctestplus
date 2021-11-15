@@ -22,8 +22,9 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
 
 _pytest_version = Version(pytest.__version__)
 PYTEST_GT_5 = _pytest_version > Version('5.9.9')
+PYTEST_GE_5_4 = _pytest_version >= Version('5.4')
 PYTEST_GE_6_3 = _pytest_version.is_devrelease or _pytest_version >= Version('6.3')
-PYTEST_GT_6_3 = _pytest_version.is_devrelease or _pytest_version > Version('6.3')
+PYTEST_GE_7_0 = _pytest_version.is_devrelease or _pytest_version >= Version('7.0')
 
 comment_characters = {
     '.txt': '#',
@@ -201,7 +202,7 @@ def pytest_configure(config):
             if filepath == "setup.py":
                 return
             elif filepath == "conftest.py":
-                if PYTEST_GT_6_3:
+                if PYTEST_GE_7_0:
                     module = self.config.pluginmanager._importconftest(
                         self.path, self.config.getoption("importmode"),
                         rootpath=self.config.rootpath)
@@ -567,10 +568,11 @@ class DoctestPlus(object):
                 return None
 
             # Don't override the built-in doctest plugin
-            try:
+            if PYTEST_GE_7_0:
+                return self._doctest_module_item_cls.from_parent(parent, path=Path(path))
+            elif PYTEST_GE_5_4:
                 return self._doctest_module_item_cls.from_parent(parent, fspath=path)
-            except AttributeError:
-                # pytest < 5.4
+            else:
                 return self._doctest_module_item_cls(path, parent)
 
         elif any([path.check(fnmatch=pat) for pat in self._file_globs]):
@@ -598,10 +600,11 @@ class DoctestPlus(object):
 
             # TODO: Get better names on these items when they are
             # displayed in py.test output
-            try:
+            if PYTEST_GE_7_0:
+                return self._doctest_textfile_item_cls.from_parent(parent, path=Path(path))
+            elif PYTEST_GE_5_4:
                 return self._doctest_textfile_item_cls.from_parent(parent, fspath=path)
-            except AttributeError:
-                # pytest < 5.4
+            else:
                 return self._doctest_textfile_item_cls(path, parent)
 
 
