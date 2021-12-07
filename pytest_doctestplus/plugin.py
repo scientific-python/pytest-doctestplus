@@ -23,8 +23,9 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
 _pytest_version = Version(pytest.__version__)
 PYTEST_GT_5 = _pytest_version > Version('5.9.9')
 PYTEST_GE_5_4 = _pytest_version >= Version('5.4')
-PYTEST_GE_6_3 = _pytest_version.is_devrelease or _pytest_version >= Version('6.3')
-PYTEST_GE_7_0 = _pytest_version.is_devrelease or _pytest_version >= Version('7.0')
+PYTEST_GE_7_0 = any([_pytest_version.is_devrelease,
+                     _pytest_version.is_prerelease,
+                     _pytest_version >= Version('7.0')])
 
 comment_characters = {
     '.txt': '#',
@@ -192,7 +193,7 @@ def pytest_configure(config):
         def collect(self):
             # When running directly from pytest we need to make sure that we
             # don't accidentally import setup.py!
-            if PYTEST_GE_6_3:
+            if PYTEST_GE_7_0:
                 fspath = self.path
                 filepath = self.path.name
             else:
@@ -206,9 +207,6 @@ def pytest_configure(config):
                     module = self.config.pluginmanager._importconftest(
                         self.path, self.config.getoption("importmode"),
                         rootpath=self.config.rootpath)
-                elif PYTEST_GE_6_3:
-                    module = self.config.pluginmanager._importconftest(
-                        self.path, self.config.getoption("importmode"))
                 elif PYTEST_GT_5:
                     module = self.config.pluginmanager._importconftest(
                         self.fspath, self.config.getoption("importmode"))
@@ -220,7 +218,7 @@ def pytest_configure(config):
                     if PYTEST_GT_5:
                         from _pytest.pathlib import import_path
 
-                    if PYTEST_GE_6_3:
+                    if PYTEST_GE_7_0:
                         module = import_path(fspath, root=self.config.rootpath)
                     elif PYTEST_GT_5:
                         module = import_path(fspath)
@@ -284,7 +282,7 @@ def pytest_configure(config):
     class DocTestTextfilePlus(pytest.Module):
 
         def collect(self):
-            if PYTEST_GE_6_3:
+            if PYTEST_GE_7_0:
                 fspath = self.path
                 filepath = self.path.name
             else:
@@ -475,7 +473,7 @@ class DoctestPlus(object):
         Skip paths that match any of the doctest_norecursedirs patterns or
         if doctest_only is True then skip all regular test files (eg test_*.py).
         """
-        if PYTEST_GE_6_3:
+        if PYTEST_GE_7_0:
             dirpath = Path(path).parent
         else:
             dirpath = path.dirpath()
