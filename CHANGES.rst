@@ -1,5 +1,7 @@
-0.12.0 (unreleased)
+0.11.2 (unreleased)
 ===================
+
+- Fix version check for pytest 7.0.0rc1. [#171]
 
 0.11.1 (2021-11-16)
 ===================
