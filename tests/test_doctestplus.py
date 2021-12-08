@@ -522,7 +522,7 @@ def test_show_warnings_rst(testdir):
 
 def test_doctest_glob(testdir):
     testdir.makefile(
-        '.rst',
+        '.md',
         foo_1=">>> 1 + 1\n2",
     )
     testdir.makefile(
@@ -530,8 +530,12 @@ def test_doctest_glob(testdir):
         foo_2=">>> 1 + 1\n2",
     )
     testdir.makefile(
-        '.txt',
+        '.rst',
         foo_3=">>> 1 + 1\n2",
+    )
+    testdir.makefile(
+        '.txt',
+        foo_4=">>> 1 + 1\n2",
     )
     testdir.makefile(
         '.rst',
@@ -551,8 +555,15 @@ def test_doctest_glob(testdir):
         '--doctest-plus', '--doctest-glob', '*.rst', '--doctest-glob', '*.txt'
     ).assertoutcome(passed=4)
     testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', '*.rst', '--doctest-glob', '*.txt',
+        '--doctest-glob', '*.md'
+    ).assertoutcome(passed=5)
+    testdir.inline_run(
         '--doctest-plus', '--doctest-glob', 'foo_*.rst'
     ).assertoutcome(passed=2)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', 'foo_*.md'
+    ).assertoutcome(passed=1)
     testdir.inline_run(
         '--doctest-plus', '--doctest-glob', 'foo_*.txt'
     ).assertoutcome(passed=1)
@@ -560,20 +571,25 @@ def test_doctest_glob(testdir):
 
 def test_text_file_comments(testdir):
     testdir.makefile(
+        '.md',
+        foo_1="<!-- >>> 1 + 1 -->\n3",
+    )
+    testdir.makefile(
         '.rst',
-        foo_1=".. >>> 1 + 1\n3",
+        foo_2=".. >>> 1 + 1\n3",
     )
     testdir.makefile(
         '.tex',
-        foo_2="% >>> 1 + 1\n3",
+        foo_3="% >>> 1 + 1\n3",
     )
     testdir.makefile(
         '.txt',
-        foo_3="# >>> 1 + 1\n3",
+        foo_4="# >>> 1 + 1\n3",
     )
 
     testdir.inline_run(
         '--doctest-plus',
+        '--doctest-glob', '*.md',
         '--doctest-glob', '*.rst',
         '--doctest-glob', '*.tex',
         '--doctest-glob', '*.txt'
