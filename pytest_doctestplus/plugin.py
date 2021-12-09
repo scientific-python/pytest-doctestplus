@@ -30,7 +30,8 @@ PYTEST_GE_7_0 = any([_pytest_version.is_devrelease,
 comment_characters = {
     '.txt': '#',
     '.tex': '%',
-    '.rst': r'\.\.'
+    '.rst': r'\.\.',
+    '.md': '<!--'
 }
 
 
