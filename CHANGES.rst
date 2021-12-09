@@ -1,10 +1,10 @@
-0.11.2 (unreleased)
+0.11.2 (2021-12-09)
 ===================
 
 - Fix version check for pytest 7.0.0rc1. [#171]
 
-- Recognize text beginning with `<!--` as a comment for Markdown (`.md`) files.
-  [#169]
+- Recognize text beginning with ``<!--`` as a comment for Markdown (``.md``)
+  files. [#169]
 
 0.11.1 (2021-11-16)
 ===================
