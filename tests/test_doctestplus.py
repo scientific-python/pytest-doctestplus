@@ -1,5 +1,5 @@
 import os
-from distutils.version import LooseVersion
+from packaging.version import Version
 from textwrap import dedent
 
 import pytest
@@ -651,7 +651,7 @@ def test_ignore_option(testdir):
     ).assertoutcome(passed=2)
 
 
-if LooseVersion('4.3.0') <= LooseVersion(pytest.__version__):
+if Version('4.3.0') <= Version(pytest.__version__):
     def test_ignore_glob_option(testdir):
         testdir.makepyfile(foo="""
             def f():

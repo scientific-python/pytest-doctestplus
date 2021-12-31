@@ -19,7 +19,7 @@ class DoctestSkipDirective(Directive):
 
     def run(self):
         # Check if there is any valid argument, and skip it. Currently only
-        # 'win32' is supported in astropy.tests.pytest_plugins.
+        # 'win32' is supported.
         if re.match('win32', self.content[0]):
             self.content = self.content[2:]
         code = '\n'.join(self.content)
