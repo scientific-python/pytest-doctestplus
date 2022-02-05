@@ -98,6 +98,12 @@ def pytest_addoption(parser):
                          "This is no longer recommended, use --doctest-glob instead."
                      ))
 
+    parser.addoption("--doctest-ufunc", action="store_true",
+                     help=(
+                         "Enable running doctests in docstrings of Numpy ufuncs. "
+                         "Implies usage of doctest-plus."
+                     ))
+
     # Defaults to `atol` parameter from `numpy.allclose`.
     parser.addoption("--doctest-plus-atol", action="store",
                      help="set the absolute tolerance for float comparison",
@@ -129,6 +135,10 @@ def pytest_addoption(parser):
                   "Run the doctests in the rst documentation",
                   default=False)
 
+    parser.addini("doctest_ufunc",
+                  "Run doctests in docstrings of Numpy ufuncs",
+                  default=False)
+
     parser.addini("doctest_plus_atol",
                   "set the absolute tolerance for float comparison",
                   default=1e-08)
@@ -157,11 +167,26 @@ def get_optionflags(parent):
     return flag_int
 
 
+def _is_numpy_ufunc(method):
+    try:
+        import numpy as np
+    except ModuleNotFoundError:
+        # If Numpy is not installed, then there can't be any ufuncs!
+        return False
+    while True:
+        try:
+            method = method.__wrapped__
+        except AttributeError:
+            break
+    return isinstance(method, np.ufunc)
+
+
 def pytest_configure(config):
     doctest_plugin = config.pluginmanager.getplugin('doctest')
     run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
+    use_ufunc = config.getini('doctest_ufunc') or config.option.doctest_ufunc
     use_doctest_plus = config.getini(
-        'doctest_plus') or config.option.doctest_plus or config.option.doctest_only
+        'doctest_plus') or config.option.doctest_plus or config.option.doctest_only or use_ufunc
     if doctest_plugin is None or run_regular_doctest or not use_doctest_plus:
         return
 
@@ -238,7 +263,14 @@ def pytest_configure(config):
             runner = doctest.DebugRunner(
                 verbose=False, optionflags=options, checker=OutputChecker())
 
-            for test in finder.find(module):
+            tests = finder.find(module)
+            if use_ufunc:
+                for method in module.__dict__.values():
+                    if _is_numpy_ufunc(method):
+                        found = finder.find(method, module=module)
+                        tests += found
+
+            for test in tests:
                 if test.examples:  # skip empty doctests
                     ignore_warnings_context_needed = False
                     show_warnings_context_needed = False
