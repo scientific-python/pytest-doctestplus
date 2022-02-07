@@ -3,8 +3,6 @@ import textwrap
 
 import pytest
 
-collect_ignore = ['ufunc_example']
-
 
 def _wrap_docstring_in_func(func_name, docstring):
     template = textwrap.dedent(r"""
