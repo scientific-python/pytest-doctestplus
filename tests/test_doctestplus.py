@@ -1032,14 +1032,5 @@ def test_ufunc(testdir):
     testdir.run(sys.executable, 'setup.py', 'build')
     build_dir, = glob.glob(str(testdir.tmpdir / 'build/lib.*'))
 
-    # Run pytest without doctests: 0 tests run
-    result = testdir.runpytest(build_dir)
-    result.assert_outcomes(passed=0, failed=0)
-
-    # Run pytest with doctests: 1 test run
-    result = testdir.runpytest(build_dir, '--doctest-modules')
-    result.assert_outcomes(passed=1, failed=0)
-
-    # Run pytest with doctests including ufuncs: 2 tests run
-    result = testdir.runpytest(build_dir, '--doctest-plus', '--doctest-modules', '--doctest-ufunc')
-    result.assert_outcomes(passed=2, failed=0)
+    result = testdir.inline_run(build_dir, '--doctest-plus', '--doctest-modules')
+    result.assertoutcome(passed=2, failed=0)

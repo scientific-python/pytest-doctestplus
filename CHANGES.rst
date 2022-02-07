@@ -1,8 +1,7 @@
 0.12.0 (unreleased)
 ===================
 
-- Add ``--doctest-ufunc`` option to run doctests in docstrings of Numpy ufuncs.
-  [#123]
+- Run doctests in docstrings of Numpy ufuncs. [#123]
 
 0.11.2 (2021-12-09)
 ===================
