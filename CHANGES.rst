@@ -1,6 +1,8 @@
 0.12.0 (unreleased)
 ===================
 
+- Run doctests in docstrings of Numpy ufuncs. [#123, #174]
+
 0.11.2 (2021-12-09)
 ===================
 
