@@ -252,13 +252,7 @@ def pytest_configure(config):
             runner = doctest.DebugRunner(
                 verbose=False, optionflags=options, checker=OutputChecker())
 
-            tests = finder.find(module)
-            for method in module.__dict__.values():
-                if _is_numpy_ufunc(method):
-                    found = finder.find(method, module=module)
-                    tests += found
-
-            for test in tests:
+            for test in finder.find(module):
                 if test.examples:  # skip empty doctests
                     ignore_warnings_context_needed = False
                     show_warnings_context_needed = False
@@ -664,13 +658,19 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
         tests = doctest.DocTestFinder.find(self, obj, name, module, globs, extraglobs)
+
+        if name is None and hasattr(obj, '__name__'):
+            name = obj.__name__
+        else:
+            raise ValueError("DocTestFinder.find: name must be given "
+                                "when obj.__name__ doesn't exist: {!r}"
+                                .format((type(obj),)))
+
+        for ufunc_name, ufunc_method in obj.__dict__.items():
+            if _is_numpy_ufunc(ufunc_method):
+                tests += doctest.DocTestFinder.find(self, ufunc_method, f'{name}.{ufunc_name}', module=obj, globs=globs, extraglobs=extraglobs)
+
         if hasattr(obj, '__doctest_skip__') or hasattr(obj, '__doctest_requires__'):
-            if name is None and hasattr(obj, '__name__'):
-                name = obj.__name__
-            else:
-                raise ValueError("DocTestFinder.find: name must be given "
-                                 "when obj.__name__ doesn't exist: {!r}"
-                                 .format((type(obj),)))
 
             def test_filter(test):
                 for pat in getattr(obj, '__doctest_skip__', []):
