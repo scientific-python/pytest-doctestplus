@@ -242,7 +242,7 @@ def test_allow_bytes_unicode(testdir):
         doctestplus = enabled
     """
     )
-    # These are dummy tests just to check tht doctest-plus can parse the
+    # These are dummy tests just to check that doctest-plus can parse the
     # ALLOW_BYTES and ALLOW_UNICODE options. It doesn't actually implement
     # these options.
     p = testdir.makepyfile(
