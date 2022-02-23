@@ -42,7 +42,7 @@ providing the following features:
 * handling doctests that use remote data in conjunction with the
   `pytest-remotedata`_ plugin (see `Remote Data`_)
 * optional inclusion of ``*.rst`` files for doctests (see `Setup and Configuration`_)
-* inclusion of doctests in docstrings of Numpy ufuncs
+* optional inclusion of doctests in docstrings of Numpy ufuncs
 
 .. _pytest-remotedata: https://github.com/astropy/pytest-remotedata
 
@@ -71,9 +71,10 @@ Usage
 Setup and Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This plugin provides two command line options: ``--doctest-plus`` for enabling
-the advanced features mentioned above, and ``--doctest-rst`` for including
-``*.rst`` files in doctest collection.
+This plugin provides three command line options: ``--doctest-plus`` for enabling
+the advanced features mentioned above, ``--doctest-rst`` for including
+``*.rst`` files in doctest collection, and ``--doctest-ufunc`` for including
+doctests in docstrings of Numpy ufuncs.
 
 This plugin can also be enabled by default by adding ``doctest_plus = enabled``
 to the ``[tool:pytest]`` section of the package's ``setup.cfg`` file.
