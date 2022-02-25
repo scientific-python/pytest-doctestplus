@@ -20,7 +20,7 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.7
             toxenv: py37-test-pytest46
-          - os: windows-latest
+          - os: windows-2019
             python-version: 3.7
             toxenv: py37-test-pytest50
           - os: macos-latest
@@ -29,7 +29,7 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.7
             toxenv: py37-test-pytest52
-          - os: windows-latest
+          - os: windows-2019
             python-version: 3.8
             toxenv: py38-test-pytest53
           - os: ubuntu-latest
