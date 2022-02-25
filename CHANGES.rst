@@ -1,4 +1,4 @@
-0.12.0 (unreleased)
+0.12.0 (2022-02-25)
 ===================
 
 - Run doctests in docstrings of Numpy ufuncs. [#123, #174]
