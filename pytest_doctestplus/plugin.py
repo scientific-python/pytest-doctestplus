@@ -85,6 +85,10 @@ def pytest_addoption(parser):
                           "features not found in the normal doctest "
                           "plugin")
 
+    parser.addoption("--doctest-ufunc", action="store_true",
+                     help="enable running doctests in docstrings of Numpy "
+                          "ufuncs")
+
     parser.addoption("--doctest-rst", action="store_true",
                      help=(
                          "Enable running doctests in .rst documentation. "
@@ -120,6 +124,9 @@ def pytest_addoption(parser):
 
     parser.addini("doctest_plus", "enable running doctests with additional "
                                   "features not found in the normal doctest plugin")
+
+    parser.addini("doctest_ufunc", "enable running doctests in docstrings of "
+                                   "Numpy ufuncs")
 
     parser.addini("doctest_norecursedirs",
                   "like the norecursedirs option but applies only to doctest "
@@ -176,6 +183,8 @@ def pytest_configure(config):
     run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
     use_doctest_plus = config.getini(
         'doctest_plus') or config.option.doctest_plus or config.option.doctest_only
+    use_doctest_ufunc = config.getini(
+        'doctest_ufunc') or config.option.doctest_ufunc
     if doctest_plugin is None or run_regular_doctest or not use_doctest_plus:
         return
 
@@ -248,17 +257,11 @@ def pytest_configure(config):
             options = get_optionflags(self) | FIX
 
             # uses internal doctest module parsing mechanism
-            finder = DocTestFinderPlus()
+            finder = DocTestFinderPlus(doctest_ufunc=use_doctest_ufunc)
             runner = doctest.DebugRunner(
                 verbose=False, optionflags=options, checker=OutputChecker())
 
-            tests = finder.find(module)
-            for method in module.__dict__.values():
-                if _is_numpy_ufunc(method):
-                    found = finder.find(method, module=module)
-                    tests += found
-
-            for test in tests:
+            for test in finder.find(module):
                 if test.examples:  # skip empty doctests
                     ignore_warnings_context_needed = False
                     show_warnings_context_needed = False
@@ -636,6 +639,10 @@ class DocTestFinderPlus(doctest.DocTestFinder):
     _import_cache = {}
     _module_checker = ModuleChecker()
 
+    def __init__(self, *args, doctest_ufunc=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._doctest_ufunc = doctest_ufunc
+
     @classmethod
     def check_required_modules(cls, mods):
         """Check that modules in `mods` list are available.
@@ -664,13 +671,22 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
     def find(self, obj, name=None, module=None, globs=None, extraglobs=None):
         tests = doctest.DocTestFinder.find(self, obj, name, module, globs, extraglobs)
+
+        if name is None and hasattr(obj, '__name__'):
+            name = obj.__name__
+        else:
+            raise ValueError("DocTestFinder.find: name must be given "
+                                "when obj.__name__ doesn't exist: {!r}"
+                                .format((type(obj),)))
+
+        if self._doctest_ufunc:
+            for ufunc_name, ufunc_method in obj.__dict__.items():
+                if _is_numpy_ufunc(ufunc_method):
+                    tests += doctest.DocTestFinder.find(
+                        self, ufunc_method, f'{name}.{ufunc_name}',
+                        module=obj, globs=globs, extraglobs=extraglobs)
+
         if hasattr(obj, '__doctest_skip__') or hasattr(obj, '__doctest_requires__'):
-            if name is None and hasattr(obj, '__name__'):
-                name = obj.__name__
-            else:
-                raise ValueError("DocTestFinder.find: name must be given "
-                                 "when obj.__name__ doesn't exist: {!r}"
-                                 .format((type(obj),)))
 
             def test_filter(test):
                 for pat in getattr(obj, '__doctest_skip__', []):

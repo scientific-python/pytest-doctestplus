@@ -1033,4 +1033,7 @@ def test_ufunc(testdir):
     build_dir, = glob.glob(str(testdir.tmpdir / 'build/lib.*'))
 
     result = testdir.inline_run(build_dir, '--doctest-plus', '--doctest-modules')
+    result.assertoutcome(passed=1, failed=0)
+
+    result = testdir.inline_run(build_dir, '--doctest-plus', '--doctest-modules', '--doctest-ufunc')
     result.assertoutcome(passed=2, failed=0)
