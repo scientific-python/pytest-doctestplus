@@ -112,6 +112,29 @@ def test_float_cmp_list(testdir):
     reprec.assertoutcome(failed=0, passed=1)
 
 
+def test_float_cmp_dict(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctest_optionflags = ELLIPSIS
+        doctestplus = enabled
+    """
+    )
+    p = testdir.makepyfile(
+        """
+        def g():
+            '''
+            >>> x = {'a': 1/3., 'b': 2/3.}
+            >>> x    # doctest: +FLOAT_CMP
+            {'a': 0.333333, 'b': 0.666666}
+            '''
+            pass
+    """
+    )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(failed=0, passed=1)
+
+
 def test_float_cmp_global(testdir):
     testdir.makeini("""
         [pytest]

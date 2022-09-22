@@ -70,7 +70,7 @@ class OutputChecker(doctest.OutputChecker):
         want_floats = got_floats + r'(\.{3})?'
 
         front_sep = r'\s|[*+-,<=(\[]'
-        back_sep = front_sep + r'|[>j)\]]'
+        back_sep = front_sep + r'|[>j)\]}]'
 
         fbeg = r'^{}(?={}|$)'.format(got_floats, back_sep)
         fmidend = r'(?<={}){}(?={}|$)'.format(front_sep, got_floats, back_sep)
