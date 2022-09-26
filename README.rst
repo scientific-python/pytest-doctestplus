@@ -144,6 +144,11 @@ To address this issue, the ``pytest-doctestplus`` plugin provides support for a
   >>> 1.0 / 3.0  # doctest: +FLOAT_CMP
   0.333333333333333311
 
+.. code-block:: python
+
+  >>> {'a': 1 / 3., 'b': 2 / 3.}  # doctest: +FLOAT_CMP
+  {'a': 0.333333, 'b': 0.666666}
+
 When this flag is used, the expected and actual outputs are both parsed to find
 any floating point values in the strings.  Those are then converted to actual
 Python `float` objects and compared numerically.  This means that small
