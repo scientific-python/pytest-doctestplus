@@ -1,4 +1,4 @@
-0.12.1 (unreleased)
+0.12.1 (2022-09-26)
 ===================
 
 - Allow floating point comparison in Python dictionary. [#186]
