@@ -217,6 +217,22 @@ directive
 However, it is often useful to be able to skip docstrings associated with
 particular functions, methods, classes, or even entire files.
 
+Skipping All the Tests
+^^^^^^^^^^^^^^^^^^^^^^
+
+It is also possible to skip all doctests below a certain line using
+a ``doctest-skip-all`` comment.  Note the lack of ``::`` at the end
+of the line here.
+
+.. code-block:: rst
+
+    .. doctest-skip-all
+
+       >>> import non_existing
+       >>> non_existing.write_pseudo_code()
+       All the doctests are skipped in the file below
+
+
 Skip Unconditionally
 ^^^^^^^^^^^^^^^^^^^^
 
