@@ -731,7 +731,7 @@ def test_doctest_only(testdir, makepyfile, maketestfile, makerstfile):
     testdir.inline_run("--doctest-only", "--doctest-rst").assertoutcome(passed=3, failed=2)
 
 
-def test_doctest_float_replacement(tmpdir):
+def test_doctest_float_replacement(tmp_path):
     test1 = dedent("""
         This will demonstrate a doctest that fails due to a few extra decimal
         places::
@@ -748,17 +748,27 @@ def test_doctest_float_replacement(tmpdir):
             0.333333333333333311
     """)
 
-    test1_rst = tmpdir.join('test1.rst')
-    test2_rst = tmpdir.join('test2.rst')
-    test1_rst.write(test1)
-    test2_rst.write(test2)
+    test1_rst = tmp_path / "test1.rst"
+    test2_rst = tmp_path / "test2.rst"
+    test1_rst.write_text(test1)
+    test2_rst.write_text(test2)
 
     with pytest.raises(doctest.DocTestFailure):
-        doctest.testfile(str(test1_rst), module_relative=False,
-                         raise_on_error=True, verbose=False, encoding='utf-8')
+        doctest.testfile(
+            test1_rst,
+            module_relative=False,
+            raise_on_error=True,
+            verbose=False,
+            encoding="utf-8",
+        )
 
-    doctest.testfile(str(test2_rst), module_relative=False,
-                     raise_on_error=True, verbose=False, encoding='utf-8')
+    doctest.testfile(
+        test2_rst,
+        module_relative=False,
+        raise_on_error=True,
+        verbose=False,
+        encoding="utf-8",
+    )
 
 
 def test_doctest_subpackage_requires(testdir, caplog):
