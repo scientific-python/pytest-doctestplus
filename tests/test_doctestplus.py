@@ -1,6 +1,5 @@
 import glob
 import os
-from packaging.version import Version
 from textwrap import dedent
 import sys
 
@@ -676,35 +675,34 @@ def test_ignore_option(testdir):
     ).assertoutcome(passed=2)
 
 
-if Version('4.3.0') <= Version(pytest.__version__):
-    def test_ignore_glob_option(testdir):
-        testdir.makepyfile(foo="""
-            def f():
-                '''
-                >>> 1+1
-                2
-                '''
-                pass
-        """)
-        testdir.makepyfile(bar="""
-            def f():
-                '''
-                >>> 1+1
-                2
-                '''
-                pass
-        """)
-        testdir.makefile('.rst', foo='>>> 1+1\n2')
+def test_ignore_glob_option(testdir):
+    testdir.makepyfile(foo="""
+        def f():
+            '''
+            >>> 1+1
+            2
+            '''
+            pass
+    """)
+    testdir.makepyfile(bar="""
+        def f():
+            '''
+            >>> 1+1
+            2
+            '''
+            pass
+    """)
+    testdir.makefile('.rst', foo='>>> 1+1\n2')
 
-        testdir.inline_run(
-            '--doctest-plus', '--doctest-rst', '--ignore-glob', 'foo*'
-        ).assertoutcome(passed=1)
-        testdir.inline_run(
-            '--doctest-plus', '--doctest-rst', '--ignore-glob', 'bar*'
-        ).assertoutcome(passed=2)
-        testdir.inline_run(
-            '--doctest-plus', '--doctest-rst', '--ignore-glob', '*.rst'
-        ).assertoutcome(passed=2)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore-glob', 'foo*'
+    ).assertoutcome(passed=1)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore-glob', 'bar*'
+    ).assertoutcome(passed=2)
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-rst', '--ignore-glob', '*.rst'
+    ).assertoutcome(passed=2)
 
 
 def test_doctest_only(testdir, makepyfile, maketestfile, makerstfile):
