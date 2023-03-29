@@ -11,8 +11,10 @@ import sys
 import warnings
 from pathlib import Path
 from textwrap import indent
+from unittest import SkipTest
 
 import pytest
+from _pytest.outcomes import OutcomeException  # Private API, but been around since 3.7
 from packaging.version import Version
 
 from pytest_doctestplus.utils import ModuleChecker
@@ -258,7 +260,7 @@ def pytest_configure(config):
 
             # uses internal doctest module parsing mechanism
             finder = DocTestFinderPlus(doctest_ufunc=use_doctest_ufunc)
-            runner = doctest.DebugRunner(
+            runner = DebugRunnerPlus(
                 verbose=False, optionflags=options, checker=OutputChecker())
 
             for test in finder.find(module):
@@ -320,7 +322,7 @@ def pytest_configure(config):
 
             optionflags = get_optionflags(self) | FIX
 
-            runner = doctest.DebugRunner(
+            runner = DebugRunnerPlus(
                 verbose=False, optionflags=optionflags, checker=OutputChecker())
 
             parser = DocTestParserPlus()
@@ -707,3 +709,11 @@ class DocTestFinderPlus(doctest.DocTestFinder):
             tests = list(filter(test_filter, tests))
 
         return tests
+
+
+class DebugRunnerPlus(doctest.DebugRunner):
+    def report_unexpected_exception(self, out, test, example, exc_info):
+        cls, exception, traceback = exc_info
+        if isinstance(exception, (OutcomeException, SkipTest)):
+            raise exception
+        super().report_unexpected_exception(out, test, example, exc_info)
