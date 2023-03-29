@@ -965,6 +965,28 @@ def test_remote_data_ignore_warnings(testdir):
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
+def test_skiptest(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """
+    )
+    p = testdir.makepyfile(
+        """
+        class MyClass:
+            '''
+            >>> import pytest
+            >>> pytest.skip("I changed my mind")
+            >>> assert False, "This should not be reached"
+            '''
+            pass
+    """
+    )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(skipped=1, failed=0)
+
+
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
 
