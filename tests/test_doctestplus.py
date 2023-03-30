@@ -987,6 +987,40 @@ def test_skiptest(testdir):
     reprec.assertoutcome(skipped=1, failed=0)
 
 
+def test_fail_two_tests(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """
+    )
+    p = testdir.makepyfile(
+        """
+        class MyClass:
+            '''
+            .. doctest::
+
+                >>> print(2)
+                1
+
+            .. doctest::
+
+                >>> print(3)
+                1
+            '''
+            pass
+
+    """
+    )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(skipped=0, failed=1)
+    _, _, failed = reprec.listoutcomes()
+    report = failed[0]
+    assert "Expected:\n    1\nGot:\n    2" in report.longreprtext
+    assert "Expected:\n    1\nGot:\n    3" in report.longreprtext
+
+
+
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
 
