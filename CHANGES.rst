@@ -1,6 +1,8 @@
 0.12.2 (unreleased)
 ===================
 
+- Report doctests raising skip exceptions as skipped. [#196]
+
 0.12.1 (2022-09-26)
 ===================
 
