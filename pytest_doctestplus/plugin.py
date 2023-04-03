@@ -260,8 +260,7 @@ def pytest_configure(config):
 
             # uses internal doctest module parsing mechanism
             finder = DocTestFinderPlus(doctest_ufunc=use_doctest_ufunc)
-            runner = DebugRunnerPlus(
-                verbose=False, optionflags=options, checker=OutputChecker())
+            runner = DebugRunnerPlus(verbose=False, optionflags=options, checker=OutputChecker())
 
             for test in finder.find(module):
                 if test.examples:  # skip empty doctests
@@ -712,8 +711,23 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
 
 class DebugRunnerPlus(doctest.DebugRunner):
+    def __init__(self, checker=None, verbose=None, optionflags=0, continue_on_failure=True):
+        super().__init__(checker=checker, verbose=verbose, optionflags=optionflags)
+        self.continue_on_failure = continue_on_failure
+
+    def report_failure(self, out, test, example, got):
+        failure = doctest.DocTestFailure(test, example, got)
+        if self.continue_on_failure:
+            out.append(failure)
+        else:
+            raise failure
+
     def report_unexpected_exception(self, out, test, example, exc_info):
         cls, exception, traceback = exc_info
         if isinstance(exception, (OutcomeException, SkipTest)):
             raise exception
-        super().report_unexpected_exception(out, test, example, exc_info)
+        failure = doctest.UnexpectedException(test, example, exc_info)
+        if self.continue_on_failure:
+            out.append(failure)
+        else:
+            raise failure
