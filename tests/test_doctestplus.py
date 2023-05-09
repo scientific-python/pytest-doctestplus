@@ -1020,6 +1020,34 @@ def test_fail_two_tests(testdir):
     assert "Expected:\n    1\nGot:\n    3" in report.longreprtext
 
 
+def test_fail_data_dependency(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """
+    )
+    p = testdir.makepyfile(
+        """
+        class MyClass:
+            '''
+            .. doctest::
+
+                >>> import nonexistentmodule as nem
+                >>> a = nem.calculate_something()
+            '''
+            pass
+
+    """
+    )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(skipped=0, failed=1)
+    _, _, failed = reprec.listoutcomes()
+    # Both lines fail in a single error
+    report = failed[0]
+    assert " as nem\nUNEXPECTED EXCEPTION: ModuleNotFoundError" in report.longreprtext
+    assert "something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext
+
 
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
