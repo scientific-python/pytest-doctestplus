@@ -15,6 +15,7 @@ from unittest import SkipTest
 
 import pytest
 from _pytest.outcomes import OutcomeException  # Private API, but been around since 3.7
+from _pytest.doctest import _get_continue_on_failure  # Since 3.5, still in 7.3
 from packaging.version import Version
 
 from pytest_doctestplus.utils import ModuleChecker
@@ -260,7 +261,13 @@ def pytest_configure(config):
 
             # uses internal doctest module parsing mechanism
             finder = DocTestFinderPlus(doctest_ufunc=use_doctest_ufunc)
-            runner = DebugRunnerPlus(verbose=False, optionflags=options, checker=OutputChecker())
+            runner = DebugRunnerPlus(
+                verbose=False,
+                optionflags=options,
+                checker=OutputChecker(),
+                # Helper disables continue-on-failure when debugging is enabled
+                continue_on_failure=_get_continue_on_failure(config),
+            )
 
             for test in finder.find(module):
                 if test.examples:  # skip empty doctests
@@ -672,9 +679,10 @@ class DocTestFinderPlus(doctest.DocTestFinder):
         if name is None and hasattr(obj, '__name__'):
             name = obj.__name__
         else:
-            raise ValueError("DocTestFinder.find: name must be given "
-                                "when obj.__name__ doesn't exist: {!r}"
-                                .format((type(obj),)))
+            raise ValueError(
+                "DocTestFinder.find: name must be given when obj.__name__ doesn't exist: "
+                f"{type(obj)!r}"
+            )
 
         if self._doctest_ufunc:
             for ufunc_name, ufunc_method in obj.__dict__.items():

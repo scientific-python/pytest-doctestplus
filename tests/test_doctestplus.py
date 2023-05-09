@@ -987,13 +987,8 @@ def test_skiptest(testdir):
     reprec.assertoutcome(skipped=1, failed=0)
 
 
-def test_fail_two_tests(testdir):
-    testdir.makeini(
-        """
-        [pytest]
-        doctestplus = enabled
-    """
-    )
+@pytest.mark.parametrize('cont_on_fail', [False, True])
+def test_fail_two_tests(testdir, cont_on_fail):
     p = testdir.makepyfile(
         """
         class MyClass:
@@ -1009,24 +1004,19 @@ def test_fail_two_tests(testdir):
                 1
             '''
             pass
-
     """
     )
-    reprec = testdir.inline_run(p, "--doctest-plus")
+    arg = ("--doctest-continue-on-failure",) if cont_on_fail else ()
+    reprec = testdir.inline_run(p, "--doctest-plus", *arg)
     reprec.assertoutcome(skipped=0, failed=1)
     _, _, failed = reprec.listoutcomes()
     report = failed[0]
     assert "Expected:\n    1\nGot:\n    2" in report.longreprtext
-    assert "Expected:\n    1\nGot:\n    3" in report.longreprtext
+    assert ("Expected:\n    1\nGot:\n    3" in report.longreprtext) == cont_on_fail
 
 
-def test_fail_data_dependency(testdir):
-    testdir.makeini(
-        """
-        [pytest]
-        doctestplus = enabled
-    """
-    )
+@pytest.mark.parametrize('cont_on_fail', [False, True])
+def test_fail_data_dependency(testdir, cont_on_fail):
     p = testdir.makepyfile(
         """
         class MyClass:
@@ -1037,16 +1027,16 @@ def test_fail_data_dependency(testdir):
                 >>> a = nem.calculate_something()
             '''
             pass
-
     """
     )
-    reprec = testdir.inline_run(p, "--doctest-plus")
+    arg = ("--doctest-continue-on-failure",) if cont_on_fail else ()
+    reprec = testdir.inline_run(p, "--doctest-plus", *arg)
     reprec.assertoutcome(skipped=0, failed=1)
     _, _, failed = reprec.listoutcomes()
     # Both lines fail in a single error
     report = failed[0]
     assert " as nem\nUNEXPECTED EXCEPTION: ModuleNotFoundError" in report.longreprtext
-    assert "something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext
+    assert ("something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext) == cont_on_fail
 
 
 def test_ufunc(testdir):
