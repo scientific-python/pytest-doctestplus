@@ -288,6 +288,16 @@ conditionally skipped if a dependency is not available.
         >>> import asdf
         >>> asdf.open('file.asdf')
 
+Furthermore, if the code only runs for specific versions of the optional dependency,
+you can add a version check like this::
+
+.. code-block:: rst
+
+    .. doctest-requires:: asdf<3
+
+        >>> import asdf
+        >>> asdf.open('file.asdf')
+
 Finally, it is possible to skip collecting doctests in entire subpackages by
 using the ``doctest_subpackage_requires`` in the ``[tool:pytest]`` section of
 the package's ``setup.cfg`` file. The syntax for this option is a list of
