@@ -289,7 +289,7 @@ conditionally skipped if a dependency is not available.
         >>> asdf.open('file.asdf')
 
 Furthermore, if the code only runs for specific versions of the optional dependency,
-you can add a version check like this::
+you can add a version check like this:
 
 .. code-block:: rst
 
