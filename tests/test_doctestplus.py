@@ -1012,7 +1012,7 @@ def test_fail_two_tests(testdir, cont_on_fail):
     _, _, failed = reprec.listoutcomes()
     report = failed[0]
     assert "Expected:\n    1\nGot:\n    2" in report.longreprtext
-    assert ("Expected:\n    1\nGot:\n    3" in report.longreprtext) == cont_on_fail
+    assert ("Expected:\n    1\nGot:\n    3" in report.longreprtext) is cont_on_fail
 
 
 @pytest.mark.parametrize('cont_on_fail', [False, True])
@@ -1036,7 +1036,7 @@ def test_fail_data_dependency(testdir, cont_on_fail):
     # Both lines fail in a single error
     report = failed[0]
     assert " as nem\nUNEXPECTED EXCEPTION: ModuleNotFoundError" in report.longreprtext
-    assert ("something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext) == cont_on_fail
+    assert ("something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext) is cont_on_fail
 
 
 def test_ufunc(testdir):
