@@ -329,7 +329,9 @@ def pytest_configure(config):
             optionflags = get_optionflags(self) | FIX
 
             runner = DebugRunnerPlus(
-                verbose=False, optionflags=optionflags, checker=OutputChecker())
+                verbose=False, optionflags=optionflags, checker=OutputChecker(),
+                continue_on_failure=_get_continue_on_failure(self.config),
+            )
 
             parser = DocTestParserPlus()
             test = parser.get_doctest(text, globs, filepath, filename, 0)
