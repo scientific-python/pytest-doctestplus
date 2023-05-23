@@ -987,6 +987,58 @@ def test_skiptest(testdir):
     reprec.assertoutcome(skipped=1, failed=0)
 
 
+@pytest.mark.parametrize('cont_on_fail', [False, True])
+def test_fail_two_tests(testdir, cont_on_fail):
+    p = testdir.makepyfile(
+        """
+        class MyClass:
+            '''
+            .. doctest::
+
+                >>> print(2)
+                1
+
+            .. doctest::
+
+                >>> print(3)
+                1
+            '''
+            pass
+    """
+    )
+    arg = ("--doctest-continue-on-failure",) if cont_on_fail else ()
+    reprec = testdir.inline_run(p, "--doctest-plus", *arg)
+    reprec.assertoutcome(skipped=0, failed=1)
+    _, _, failed = reprec.listoutcomes()
+    report = failed[0]
+    assert "Expected:\n    1\nGot:\n    2" in report.longreprtext
+    assert ("Expected:\n    1\nGot:\n    3" in report.longreprtext) is cont_on_fail
+
+
+@pytest.mark.parametrize('cont_on_fail', [False, True])
+def test_fail_data_dependency(testdir, cont_on_fail):
+    p = testdir.makepyfile(
+        """
+        class MyClass:
+            '''
+            .. doctest::
+
+                >>> import nonexistentmodule as nem
+                >>> a = nem.calculate_something()
+            '''
+            pass
+    """
+    )
+    arg = ("--doctest-continue-on-failure",) if cont_on_fail else ()
+    reprec = testdir.inline_run(p, "--doctest-plus", *arg)
+    reprec.assertoutcome(skipped=0, failed=1)
+    _, _, failed = reprec.listoutcomes()
+    # Both lines fail in a single error
+    report = failed[0]
+    assert " as nem\nUNEXPECTED EXCEPTION: ModuleNotFoundError" in report.longreprtext
+    assert ("something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext) is cont_on_fail
+
+
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
 
