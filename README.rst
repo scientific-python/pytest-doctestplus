@@ -94,6 +94,12 @@ reason both ``--doctest-modules`` and ``--doctest-plus`` are given, the
 ``pytest-doctestplus`` plugin will be used, regardless of the contents of
 ``setup.cfg``.
 
+``pytest-doctestplus`` respects the ``--doctest-continue-on-failure`` flag.
+If set, doctests will report all failing lines, which may be useful to detect
+independent errors within the same doctest. However, it is likely to generate
+false positives when an early failure causes a variable later lines access to
+remain unset or have an unexpected value.
+
 This plugin respects the doctest options that are used by the built-in doctest
 plugin and are set in ``doctest_optionflags`` in ``setup.cfg``. By default,
 ``ELLIPSIS`` and ``NORMALIZE_WHITESPACE`` are used. For a description of all
