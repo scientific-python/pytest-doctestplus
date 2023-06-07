@@ -1142,3 +1142,26 @@ def test_ufunc(testdir):
 
     result = testdir.inline_run(build_dir, '--doctest-plus', '--doctest-modules', '--doctest-ufunc')
     result.assertoutcome(passed=2, failed=0)
+
+
+def test_norecursedirs(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        norecursedirs = \"bad_dir\"
+        doctestplus = enabled
+    """
+    )
+    subdir = testdir.mkdir("bad_dir")
+    badfile = subdir.join("test_foobar.py")
+    badfile.write_text("""
+        def f():
+            '''
+            >>> x = 1/3.
+            >>> x
+            0.333333
+            '''
+            fail
+    """, "utf-8")
+    reprec = testdir.inline_run(str(testdir), "--doctest-plus")
+    reprec.assertoutcome(failed=0, passed=0)
