@@ -1,7 +1,7 @@
 0.12.2 (unreleased)
 ===================
 
-- Compatibility with pytest 7.4 w.r.t. norecursedirs handling. [#201]
+- Compatibility with pytest 7.4 with respect to ``norecursedirs`` handling. [#201]
 
 - Respect ``--doctest-continue-on-failure`` flag. [#197]
 
