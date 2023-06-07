@@ -1142,3 +1142,26 @@ def test_ufunc(testdir):
 
     result = testdir.inline_run(build_dir, '--doctest-plus', '--doctest-modules', '--doctest-ufunc')
     result.assertoutcome(passed=2, failed=0)
+
+
+def test_norecursedirs(pytester):
+    pytester.makeini(
+        """
+        [pytest]
+        norecursedirs = \"bad_dir\"
+        doctestplus = enabled
+    """
+    )
+    subdir = pytester.mkdir("bad_dir")
+    with open(subdir / "test_foobar.py", "w") as fout:
+        fout.write("""
+        def f():
+            '''
+            >>> x = 1/3.
+            >>> x
+            0.333333
+            '''
+            fail
+    """)
+    reprec = pytester.inline_run(pytester.path, "--doctest-plus")
+    reprec.assertoutcome(failed=0, passed=0)
