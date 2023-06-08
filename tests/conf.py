@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'pytest-doctestplus'
-copyright = '2021, Astropy Infrastructure Team'
+copyright = '2011-2023, Astropy Infrastructure Team'
 author = 'Astropy Infrastructure Team'
 
 
