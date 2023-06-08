@@ -1,4 +1,4 @@
-Copyright (c) 2023, Scientific Python
+Copyright (c) 2023, Scientific Python Developers
 Copyright (c) 2011-2023, Astropy Developers
 
 All rights reserved.
