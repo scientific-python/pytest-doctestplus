@@ -554,7 +554,8 @@ class DoctestPlus(object):
                     self._ignore_paths.append(path)
                     break
 
-        # None = Let other plugins decide the outcome.
+        # Let other plugins decide the outcome.
+        return None
 
     def pytest_collect_file(self, path, parent):
         """Implements an enhanced version of the doctest module from py.test
