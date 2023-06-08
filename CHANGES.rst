@@ -1,4 +1,4 @@
-0.12.2 (unreleased)
+0.13.0 (2023-06-07)
 ===================
 
 - Compatibility with pytest 7.4 with respect to ``norecursedirs`` handling. [#201]
@@ -15,7 +15,7 @@
 0.12.0 (2022-02-25)
 ===================
 
-- Run doctests in docstrings of Numpy ufuncs. [#123, #174]
+- Run doctests in docstrings of Numpy ufuncs. [#174, #175]
 
 0.11.2 (2021-12-09)
 ===================
