@@ -6,8 +6,8 @@ pytest-doctestplus
    :target: https://zenodo.org/badge/latestdoi/104253824
    :alt: Zenodo DOI
 
-.. image:: https://github.com/astropy/pytest-doctestplus/workflows/Run%20unit%20tests/badge.svg
-    :target: https://github.com/astropy/pytest-doctestplus/actions
+.. image:: https://github.com/scientific-python/pytest-doctestplus/workflows/Run%20unit%20tests/badge.svg
+    :target: https://github.com/scientific-python/pytest-doctestplus/actions
     :alt: CI Status
 
 This package contains a plugin for the `pytest`_ framework that provides
@@ -56,7 +56,7 @@ The ``pytest-doctestplus`` plugin can be installed using ``pip``::
 It is also possible to install the latest development version from the source
 repository::
 
-    $ git clone https://github.com/astropy/pytest-doctestplus
+    $ git clone https://github.com/scientific-python/pytest-doctestplus
     $ cd pytest-doctestplus
     $ pip install .
 
@@ -366,7 +366,7 @@ Development Status
 
 Questions, bug reports, and feature requests can be submitted on `github`_.
 
-.. _github: https://github.com/astropy/pytest-doctestplus
+.. _github: https://github.com/scientific-python/pytest-doctestplus
 
 License
 -------
