@@ -13,13 +13,14 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+from datetime import datetime
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'pytest-doctestplus'
-copyright = '2011-2023, Astropy Infrastructure Team'
-author = 'Astropy Infrastructure Team'
+copyright = f'2023-{datetime.now().year}, Scientific Python Developers'
+author = 'Scientific Python Developers'
 
 
 # -- General configuration ---------------------------------------------------

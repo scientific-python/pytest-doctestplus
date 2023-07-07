@@ -42,13 +42,31 @@ jobs:
           - os: ubuntu-latest
             python-version: 3.9
             toxenv: py39-test-pytest62
-          - os: macos-latest
-            python-version: '3.11'
-            toxenv: py311-test-pytestdev
           - os: ubuntu-latest
             python-version: '3.10'
             toxenv: py310-test-pytest70
+          - os: ubuntu-latest
+            python-version: '3.10'
+            toxenv: py310-test-pytest71
+          - os: windows-latest
+            python-version: '3.11'
+            toxenv: py311-test-pytest72
+          - os: ubuntu-latest
+            python-version: '3.11'
+            toxenv: py311-test-pytest73
+          - os: ubuntu-latest
+            python-version: '3.11'
+            toxenv: py311-test-pytest74
             toxargs: --pre
+          - os: macos-latest
+            python-version: '3.11'
+            toxenv: py311-test-pytestdev
+          - os: windows-latest
+            python-version: '3.11'
+            toxenv: py311-test-pytestdev
+          - os: ubuntu-latest
+            python-version: '3.12-dev'
+            toxenv: py312-test-pytestdev
 
     steps:
     - uses: actions/checkout@v3
