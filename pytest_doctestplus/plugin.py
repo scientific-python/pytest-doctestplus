@@ -26,9 +26,10 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
 _pytest_version = Version(pytest.__version__)
 PYTEST_GT_5 = _pytest_version > Version('5.9.9')
 PYTEST_GE_5_4 = _pytest_version >= Version('5.4')
-PYTEST_GE_7_0 = any([_pytest_version.is_devrelease,
+PYTEST_GE_7_0 = _pytest_version >= Version('7.0')
+PYTEST_GE_8_0 = any([_pytest_version.is_devrelease,
                      _pytest_version.is_prerelease,
-                     _pytest_version >= Version('7.0')])
+                     _pytest_version >= Version('8.0')])
 
 comment_characters = {
     '.txt': '#',
@@ -507,7 +508,11 @@ class DoctestPlus(object):
         Skip paths that match any of the doctest_norecursedirs patterns or
         if doctest_only is True then skip all regular test files (eg test_*.py).
         """
-        if PYTEST_GE_7_0:
+        if PYTEST_GE_8_0:
+            dirpath = Path(path).parent
+            collect_ignore = config._getconftest_pathlist("collect_ignore",
+                                                          path=dirpath)
+        elif PYTEST_GE_7_0:
             dirpath = Path(path).parent
             collect_ignore = config._getconftest_pathlist("collect_ignore",
                                                           path=dirpath,
