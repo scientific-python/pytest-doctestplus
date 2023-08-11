@@ -673,6 +673,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
             if mod in cls._import_cache:
                 if not cls._import_cache[mod]:
                     return False
+                continue
 
             if cls._module_checker.check(mod):
                 cls._import_cache[mod] = True
@@ -712,12 +713,16 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
                 reqs = getattr(obj, '__doctest_requires__', {})
                 for pats, mods in reqs.items():
-                    if not isinstance(pats, tuple):
-                        pats = (pats,)
+                    if self.check_required_modules(mods):
+                        # All mods available, no need to probe
+                        continue
+
                     for pat in pats:
-                        if not fnmatch.fnmatch(test.name, '.'.join((name, pat))):
-                            continue
-                        if not self.check_required_modules(mods):
+                        if pat == '*':
+                            return False
+                        elif pat == '.' and test.name == name:
+                            return False
+                        elif fnmatch.fnmatch(test.name, '.'.join((name, pat))):
                             return False
                 return True
 
