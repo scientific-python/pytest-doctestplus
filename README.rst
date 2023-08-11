@@ -11,13 +11,10 @@ pytest-doctestplus
     :alt: CI Status
 
 This package contains a plugin for the `pytest`_ framework that provides
-advanced doctest support and enables the testing of `reStructuredText`_
-(".rst") files. It was originally part of the `astropy`_ core package, but has
-been moved to a separate package in order to be of more general use.
+advanced doctest support and enables the testing of various text files, such
+as reStructuredText (".rst"), markdown (".md"), and TeX (".tex").
 
 .. _pytest: https://pytest.org/en/latest/
-.. _astropy: https://astropy.org/
-.. _reStructuredText: https://en.wikipedia.org/wiki/ReStructuredText
 
 
 Motivation
@@ -44,7 +41,6 @@ providing the following features:
 * optional inclusion of ``*.rst`` files for doctests (see `Setup and Configuration`_)
 * optional inclusion of doctests in docstrings of Numpy ufuncs
 
-.. _pytest-remotedata: https://github.com/astropy/pytest-remotedata
 
 Installation
 ------------
@@ -331,7 +327,7 @@ marked:
 .. code-block:: python
 
     >>> from urlib.request import urlopen
-    >>> url = urlopen('http://astropy.org') # doctest: +REMOTE_DATA
+    >>> url = urlopen('http://astropy.org')  # doctest: +REMOTE_DATA
 
 The ``+REMOTE_DATA`` directive indicates that the marked statement should only
 be executed if the ``--remote-data`` option is given. By default, all
