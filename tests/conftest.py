@@ -8,7 +8,7 @@ import numpy as np
 
 # Keep this until we require numpy to be >=2.0 or there is a directive in doctestplus
 # to support multiple ways of repr
-if Version(np.__version__) > Version("2.0.0.dev0+151"):
+if Version(np.__version__) >= Version("2.0.dev"):
     np.set_printoptions(legacy="1.25")
 
 
