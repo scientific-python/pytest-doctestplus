@@ -1,6 +1,8 @@
 1.1.0 (unreleased)
 ==================
 
+- Versions of Python <3.8 are no longer supported. [#217]
+
 
 1.0.0 (2023-08-11)
 ==================

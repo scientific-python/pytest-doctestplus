@@ -204,7 +204,7 @@ def pytest_configure(config):
     use_rst = config.getini('doctest_rst') or config.option.doctest_rst
     file_ext = config.option.text_file_format or config.getini('text_file_format') or 'rst'
     if use_rst:
-        config.option.doctestglob.append('*.{}'.format(file_ext))
+        config.option.doctestglob.append(f'*.{file_ext}')
 
     # override default comment characters
     ext_comment_pairs = [pair.split('=') for pair in config.getini('text_file_comment_chars')]
@@ -394,7 +394,7 @@ def pytest_configure(config):
                     skip_next = False
                     lines = entry.strip().splitlines()
                     if any(re.match(
-                            '{} doctest-skip-all'.format(comment_char), x.strip()) for x in lines):
+                            f'{comment_char} doctest-skip-all', x.strip()) for x in lines):
                         skip_all = True
                         continue
 
@@ -405,7 +405,7 @@ def pytest_configure(config):
                     # special environment to be in between, e.g. \begin{python}
                     last_lines = lines[-2:]
                     matches = [re.match(
-                        r'{}\s+doctest-skip\s*::(\s+.*)?'.format(comment_char),
+                        fr'{comment_char}\s+doctest-skip\s*::(\s+.*)?',
                         last_line) for last_line in last_lines]
 
                     if len(matches) > 1:
@@ -423,7 +423,7 @@ def pytest_configure(config):
 
                     if config.getoption('remote_data', 'none') != 'any':
                         matches = (re.match(
-                            r'{}\s+doctest-remote-data\s*::'.format(comment_char),
+                            fr'{comment_char}\s+doctest-remote-data\s*::',
                             last_line) for last_line in last_lines)
 
                         if any(matches):
@@ -431,7 +431,7 @@ def pytest_configure(config):
                             continue
 
                     matches = [re.match(
-                        r'{}\s+doctest-requires\s*::\s+(.*)'.format(comment_char),
+                        fr'{comment_char}\s+doctest-requires\s*::\s+(.*)',
                         last_line) for last_line in last_lines]
 
                     if len(matches) > 1:
@@ -487,7 +487,7 @@ def pytest_configure(config):
     config.pluginmanager.unregister(doctest_plugin)
 
 
-class DoctestPlus(object):
+class DoctestPlus:
     def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
         """
         doctest_module_item_cls should be a class inheriting
