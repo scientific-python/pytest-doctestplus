@@ -8,8 +8,8 @@ on:
       - '*'
   workflow_dispatch:
   schedule:
-    # Run every Sunday at 03:53 UTC
-    - cron: 53 3 * * 0
+    # Run every Tuesday at 03:53 UTC
+    - cron: 53 3 * * 2
 
 jobs:
   tests:
