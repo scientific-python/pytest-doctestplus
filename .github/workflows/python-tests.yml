@@ -19,17 +19,17 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: 3.7
-            toxenv: py37-test-pytest46
+            python-version: 3.8
+            toxenv: py38-test-pytestoldest
           - os: windows-latest
-            python-version: 3.7
-            toxenv: py37-test-pytest50
+            python-version: 3.8
+            toxenv: py38-test-pytest50
           - os: macos-latest
-            python-version: 3.7
-            toxenv: py37-test-pytest51
+            python-version: 3.8
+            toxenv: py38-test-pytest51
           - os: ubuntu-latest
-            python-version: 3.7
-            toxenv: py37-test-pytest52
+            python-version: 3.8
+            toxenv: py38-test-pytest52
           - os: windows-latest
             python-version: 3.8
             toxenv: py38-test-pytest53
@@ -80,11 +80,3 @@ jobs:
       run: python -m pip install tox
     - name: Run Tox
       run: tox ${{ matrix.toxargs }} -v -e ${{ matrix.toxenv }}
-
-    # - name: Slack Notification
-    #   uses: 8398a7/action-slack@v3
-    #   with:
-    #     status: ${{ job.status }}
-    #   env:
-    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-    #   if: always() # TODO: cron
