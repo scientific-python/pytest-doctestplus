@@ -102,6 +102,23 @@ plugin and are set in ``doctest_optionflags`` in ``setup.cfg``. By default,
 doctest settings, see the `doctest documentation
 <https://docs.python.org/3/library/doctest.html#option-flags>`_.
 
+Running Tests in Markdown Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To run doctests in Markdown files, invoke pytest with the command line options
+``--doctest-plus --doctest-glob '*.md'``.
+
+If you write doctests inside `GitHub-style triple backtick fenced code blocks
+<https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#fenced-code-blocks>`_,
+then in order for pytest-doctest to find and run them you need to include an
+extra trailing newline inside your code blocks, like this::
+
+    ```pycon
+    >>> 1 + 2
+    2
+
+    ```
+
 Doctest Directives
 ~~~~~~~~~~~~~~~~~~
 
