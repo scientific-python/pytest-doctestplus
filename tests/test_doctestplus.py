@@ -593,6 +593,32 @@ def test_doctest_glob(testdir):
     ).assertoutcome(passed=1)
 
 
+@pytest.mark.xfail(reason='known issue, fenced code blocks require an extra trailing newline')
+def test_markdown_fenced_code(testdir):
+    testdir.makefile('.md', foo="""\
+```
+>>> 1 + 1
+2
+```
+""")
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', '*.md'
+    ).assertoutcome(passed=1)
+
+
+def test_markdown_fenced_code_with_extra_newline(testdir):
+    testdir.makefile('.md', foo="""\
+```
+>>> 1 + 1
+2
+
+```
+""")
+    testdir.inline_run(
+        '--doctest-plus', '--doctest-glob', '*.md'
+    ).assertoutcome(passed=1)
+
+
 def test_text_file_comments(testdir):
     testdir.makefile(
         '.md',
