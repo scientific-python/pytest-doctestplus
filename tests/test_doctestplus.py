@@ -3,6 +3,8 @@ import os
 from textwrap import dedent
 import sys
 
+from packaging.version import Version
+
 import pytest
 
 import doctest
@@ -10,6 +12,9 @@ from pytest_doctestplus.output_checker import OutputChecker, FLOAT_CMP
 
 
 pytest_plugins = ['pytester']
+
+
+PYTEST_LT_6 = Version(pytest.__version__) < Version('6.0.0')
 
 
 def test_ignored_whitespace(testdir):
@@ -795,20 +800,38 @@ def test_doctest_float_replacement(tmp_path):
     )
 
 
-def test_doctest_subpackage_requires(testdir, caplog):
-
-    # Note that each entry below has different whitespace around the = to
-    # make sure that all cases work properly.
-
-    testdir.makeini(
-        """
-        [pytest]
-        doctest_subpackage_requires =
-            test/a/* = pytest>1
-            test/b/*= pytest>1;averyfakepackage>99999.9
-            test/c/*=anotherfakepackage>=22000.1.2
+# Note that each entry under doctest_subpackage_requires has different whitespace
+# around the = to make sure that all cases work properly.
+SUBPACKAGE_REQUIRES_INI = (
+    "makeini",
     """
-    )
+    [pytest]
+    doctest_subpackage_requires =
+        test/a/* = pytest>1
+        test/b/*= pytest>1;averyfakepackage>99999.9
+        test/c/*=anotherfakepackage>=22000.1.2
+    """
+)
+SUBPACKAGE_REQUIRES_PYPROJECT = (
+    "makepyprojecttoml",
+    """
+    [tool.pytest.ini_options]
+    doctest_subpackage_requires = [
+        "test/a/* = pytest>1",
+        "test/b/*= pytest>1;averyfakepackage>99999.9",
+        "test/c/*=anotherfakepackage>=22000.1.2",
+    ]
+    """
+)
+
+
+@pytest.fixture()
+def subpackage_requires_testdir(testdir, request):
+    if request.param[0] == 'makepyprojecttoml' and PYTEST_LT_6:
+        return None, None
+
+    config_file = getattr(testdir, request.param[0])(request.param[1])
+
     test = testdir.mkdir('test')
     a = test.mkdir('a')
     b = test.mkdir('b')
@@ -827,7 +850,16 @@ def test_doctest_subpackage_requires(testdir, caplog):
     b.join('testcode.py').write(pyfile)
     c.join('testcode.py').write(pyfile)
 
-    reprec = testdir.inline_run(test, "--doctest-plus")
+    return config_file, testdir
+
+
+@pytest.mark.parametrize('subpackage_requires_testdir', [SUBPACKAGE_REQUIRES_INI, SUBPACKAGE_REQUIRES_PYPROJECT], indirect=True)
+def test_doctest_subpackage_requires(subpackage_requires_testdir, caplog):
+    config_file, testdir = subpackage_requires_testdir
+    if config_file is None:
+        pytest.skip("pyproject.toml not supported in pytest<6")
+
+    reprec = testdir.inline_run(str(testdir), f"-c={config_file}", "--doctest-plus")
     reprec.assertoutcome(passed=1)
     assert reprec.listoutcomes()[0][0].location[0] == os.path.join('test', 'a', 'testcode.py')
     assert caplog.text == ''
@@ -1168,6 +1200,88 @@ def test_ufunc(testdir):
 
     result = testdir.inline_run(build_dir, '--doctest-plus', '--doctest-modules', '--doctest-ufunc')
     result.assertoutcome(passed=2, failed=0)
+
+
+NORCURSEDIRS_INI = (
+    "makeini",
+    """
+    [pytest]
+    doctest_norecursedirs =
+        "bad_dir"
+        "*/bad_file.py"
+    """
+)
+NORCURSEDIRS_PYPROJECT = (
+    "makepyprojecttoml",
+    """
+    [tool.pytest.ini_options]
+    doctest_norecursedirs = [
+        "bad_dir",
+        "*/bad_file.py",
+    ]
+    """
+)
+
+
+@pytest.fixture()
+def norecursedirs_testdir(testdir, request):
+    if request.param[0] == 'makepyprojecttoml' and PYTEST_LT_6:
+        return None, None
+
+    config_file = getattr(testdir, request.param[0])(request.param[1])
+
+    bad_text = dedent("""
+        def f():
+            '''
+            This should fail doc testing
+            >>> 1
+            2
+            '''
+            pass
+    """)
+
+    good_text = dedent("""
+        def g():
+            '''
+            This should pass doc testing
+            >>> 1
+            1
+            '''
+            pass
+    """)
+
+    # Create a bad file that should be by its folder
+    bad_subdir = testdir.mkdir("bad_dir")
+    bad_file = bad_subdir.join("test_foobar.py")
+    bad_file.write_text(bad_text, "utf-8")
+
+    # Create a bad file that should be skipped by its name
+    okay_subdir1 = testdir.mkdir("okay_foo_dir")
+    bad_file = okay_subdir1.join("bad_file.py")
+    bad_file.write_text(bad_text, "utf-8")  
+    # Create a good file in that directory that doctest won't skip
+    good_file1 = okay_subdir1.join("good_file1.py")
+    good_file1.write_text(good_text, "utf-8")
+
+    # Create another bad file that should be skipped by its name
+    okay_subdir2 = testdir.mkdir("okay_bar_dir")
+    bad_file = okay_subdir2.join("bad_file.py")
+    bad_file.write_text(bad_text, "utf-8")  
+    # Create a good file in that directory that doctest won't skip
+    good_file2 = okay_subdir2.join("good_file2.py")
+    good_file2.write_text(good_text, "utf-8")
+
+    return config_file, testdir
+
+
+@pytest.mark.parametrize('norecursedirs_testdir', [NORCURSEDIRS_INI, NORCURSEDIRS_PYPROJECT], indirect=True)
+def test_doctest_norecursedirs(norecursedirs_testdir):
+    config_file, testdir = norecursedirs_testdir
+    if config_file is None:
+        pytest.skip("pyproject.toml not supported in pytest<6")
+
+    reprec = testdir.inline_run(str(testdir), f"-c={config_file}", "--doctest-plus")
+    reprec.assertoutcome(passed=2)
 
 
 def test_norecursedirs(testdir):
