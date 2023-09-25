@@ -43,8 +43,6 @@ class OutputChecker(doctest.OutputChecker):
     rtol = 1e-05
     atol = 1e-08
 
-    _original_output_checker = doctest.OutputChecker
-
     _str_literal_re = re.compile(
         r"(\W|^)[uU]([rR]?[\'\"])", re.UNICODE)
     _byteorder_re = re.compile(
@@ -281,19 +279,13 @@ class OutputChecker(doctest.OutputChecker):
         if flags & FLOAT_CMP:
             return self.normalize_floats(want, got, flags)
 
-        # Can't use super here because doctest.OutputChecker is not a
-        # new-style class.
-        return self._original_output_checker.check_output(
-            self, want, got, flags)
+        return super().check_output(want, got, flags)
 
     def output_difference(self, want, got, flags):
         if flags & FIX:
             want, got = self.do_fixes(want, got)
 
-        # Can't use super here because doctest.OutputChecker is not a
-        # new-style class.
-        return self._original_output_checker.output_difference(
-            self, want, got, flags)
+        return super().output_difference(want, got, flags)
 
 
 try:
