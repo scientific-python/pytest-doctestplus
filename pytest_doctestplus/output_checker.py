@@ -53,9 +53,6 @@ class OutputChecker(doctest.OutputChecker):
         r"([0-9]+)L", re.UNICODE)
 
     def __init__(self):
-        # NOTE OutputChecker is an old-style class with no __init__ method,
-        # so we can't call the base class version of __init__ here
-
         exp = r'(?:e[+-]?\d+)'
 
         got_floats = (r'\s*([+-]?\d+\.\d*{0}?|'
@@ -77,6 +74,10 @@ class OutputChecker(doctest.OutputChecker):
         fbeg = r'^{}(?={}|$)'.format(want_floats, back_sep)
         fmidend = r'(?<={}){}(?={}|$)'.format(front_sep, want_floats, back_sep)
         self.num_want_rgx = re.compile(r'({}|{})'.format(fbeg, fmidend))
+
+        # As of 2023-09-26, Python base class has no init, but just in case
+        # it acquires one.
+        super().__init__()
 
     def do_fixes(self, want, got):
         want = re.sub(self._str_literal_re, r'\1\2', want)
