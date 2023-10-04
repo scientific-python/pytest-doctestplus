@@ -65,11 +65,11 @@ jobs:
             python-version: '3.11'
             toxenv: py311-test-pytestdev
           - os: ubuntu-latest
-            python-version: '3.12-dev'
+            python-version: '3.12'
             toxenv: py312-test-pytestdev
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
