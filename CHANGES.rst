@@ -1,6 +1,8 @@
 1.1.0 (unreleased)
 ==================
 
+- Fix module level ``__doctest_requires__``. [#228]
+
 - Versions of Python <3.8 are no longer supported. [#217]
 
 
