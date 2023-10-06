@@ -878,7 +878,7 @@ class DebugRunnerPlus(doctest.DebugRunner):
     _changesets = defaultdict(lambda: [])
     _generate_diff = False
 
-    def __init__(self, checker=None, verbose=None, optionflags=0, continue_on_failure=True, generate_diff=None):
+    def __init__(self, checker=None, verbose=None, optionflags=0, continue_on_failure=True, generate_diff=False):
         # generated_diff is False, "diff", or "inplace" (only need truthiness)
         DebugRunnerPlus._generate_diff = generate_diff
 
@@ -924,13 +924,13 @@ class DebugRunnerPlus(doctest.DebugRunner):
         self._changesets[filename].append(info)
 
     def report_success(self, out, test, example, got):
-        if self._generate_diff is None:
-            return super().report_success(out, test, example, got)
+        if self._generate_diff:
+            return self.track_diff(True, out, test, example, got)
 
-        return self.track_diff(True, out, test, example, got)
+        return super().report_success(out, test, example, got)
 
     def report_failure(self, out, test, example, got):
-        if self._generate_diff is None:
-            return super().report_success(out, test, example, got)
+        if self._generate_diff:
+            self.track_diff(False, out, test, example, got)
 
-        return self.track_diff(False, out, test, example, got)
+        return super().report_failure(out, test, example, got)
