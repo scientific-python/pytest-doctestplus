@@ -800,6 +800,8 @@ def write_modified_file(fname, new_fname, changes):
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     changesets = DebugRunnerPlus._changesets
     diff_mode = DebugRunnerPlus._generate_diff
+    DebugRunnerPlus._changesets = defaultdict(lambda: [])
+    DebugRunnerPlus._generate_diff = None
     all_bad_tests = []
     if not diff_mode:
         return  # we do not report or apply diffs
