@@ -381,42 +381,44 @@ running the doctests with sphinx is not supported. To do this, add
 Fixing Existing Docstrings
 --------------------------
 The plugin has basic support to fix docstrings, this can be enabled by
-running `pytest` with `--doctest-plus-generate-diff`.
+running ``pytest`` with ``--doctest-plus-generate-diff``.
 Without further options, this will print out a diff and a list of files that
-would be modified.  Using `--doctest-plus-generate-diff=overwrite` will
+would be modified.  Using ``--doctest-plus-generate-diff=overwrite`` will
 modify the files in-place, so it is recommended to run the check first to
 verify the paths.
-You may wish to use e.g. `git commit -p` to review changes manually.
+You may wish to use e.g. ``git commit -p`` to review changes manually.
 
 The current diff generation is not very smart, so it does not account for
-existing `...`.  By default a diff is only generated for *failing* doctests.
+existing ``...``.  By default a diff is only generated for *failing* doctests.
 
 In general, a mass edit may wish to focus on a specific change and
 possibly include passing tests.  So you can hook into the behavior by
-adding a hook to your `conftest.py`:
-```python
-@pytest.hookimpl
-def pytest_doctestplus_diffhook(info):
-    info["use"] = True  # Overwrite all results (even successes)
-    if info["fileno"] is None:
-        # E.g. NumPy has C docstrings that cannot be found, we can add custom
-        # logic here to try and find these:
-        info["filename"] = ...
-        info["lineno"] = ...
-```
-Where `info` is a dictionary containing the following items:
-* `use`: `True` or `False` signalling whether to apply the diff.  This is
-  set to `False` if a doctest succeeded and `True` if the doctest failed.
-* `name`: The name of the test (e.g. the function being documented)
-* `filename`: The file that contains the test (this can be wrong in certain
-  situation and in that case `test_lineno` will be wrong as well).
-* `source`: The source code that was executed for this test
-* `test_lineno`: The line of code where the example block (or function) starts.
-  In some cases, the test file cannot be found and the lineno will be `None`,
+adding a hook to your ``conftest.py``::
+
+    @pytest.hookimpl
+    def pytest_doctestplus_diffhook(info):
+        info["use"] = True  # Overwrite all results (even successes)
+        if info["fileno"] is None:
+            # E.g. NumPy has C docstrings that cannot be found, we can add
+            # custom logic here to try and find these:
+            info["filename"] = ...
+            info["lineno"] = ...
+
+Where ``info`` is a dictionary containing the following items:
+
+* ``use``: ``True`` or ``False`` signalling whether to apply the diff.  This is
+  set to ``False`` if a doctest succeeded and ``True`` if the doctest failed.
+* ``name``: The name of the test (e.g. the function being documented)
+* ``filename``: The file that contains the test (this can be wrong in certain
+  situation and in that case ``test_lineno`` will be wrong as well).
+* ``source``: The source code that was executed for this test
+* ``test_lineno``: The line of code where the example block (or function) starts.
+  In some cases, the test file cannot be found and the lineno will be ``None``,
   you can manually try to fix these.
-* `example_lineno`: The line number of the example snippet (individual `>>>`).
-* `want`: The current documentation.
-* `got`: The result of executing the example.
+* ``example_lineno``: The line number of the example snippet
+  (individual ``>>>``).
+* ``want``: The current documentation.
+* ``got``: The result of executing the example.
 
 You can modify the dictionary in-place to modify the behavior.
 
