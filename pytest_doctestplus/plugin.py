@@ -208,6 +208,8 @@ def _is_numpy_ufunc(method):
 def pytest_configure(config):
     doctest_plugin = config.pluginmanager.getplugin('doctest')
     run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
+    if config.option.doctest_plus_generate_diff:
+        config.option.doctest_only = True
     use_doctest_plus = config.getini(
         'doctest_plus') or config.option.doctest_plus or config.option.doctest_only
     use_doctest_ufunc = config.getini(
@@ -890,13 +892,15 @@ class DebugRunnerPlus(doctest.DebugRunner):
 
     def report_success(self, out, test, example, got):
         if self._generate_diff:
-            return self.track_diff(True, out, test, example, got)
+            self.track_diff(False, out, test, example, got)
+            return
 
         return super().report_success(out, test, example, got)
 
     def report_failure(self, out, test, example, got):
         if self._generate_diff:
-            self.track_diff(False, out, test, example, got)
+            self.track_diff(True, out, test, example, got)
+            return
 
         failure = doctest.DocTestFailure(test, example, got)
         if self.continue_on_failure:
