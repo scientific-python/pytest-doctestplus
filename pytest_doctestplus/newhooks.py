@@ -1,5 +1,4 @@
-# Copyright (c) 2023, Scientific Python Developers, NVIDIA see LICENSE.rst
-# SPDX-License-Identifier: BSD-3-Clause
+# Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 
 def pytest_doctestplus_diffhook(info):
