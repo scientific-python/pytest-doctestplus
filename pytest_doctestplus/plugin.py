@@ -124,16 +124,18 @@ def pytest_addoption(parser):
                      help="Test only doctests. Implies usage of doctest-plus.")
 
     parser.addoption("--doctest-plus-generate-diff",
-                  help="Generate a diff for where expected output and real output "
-                  "differ.  The diff is printed to stdout if not using "
-                  "`--doctest-plus-generate-diff=overwrite` which causes editing of "
-                  "the original files.\n"
-                  "NOTE: Unless an in-pace build is picked "
-                  "up, python file paths may point to unexpected places. "
-                  "If inplace is not used, will create a temporary folder and "
-                  "use `git diff -p` to generate a diff.",
-                  choices=["diff", "overwrite"],
-                  action="store", nargs="?", default=False, const="diff")
+                     help=(
+                         "Generate a diff for where expected output and real "
+                         "output differ.  "
+                         "The diff is printed to stdout if not using "
+                         "`--doctest-plus-generate-diff=overwrite` which "
+                         "causes editing of the original files.\n"
+                         "NOTE: Unless an in-pace build is picked up, python "
+                         "file paths may point to unexpected places. "
+                         "If inplace is not used, will create a temporary "
+                         "folder and use `git diff -p` to generate a diff."),
+                     choices=["diff", "overwrite"],
+                     action="store", nargs="?", default=False, const="diff")
 
     parser.addini("text_file_format",
                   "Default format for docs. "
@@ -178,7 +180,7 @@ def pytest_addoption(parser):
 
 def pytest_addhooks(pluginmanager):
     from pytest_doctestplus import newhooks
-    method = pluginmanager.add_hookspecs(newhooks)
+    pluginmanager.add_hookspecs(newhooks)
 
 
 def get_optionflags(parent):
@@ -767,7 +769,7 @@ def write_modified_file(fname, new_fname, changes):
     # Sort in reversed order to edit the lines:
     bad_tests = []
     changes.sort(key=lambda x: (x["test_lineno"], x["example_lineno"]),
-                    reverse=True)
+                 reverse=True)
 
     with open(fname, "r") as f:
         text = f.readlines()
@@ -878,14 +880,24 @@ class DebugRunnerPlus(doctest.DebugRunner):
     _changesets = defaultdict(lambda: [])
     _generate_diff = False
 
-    def __init__(self, checker=None, verbose=None, optionflags=0, continue_on_failure=True, generate_diff=False):
+    def __init__(self, checker=None, verbose=None, optionflags=0,
+                 continue_on_failure=True, generate_diff=False):
         # generated_diff is False, "diff", or "inplace" (only need truthiness)
         DebugRunnerPlus._generate_diff = generate_diff
 
         super().__init__(checker=checker, verbose=verbose, optionflags=optionflags)
         self.continue_on_failure = continue_on_failure
 
+    def report_success(self, out, test, example, got):
+        if self._generate_diff:
+            return self.track_diff(True, out, test, example, got)
+
+        return super().report_success(out, test, example, got)
+
     def report_failure(self, out, test, example, got):
+        if self._generate_diff:
+            self.track_diff(False, out, test, example, got)
+
         failure = doctest.DocTestFailure(test, example, got)
         if self.continue_on_failure:
             out.append(failure)
@@ -913,24 +925,5 @@ class DebugRunnerPlus(doctest.DebugRunner):
         doctestplus_diffhook(info=info)
         if not info["use"]:
             return
-        name = info["name"]
-        filename = info["filename"]
-        source = info["source"]
-        test_lineno = info["test_lineno"]
-        example_lineno = info["example_lineno"]
-        want = info["want"]
-        got = info["got"]
 
-        self._changesets[filename].append(info)
-
-    def report_success(self, out, test, example, got):
-        if self._generate_diff:
-            return self.track_diff(True, out, test, example, got)
-
-        return super().report_success(out, test, example, got)
-
-    def report_failure(self, out, test, example, got):
-        if self._generate_diff:
-            self.track_diff(False, out, test, example, got)
-
-        return super().report_failure(out, test, example, got)
+        self._changesets[info["filename"]].append(info)
