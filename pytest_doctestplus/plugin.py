@@ -713,16 +713,20 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
                 reqs = getattr(obj, '__doctest_requires__', {})
                 for pats, mods in reqs.items():
-                    if self.check_required_modules(mods):
-                        # All mods available, no need to probe
-                        continue
+                    if not isinstance(pats, tuple):
+                        pats = (pats,)
 
                     for pat in pats:
                         if pat == '*':
-                            return False
+                            pass
                         elif pat == '.' and test.name == name:
-                            return False
+                            pass
                         elif fnmatch.fnmatch(test.name, '.'.join((name, pat))):
+                            pass
+                        else:
+                            continue  # The pattern does not apply
+
+                        if not self.check_required_modules(mods):
                             return False
                 return True
 
