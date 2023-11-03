@@ -1097,6 +1097,24 @@ def test_fail_data_dependency(testdir, cont_on_fail):
     assert ("something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext) is cont_on_fail
 
 
+def test_main(testdir):
+    pkg = testdir.mkdir('pkg')
+    code = dedent(
+        '''
+        def f():
+            raise RuntimeError("This is a CLI, do not execute module while doctesting")
+        
+        f()
+        '''
+    )
+    pkg.join('__init__.py').write_text("", "utf-8")
+    main_path = pkg.join('__main__.py')
+    main_path.write_text(code, "utf-8")
+
+    testdir.inline_run(pkg).assertoutcome(passed=0)
+    testdir.inline_run(pkg, '--doctest-plus').assertoutcome(passed=0)
+
+
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
 
