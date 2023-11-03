@@ -865,7 +865,12 @@ def test_doctest_subpackage_requires(subpackage_requires_testdir, caplog):
     assert caplog.text == ''
 
 
-def test_import_mode(testdir):
+@pytest.mark.parametrize(('import_mode', 'expected'), [
+    pytest.param('importlib', dict(passed=2), marks=pytest.mark.skipif(PYTEST_LT_6, reason="importlib import mode not supported on Pytest <6"), id="importlib"),
+    pytest.param('append', dict(failed=1), id="append"),
+    pytest.param('prepend', dict(failed=1), id="prepend"),
+])
+def test_import_mode(testdir, import_mode, expected):
     """Test that two files with the same name but in different folders work with --import-mode=importlib."""
     a = testdir.mkdir('a')
     b = testdir.mkdir('b')
@@ -881,10 +886,8 @@ def test_import_mode(testdir):
     a.join('testcode.py').write(pyfile)
     b.join('testcode.py').write(pyfile)
 
-    mismatch = testdir.inline_run(str(testdir), "--doctest-plus", "--import-mode=prepend")
-    mismatch.assertoutcome(failed=1)
-    works = testdir.inline_run(str(testdir), "--doctest-plus", "--import-mode=importlib")
-    works.assertoutcome(passed=2)
+    reprec = testdir.inline_run(str(testdir), "--doctest-plus", f"--import-mode={import_mode}")
+    reprec.assertoutcome(**expected)
 
 
 def test_doctest_skip(testdir):
