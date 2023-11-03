@@ -865,6 +865,28 @@ def test_doctest_subpackage_requires(subpackage_requires_testdir, caplog):
     assert caplog.text == ''
 
 
+def test_import_mode(testdir):
+    """Test that two files with the same name but in different folders work with --import-mode=importlib."""
+    a = testdir.mkdir('a')
+    b = testdir.mkdir('b')
+
+    pyfile = dedent("""
+        def f():
+            '''
+            >>> 1
+            1
+            '''
+    """)
+
+    a.join('testcode.py').write(pyfile)
+    b.join('testcode.py').write(pyfile)
+
+    mismatch = testdir.inline_run(str(testdir), "--doctest-plus", "--import-mode=prepend")
+    mismatch.assertoutcome(failed=1)
+    works = testdir.inline_run(str(testdir), "--doctest-plus", "--import-mode=importlib")
+    works.assertoutcome(passed=2)
+
+
 def test_doctest_skip(testdir):
     testdir.makeini(
         """
