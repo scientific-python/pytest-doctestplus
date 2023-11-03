@@ -228,7 +228,7 @@ def pytest_configure(config):
                 fspath = self.fspath
                 filepath = self.fspath.basename
 
-            if filepath in {"setup.py", "__main__.py"}:
+            if filepath in ("setup.py", "__main__.py"):
                 return
             elif filepath == "conftest.py":
                 if PYTEST_GE_7_0:
