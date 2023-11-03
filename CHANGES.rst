@@ -7,6 +7,8 @@
 
 - Fix erroneous attempt to import ``__main__.py`` by skipping it [#232]
 
+- Support ``--import-mode`` [#233]
+
 
 1.0.0 (2023-08-11)
 ==================
