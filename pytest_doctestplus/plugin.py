@@ -245,11 +245,12 @@ def pytest_configure(config):
                 try:
                     if PYTEST_GT_5:
                         from _pytest.pathlib import import_path
+                        mode = self.config.getoption("importmode")
 
                     if PYTEST_GE_7_0:
-                        module = import_path(fspath, root=self.config.rootpath)
+                        module = import_path(fspath, mode=mode, root=self.config.rootpath)
                     elif PYTEST_GT_5:
-                        module = import_path(fspath)
+                        module = import_path(fspath, mode=mode)
                     else:
                         module = fspath.pyimport()
                 except ImportError:

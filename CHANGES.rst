@@ -5,7 +5,9 @@
 
 - Versions of Python <3.8 are no longer supported. [#217]
 
-- Fix erroneous attempt to import ``__main__.py`` by skipping it [#232]
+- Fix erroneous attempt to import ``__main__.py`` by skipping it. [#232]
+
+- Respect pytest ``--import-mode``. [#233]
 
 
 1.0.0 (2023-08-11)
