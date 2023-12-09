@@ -132,7 +132,7 @@ def pytest_addoption(parser):
                          "causes editing of the original files.\n"
                          "NOTE: Unless an in-pace build is picked up, python "
                          "file paths may point to unexpected places. "
-                         "If `"overwrite"` is not used, will create a temporary "
+                         "If 'overwrite' is not used, will create a temporary "
                          "folder and use `git diff -p` to generate a diff."),
                      choices=["diff", "overwrite"],
                      action="store", nargs="?", default=False, const="diff")
