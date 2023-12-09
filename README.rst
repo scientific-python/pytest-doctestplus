@@ -41,8 +41,8 @@ providing the following features:
 * optional inclusion of ``*.rst`` files for doctests (see `Setup and Configuration`_)
 * optional inclusion of doctests in docstrings of Numpy ufuncs
 
-Further, `pytest-doctestplus` supports editing files to fix incorrect docstrings
-(See `Fixing Existing Docstrings`).
+Further, ``pytest-doctestplus`` supports editing files to fix incorrect docstrings
+(See `Fixing Existing Docstrings`_).
 
 .. _pytest-remotedata: https://github.com/astropy/pytest-remotedata
 
@@ -386,13 +386,13 @@ Without further options, this will print out a diff and a list of files that
 would be modified.  Using ``--doctest-plus-generate-diff=overwrite`` will
 modify the files in-place, so it is recommended to run the check first to
 verify the paths.
-You may wish to use e.g. ``git commit -p`` to review changes manually.
+You may wish to review changes manually and only commit some patches e.g. using ``git commit --patch``.
 
-The current diff generation is not very smart, so it does not account for
+The current diff generation is still very basic, for example, it does not account for
 existing ``...``.  By default a diff is only generated for *failing* doctests.
 
 In general, a mass edit may wish to focus on a specific change and
-possibly include passing tests.  So you can hook into the behavior by
+possibly include passing tests.  So you can opt-in into the behavior by
 adding a hook to your ``conftest.py``::
 
     @pytest.hookimpl

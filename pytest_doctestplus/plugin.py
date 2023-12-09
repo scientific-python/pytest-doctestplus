@@ -125,14 +125,14 @@ def pytest_addoption(parser):
 
     parser.addoption("--doctest-plus-generate-diff",
                      help=(
-                         "Generate a diff for where expected output and real "
+                         "Generate a diff where expected output and actual "
                          "output differ.  "
                          "The diff is printed to stdout if not using "
                          "`--doctest-plus-generate-diff=overwrite` which "
                          "causes editing of the original files.\n"
                          "NOTE: Unless an in-pace build is picked up, python "
                          "file paths may point to unexpected places. "
-                         "If inplace is not used, will create a temporary "
+                         "If `"overwrite"` is not used, will create a temporary "
                          "folder and use `git diff -p` to generate a diff."),
                      choices=["diff", "overwrite"],
                      action="store", nargs="?", default=False, const="diff")
@@ -886,7 +886,7 @@ class DebugRunnerPlus(doctest.DebugRunner):
 
     def __init__(self, checker=None, verbose=None, optionflags=0,
                  continue_on_failure=True, generate_diff=False):
-        # generated_diff is False, "diff", or "inplace" (only need truthiness)
+        # generated_diff is False, "diff", or "overwrite" (only need truthiness)
         DebugRunnerPlus._generate_diff = generate_diff
 
         super().__init__(checker=checker, verbose=verbose, optionflags=optionflags)
