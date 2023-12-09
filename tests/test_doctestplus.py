@@ -1348,3 +1348,39 @@ def test_norecursedirs(testdir):
     """, "utf-8")
     reprec = testdir.inline_run(str(testdir), "--doctest-plus")
     reprec.assertoutcome(failed=0, passed=0)
+
+
+def test_generate_diff_basic(testdir, capsys):
+    p = testdir.makepyfile("""
+        def f():
+            '''
+            >>> print(2)
+            4
+            >>> print(3)
+            5
+            '''
+            pass
+        """)
+    with open(p) as f:
+        original = f.read()
+
+    testdir.inline_run(p, "--doctest-plus-generate-diff")
+    diff = dedent("""
+         >>> print(2)
+    -    4
+    +    2
+         >>> print(3)
+    -    5
+    +    3
+    """)
+    captured = capsys.readouterr()
+    assert diff in captured.out
+
+    testdir.inline_run(p, "--doctest-plus-generate-diff=overwrite")
+    captured = capsys.readouterr()
+    assert "Applied fix to the following files" in captured.out
+
+    with open(p) as f:
+        result = f.read()
+
+    assert result == original.replace("4", "2").replace("5", "3")

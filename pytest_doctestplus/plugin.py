@@ -1,4 +1,5 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+
 """
 This plugin provides advanced doctest support and enables the testing of .rst
 files.
@@ -8,8 +9,11 @@ import fnmatch
 import os
 import re
 import sys
+import tempfile
 import warnings
+from collections import defaultdict
 from pathlib import Path
+import subprocess
 from textwrap import indent
 from unittest import SkipTest
 
@@ -119,6 +123,20 @@ def pytest_addoption(parser):
     parser.addoption("--doctest-only", action="store_true",
                      help="Test only doctests. Implies usage of doctest-plus.")
 
+    parser.addoption("--doctest-plus-generate-diff",
+                     help=(
+                         "Generate a diff where expected output and actual "
+                         "output differ.  "
+                         "The diff is printed to stdout if not using "
+                         "`--doctest-plus-generate-diff=overwrite` which "
+                         "causes editing of the original files.\n"
+                         "NOTE: Unless an in-pace build is picked up, python "
+                         "file paths may point to unexpected places. "
+                         "If 'overwrite' is not used, will create a temporary "
+                         "folder and use `git diff -p` to generate a diff."),
+                     choices=["diff", "overwrite"],
+                     action="store", nargs="?", default=False, const="diff")
+
     parser.addini("text_file_format",
                   "Default format for docs. "
                   "This is no longer recommended, use --doctest-glob instead.")
@@ -160,6 +178,11 @@ def pytest_addoption(parser):
                   default=[])
 
 
+def pytest_addhooks(pluginmanager):
+    from pytest_doctestplus import newhooks
+    pluginmanager.add_hookspecs(newhooks)
+
+
 def get_optionflags(parent):
     optionflags_str = parent.config.getini('doctest_optionflags')
     flag_int = 0
@@ -185,6 +208,8 @@ def _is_numpy_ufunc(method):
 def pytest_configure(config):
     doctest_plugin = config.pluginmanager.getplugin('doctest')
     run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
+    if config.option.doctest_plus_generate_diff:
+        config.option.doctest_only = True
     use_doctest_plus = config.getini(
         'doctest_plus') or config.option.doctest_plus or config.option.doctest_only
     use_doctest_ufunc = config.getini(
@@ -210,6 +235,10 @@ def pytest_configure(config):
     ext_comment_pairs = [pair.split('=') for pair in config.getini('text_file_comment_chars')]
     for ext, chars in ext_comment_pairs:
         comment_characters[ext] = chars
+
+    # Fetch the global hook function:
+    global doctestplus_diffhook
+    doctestplus_diffhook = config.hook.pytest_doctestplus_diffhook
 
     class DocTestModulePlus(doctest_plugin.DoctestModule):
         # pytest 2.4.0 defines "collect".  Prior to that, it defined
@@ -269,6 +298,7 @@ def pytest_configure(config):
                 checker=OutputChecker(),
                 # Helper disables continue-on-failure when debugging is enabled
                 continue_on_failure=_get_continue_on_failure(config),
+                generate_diff=config.option.doctest_plus_generate_diff,
             )
 
             for test in finder.find(module):
@@ -333,6 +363,7 @@ def pytest_configure(config):
             runner = DebugRunnerPlus(
                 verbose=False, optionflags=optionflags, checker=OutputChecker(),
                 continue_on_failure=_get_continue_on_failure(self.config),
+                generate_diff=self.config.option.doctest_plus_generate_diff,
             )
 
             parser = DocTestParserPlus()
@@ -736,12 +767,143 @@ class DocTestFinderPlus(doctest.DocTestFinder):
         return tests
 
 
+def write_modified_file(fname, new_fname, changes):
+    # Sort in reversed order to edit the lines:
+    bad_tests = []
+    changes.sort(key=lambda x: (x["test_lineno"], x["example_lineno"]),
+                 reverse=True)
+
+    with open(fname, "r") as f:
+        text = f.readlines()
+
+    for change in changes:
+        if change["test_lineno"] is None:
+            bad_tests.append(change["name"])
+            continue
+        lineno = change["test_lineno"] + change["example_lineno"] + 1
+
+        indentation = " " * change["nindent"]
+        want = indent(change["want"], indentation, lambda x: True)
+        # Replace fully blank lines with the required `<BLANKLINE>`
+        # (May need to do this also if line contains only whitespace)
+        got = change["got"].replace("\n\n", "\n<BLANKLINE>\n")
+        got = indent(got, indentation, lambda x: True)
+
+        text[lineno:lineno+want.count("\n")] = [got]
+
+    with open(new_fname, "w") as f:
+        f.write("".join(text))
+
+    return bad_tests
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    changesets = DebugRunnerPlus._changesets
+    diff_mode = DebugRunnerPlus._generate_diff
+    DebugRunnerPlus._changesets = defaultdict(lambda: [])
+    DebugRunnerPlus._generate_diff = None
+    all_bad_tests = []
+    if not diff_mode:
+        return  # we do not report or apply diffs
+
+    if diff_mode != "overwrite":
+        # In this mode, we write a corrected file to a temporary folder in
+        # order to compare them (rather than modifying the file).
+        terminalreporter.section("Reporting DoctestPlus Diffs")
+        if not changesets:
+            terminalreporter.write_line("No doc changes to show")
+            return
+
+        # Strip away the common part of the path to make it a bit clearner...
+        common_path = os.path.commonpath(changesets.keys())
+        if not os.path.isdir(common_path):
+            common_path = os.path.split(common_path)[0]
+
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            for fname, changes in changesets.items():
+                # Create a new filename and ensure the path exists (in the
+                # temporary directory).
+                new_fname = fname.replace(common_path, tmpdirname)
+                os.makedirs(os.path.split(new_fname)[0], exist_ok=True)
+
+                bad_tests = write_modified_file(fname, new_fname, changes)
+                all_bad_tests.extend(bad_tests)
+
+                # git diff returns 1 to signal changes, so just ignore the
+                # exit status:
+                with subprocess.Popen(
+                        ["git", "diff", "-p", "--no-index", fname, new_fname],
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
+                    p.wait()
+                    # Diff should be fine, but write error if not:
+                    diff = p.stderr.read()
+                    diff += p.stdout.read()
+
+                    # hide the temporary directory (cleaning up anyway):
+                    if not os.path.isabs(common_path):
+                        diff = diff.replace(tmpdirname, "/" + common_path)
+                    else:
+                        # diff seems to not include extra /
+                        diff = diff.replace(tmpdirname, common_path)
+                    terminalreporter.write(diff)
+                    terminalreporter.write_line(f"{tmpdirname}, {common_path}")
+
+                terminalreporter.section("Files with modifications", "-")
+                terminalreporter.write_line(
+                    "The following files would be overwritten with "
+                    "`--doctest-plus-generate-diff=overwrite`:")
+                for fname in changesets:
+                    terminalreporter.write_line(f"    {fname}")
+                terminalreporter.write_line(
+                    "make sure these file paths are correct before calling it!")
+    else:
+        # We are in overwrite mode so will write the modified version directly
+        # back into the same file and only report which files were changed.
+        terminalreporter.section("DoctestPlus Fixing File Docs")
+        if not changesets:
+            terminalreporter.write_line("No doc changes to apply")
+            return
+        terminalreporter.write_line("Applied fix to the following files:")
+        for fname, changes in changesets.items():
+            bad_tests = write_modified_file(fname, fname, changes)
+            all_bad_tests.extend(bad_tests)
+            terminalreporter.write_line(f"    {fname}")
+
+    if all_bad_tests:
+        terminalreporter.section("Broken Linenumbers", "-")
+        terminalreporter.write_line(
+            "Doctestplus was unable to fix the following tests "
+            "(their source is hidden or `__module__` overridden?)")
+        for bad_test in all_bad_tests:
+            terminalreporter.write_line(f"    {bad_test}")
+        terminalreporter.write_line(
+            "You can implementing a hook function to fix this (see README).")
+
+
 class DebugRunnerPlus(doctest.DebugRunner):
-    def __init__(self, checker=None, verbose=None, optionflags=0, continue_on_failure=True):
+    _changesets = defaultdict(lambda: [])
+    _generate_diff = False
+
+    def __init__(self, checker=None, verbose=None, optionflags=0,
+                 continue_on_failure=True, generate_diff=False):
+        # generated_diff is False, "diff", or "overwrite" (only need truthiness)
+        DebugRunnerPlus._generate_diff = generate_diff
+
         super().__init__(checker=checker, verbose=verbose, optionflags=optionflags)
         self.continue_on_failure = continue_on_failure
 
+    def report_success(self, out, test, example, got):
+        if self._generate_diff:
+            self.track_diff(False, out, test, example, got)
+            return
+
+        return super().report_success(out, test, example, got)
+
     def report_failure(self, out, test, example, got):
+        if self._generate_diff:
+            self.track_diff(True, out, test, example, got)
+            return
+
         failure = doctest.DocTestFailure(test, example, got)
         if self.continue_on_failure:
             out.append(failure)
@@ -757,3 +919,17 @@ class DebugRunnerPlus(doctest.DebugRunner):
             out.append(failure)
         else:
             raise failure
+
+    def track_diff(self, use, out, test, example, got):
+        if example.want == got:
+            return
+
+        info = dict(use=use, name=test.name, filename=test.filename,
+                    source=example.source, nindent=example.indent,
+                    want=example.want, got=got, test_lineno=test.lineno,
+                    example_lineno=example.lineno)
+        doctestplus_diffhook(info=info)
+        if not info["use"]:
+            return
+
+        self._changesets[info["filename"]].append(info)
