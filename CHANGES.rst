@@ -1,5 +1,8 @@
-1.1.0 (unreleased)
+1.1.0 (2023-12-13)
 ==================
+
+- Added ``--doctest-plus-generate-diff`` to update documentation based on
+  actual output. [#227]
 
 - Fix module level ``__doctest_requires__``. [#228]
 
@@ -8,8 +11,6 @@
 - Fix erroneous attempt to import ``__main__.py`` by skipping it. [#232]
 
 - Respect pytest ``--import-mode``. [#233]
-
-- Ability to update documentation based on actual output. [#227]
 
 
 1.0.0 (2023-08-11)
@@ -83,7 +84,7 @@
 0.9.0 (2021-01-14)
 ==================
 
-- Declare ``setuptools`` runtime dependency [#93]
+- Declare ``setuptools`` runtime dependency. [#132]
 
 - Add ``SHOW_WARNINGS`` flag to show warnings. [#136]
 
