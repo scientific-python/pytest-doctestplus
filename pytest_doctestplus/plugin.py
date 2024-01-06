@@ -519,159 +519,299 @@ def pytest_configure(config):
     config.pluginmanager.unregister(doctest_plugin)
 
 
-class DoctestPlus:
-    def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
-        """
-        doctest_module_item_cls should be a class inheriting
-        `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
-        running of a single doctest found in a Python module.  This is passed
-        in as an argument because the actual class to be used may not be
-        available at import time, depending on whether or not the doctest
-        plugin for py.test is available.
-        """
-        self._doctest_module_item_cls = doctest_module_item_cls
-        self._doctest_textfile_item_cls = doctest_textfile_item_cls
-        self._file_globs = file_globs
-        # Directories to ignore when adding doctests
-        self._ignore_paths = []
+if PYTEST_GE_8_0:
 
-    def pytest_ignore_collect(self, path, config):
-        """
-        Skip paths that match any of the doctest_norecursedirs patterns or
-        if doctest_only is True then skip all regular test files (eg test_*.py).
-        """
-        if PYTEST_GE_8_0:
-            dirpath = Path(path).parent
+    from _pytest.pathlib import commonpath, fnmatch_ex
+
+    class DoctestPlus:
+        def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
+            """
+            doctest_module_item_cls should be a class inheriting
+            `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
+            running of a single doctest found in a Python module.  This is passed
+            in as an argument because the actual class to be used may not be
+            available at import time, depending on whether or not the doctest
+            plugin for py.test is available.
+            """
+            self._doctest_module_item_cls = doctest_module_item_cls
+            self._doctest_textfile_item_cls = doctest_textfile_item_cls
+            self._file_globs = file_globs
+            # Directories to ignore when adding doctests
+            self._ignore_paths = []
+
+        def pytest_ignore_collect(self, collection_path, config):
+            """
+            Skip paths that match any of the doctest_norecursedirs patterns or
+            if doctest_only is True then skip all regular test files (eg test_*.py).
+            """
             collect_ignore = config._getconftest_pathlist("collect_ignore",
-                                                          path=dirpath)
-        elif PYTEST_GE_7_0:
-            dirpath = Path(path).parent
-            collect_ignore = config._getconftest_pathlist("collect_ignore",
-                                                          path=dirpath,
-                                                          rootpath=config.rootpath)
-        else:
-            dirpath = path.dirpath()
-            collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
+                                                          path=collection_path.parent)
 
-        # The collect_ignore conftest.py variable should cause all test
-        # runners to ignore this file and all subfiles and subdirectories
-        if collect_ignore is not None and path in collect_ignore:
-            return True
+            # The collect_ignore conftest.py variable should cause all test
+            # runners to ignore this file and all subfiles and subdirectories
+            if collect_ignore is not None and collection_path in collect_ignore:
+                return True
 
-        if config.option.doctest_only:
-            for pattern in config.getini('python_files'):
+            if config.option.doctest_only:
+                for pattern in config.getini('python_files'):
+                    if fnmatch_ex(pattern, collection_path):
+                        return True
+
+            def get_list_opt(name):
+                return getattr(config.option, name, None) or []
+
+            for ignore_path in get_list_opt('ignore'):
+                ignore_path = os.path.abspath(ignore_path)
+                if str(collection_path).startswith(ignore_path):
+                    return True
+
+            for pattern in get_list_opt('ignore_glob'):
+                if fnmatch_ex(pattern, collection_path):
+                    return True
+
+            for pattern in config.getini("doctest_norecursedirs"):
+                if fnmatch_ex(pattern, collection_path):
+                    # Apparently pytest_ignore_collect causes files not to be
+                    # collected by any test runner; for DoctestPlus we only want to
+                    # avoid creating doctest nodes for them
+                    self._ignore_paths.append(collection_path)
+                    break
+
+            for option in config.getini("doctest_subpackage_requires"):
+                subpackage_pattern, required = option.split('=', 1)
+                if fnmatch_ex(subpackage_pattern.strip(), collection_path):
+                    required = required.strip().split(';')
+                    if not DocTestFinderPlus.check_required_modules(required):
+                        self._ignore_paths.append(collection_path)
+                        break
+
+            # Let other plugins decide the outcome.
+            return None
+
+        def pytest_collect_file(self, file_path, parent):
+            """Implements an enhanced version of the doctest module from py.test
+            (specifically, as enabled by the --doctest-modules option) which
+            supports skipping all doctests in a specific docstring by way of a
+            special ``__doctest_skip__`` module-level variable.  It can also skip
+            tests that have special requirements by way of
+            ``__doctest_requires__``.
+
+            ``__doctest_skip__`` should be a list of functions, classes, or class
+            methods whose docstrings should be ignored when collecting doctests.
+
+            This also supports wildcard patterns.  For example, to run doctests in
+            a class's docstring, but skip all doctests in its modules use, at the
+            module level::
+
+                __doctest_skip__ = ['ClassName.*']
+
+            You may also use the string ``'.'`` in ``__doctest_skip__`` to refer
+            to the module itself, in case its module-level docstring contains
+            doctests.
+
+            ``__doctest_requires__`` should be a dictionary mapping wildcard
+            patterns (in the same format as ``__doctest_skip__``) to a list of one
+            or more modules that should be *importable* in order for the tests to
+            run.  For example, if some tests require the scipy module to work they
+            will be skipped unless ``import scipy`` is possible.  It is also
+            possible to use a tuple of wildcard patterns as a key in this dict::
+
+                __doctest_requires__ = {('func1', 'func2'): ['scipy']}
+
+            """
+            for ignore_path in self._ignore_paths:
+                if commonpath(ignore_path, file_path) == ignore_path:
+                    return None
+
+            if file_path.suffix == '.py':
+                if file_path.name == 'conf.py':
+                    return None
+
+                # Don't override the built-in doctest plugin
+                return self._doctest_module_item_cls.from_parent(parent, path=file_path)
+
+            elif any([fnmatch_ex(pat, file_path) for pat in self._file_globs]):
+                # Ignore generated .rst files
+                parts = str(file_path).split(os.path.sep)
+
+                # Don't test files that start with a _
+                if file_path.name.startswith('_'):
+                    return None
+
+                # Don't test files in directories that start with a '_' if those
+                # directories are inside docs. Note that we *should* allow for
+                # example /tmp/_q/docs/file.rst but not /tmp/docs/_build/file.rst
+                # If we don't find 'docs' in the path, we should just skip this
+                # check to be safe. We also want to skip any api sub-directory
+                # of docs.
+                if 'docs' in parts:
+                    # We index from the end on the off chance that the temporary
+                    # directory includes 'docs' in the path, e.g.
+                    # /tmp/docs/371j/docs/index.rst You laugh, but who knows! :)
+                    # Also, it turns out lists don't have an rindex method. Huh??!!
+                    docs_index = len(parts) - 1 - parts[::-1].index('docs')
+                    if any(x.startswith('_') or x == 'api' for x in parts[docs_index:]):
+                        return None
+
+                # TODO: Get better names on these items when they are
+                # displayed in py.test output
+                return self._doctest_textfile_item_cls.from_parent(parent, path=file_path)
+
+else:
+
+    class DoctestPlus:
+        def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
+            """
+            doctest_module_item_cls should be a class inheriting
+            `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
+            running of a single doctest found in a Python module.  This is passed
+            in as an argument because the actual class to be used may not be
+            available at import time, depending on whether or not the doctest
+            plugin for py.test is available.
+            """
+            self._doctest_module_item_cls = doctest_module_item_cls
+            self._doctest_textfile_item_cls = doctest_textfile_item_cls
+            self._file_globs = file_globs
+            # Directories to ignore when adding doctests
+            self._ignore_paths = []
+
+        def pytest_ignore_collect(self, path, config):
+            """
+            Skip paths that match any of the doctest_norecursedirs patterns or
+            if doctest_only is True then skip all regular test files (eg test_*.py).
+            """
+            if PYTEST_GE_8_0:
+                dirpath = Path(path).parent
+                collect_ignore = config._getconftest_pathlist("collect_ignore",
+                                                              path=dirpath)
+            elif PYTEST_GE_7_0:
+                dirpath = Path(path).parent
+                collect_ignore = config._getconftest_pathlist("collect_ignore",
+                                                              path=dirpath,
+                                                              rootpath=config.rootpath)
+            else:
+                dirpath = path.dirpath()
+                collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
+
+            # The collect_ignore conftest.py variable should cause all test
+            # runners to ignore this file and all subfiles and subdirectories
+            if collect_ignore is not None and path in collect_ignore:
+                return True
+
+            if config.option.doctest_only:
+                for pattern in config.getini('python_files'):
+                    if path.check(fnmatch=pattern):
+                        return True
+
+            def get_list_opt(name):
+                return getattr(config.option, name, None) or []
+
+            for ignore_path in get_list_opt('ignore'):
+                ignore_path = os.path.abspath(ignore_path)
+                if str(path).startswith(ignore_path):
+                    return True
+
+            for pattern in get_list_opt('ignore_glob'):
                 if path.check(fnmatch=pattern):
                     return True
 
-        def get_list_opt(name):
-            return getattr(config.option, name, None) or []
-
-        for ignore_path in get_list_opt('ignore'):
-            ignore_path = os.path.abspath(ignore_path)
-            if str(path).startswith(ignore_path):
-                return True
-
-        for pattern in get_list_opt('ignore_glob'):
-            if path.check(fnmatch=pattern):
-                return True
-
-        for pattern in config.getini("doctest_norecursedirs"):
-            if path.check(fnmatch=pattern):
-                # Apparently pytest_ignore_collect causes files not to be
-                # collected by any test runner; for DoctestPlus we only want to
-                # avoid creating doctest nodes for them
-                self._ignore_paths.append(path)
-                break
-
-        for option in config.getini("doctest_subpackage_requires"):
-            subpackage_pattern, required = option.split('=', 1)
-            if path.check(fnmatch=subpackage_pattern.strip()):
-                required = required.strip().split(';')
-                if not DocTestFinderPlus.check_required_modules(required):
+            for pattern in config.getini("doctest_norecursedirs"):
+                if path.check(fnmatch=pattern):
+                    # Apparently pytest_ignore_collect causes files not to be
+                    # collected by any test runner; for DoctestPlus we only want to
+                    # avoid creating doctest nodes for them
                     self._ignore_paths.append(path)
                     break
 
-        # Let other plugins decide the outcome.
-        return None
+            for option in config.getini("doctest_subpackage_requires"):
+                subpackage_pattern, required = option.split('=', 1)
+                if path.check(fnmatch=subpackage_pattern.strip()):
+                    required = required.strip().split(';')
+                    if not DocTestFinderPlus.check_required_modules(required):
+                        self._ignore_paths.append(path)
+                        break
 
-    def pytest_collect_file(self, path, parent):
-        """Implements an enhanced version of the doctest module from py.test
-        (specifically, as enabled by the --doctest-modules option) which
-        supports skipping all doctests in a specific docstring by way of a
-        special ``__doctest_skip__`` module-level variable.  It can also skip
-        tests that have special requirements by way of
-        ``__doctest_requires__``.
+            # Let other plugins decide the outcome.
+            return None
 
-        ``__doctest_skip__`` should be a list of functions, classes, or class
-        methods whose docstrings should be ignored when collecting doctests.
+        def pytest_collect_file(self, path, parent):
+            """Implements an enhanced version of the doctest module from py.test
+            (specifically, as enabled by the --doctest-modules option) which
+            supports skipping all doctests in a specific docstring by way of a
+            special ``__doctest_skip__`` module-level variable.  It can also skip
+            tests that have special requirements by way of
+            ``__doctest_requires__``.
 
-        This also supports wildcard patterns.  For example, to run doctests in
-        a class's docstring, but skip all doctests in its modules use, at the
-        module level::
+            ``__doctest_skip__`` should be a list of functions, classes, or class
+            methods whose docstrings should be ignored when collecting doctests.
 
-            __doctest_skip__ = ['ClassName.*']
+            This also supports wildcard patterns.  For example, to run doctests in
+            a class's docstring, but skip all doctests in its modules use, at the
+            module level::
 
-        You may also use the string ``'.'`` in ``__doctest_skip__`` to refer
-        to the module itself, in case its module-level docstring contains
-        doctests.
+                __doctest_skip__ = ['ClassName.*']
 
-        ``__doctest_requires__`` should be a dictionary mapping wildcard
-        patterns (in the same format as ``__doctest_skip__``) to a list of one
-        or more modules that should be *importable* in order for the tests to
-        run.  For example, if some tests require the scipy module to work they
-        will be skipped unless ``import scipy`` is possible.  It is also
-        possible to use a tuple of wildcard patterns as a key in this dict::
+            You may also use the string ``'.'`` in ``__doctest_skip__`` to refer
+            to the module itself, in case its module-level docstring contains
+            doctests.
 
-            __doctest_requires__ = {('func1', 'func2'): ['scipy']}
+            ``__doctest_requires__`` should be a dictionary mapping wildcard
+            patterns (in the same format as ``__doctest_skip__``) to a list of one
+            or more modules that should be *importable* in order for the tests to
+            run.  For example, if some tests require the scipy module to work they
+            will be skipped unless ``import scipy`` is possible.  It is also
+            possible to use a tuple of wildcard patterns as a key in this dict::
 
-        """
-        for ignore_path in self._ignore_paths:
-            if ignore_path.common(path) == ignore_path:
-                return None
+                __doctest_requires__ = {('func1', 'func2'): ['scipy']}
 
-        if path.ext == '.py':
-            if path.basename == 'conf.py':
-                return None
-
-            # Don't override the built-in doctest plugin
-            if PYTEST_GE_7_0:
-                return self._doctest_module_item_cls.from_parent(parent, path=Path(path))
-            elif PYTEST_GE_5_4:
-                return self._doctest_module_item_cls.from_parent(parent, fspath=path)
-            else:
-                return self._doctest_module_item_cls(path, parent)
-
-        elif any([path.check(fnmatch=pat) for pat in self._file_globs]):
-            # Ignore generated .rst files
-            parts = str(path).split(os.path.sep)
-
-            # Don't test files that start with a _
-            if path.basename.startswith('_'):
-                return None
-
-            # Don't test files in directories that start with a '_' if those
-            # directories are inside docs. Note that we *should* allow for
-            # example /tmp/_q/docs/file.rst but not /tmp/docs/_build/file.rst
-            # If we don't find 'docs' in the path, we should just skip this
-            # check to be safe. We also want to skip any api sub-directory
-            # of docs.
-            if 'docs' in parts:
-                # We index from the end on the off chance that the temporary
-                # directory includes 'docs' in the path, e.g.
-                # /tmp/docs/371j/docs/index.rst You laugh, but who knows! :)
-                # Also, it turns out lists don't have an rindex method. Huh??!!
-                docs_index = len(parts) - 1 - parts[::-1].index('docs')
-                if any(x.startswith('_') or x == 'api' for x in parts[docs_index:]):
+            """
+            for ignore_path in self._ignore_paths:
+                if ignore_path.common(path) == ignore_path:
                     return None
 
-            # TODO: Get better names on these items when they are
-            # displayed in py.test output
-            if PYTEST_GE_7_0:
-                return self._doctest_textfile_item_cls.from_parent(parent, path=Path(path))
-            elif PYTEST_GE_5_4:
-                return self._doctest_textfile_item_cls.from_parent(parent, fspath=path)
-            else:
-                return self._doctest_textfile_item_cls(path, parent)
+            if path.ext == '.py':
+                if path.basename == 'conf.py':
+                    return None
+
+                # Don't override the built-in doctest plugin
+                if PYTEST_GE_7_0:
+                    return self._doctest_module_item_cls.from_parent(parent, path=Path(path))
+                elif PYTEST_GE_5_4:
+                    return self._doctest_module_item_cls.from_parent(parent, fspath=path)
+                else:
+                    return self._doctest_module_item_cls(path, parent)
+
+            elif any([path.check(fnmatch=pat) for pat in self._file_globs]):
+                # Ignore generated .rst files
+                parts = str(path).split(os.path.sep)
+
+                # Don't test files that start with a _
+                if path.basename.startswith('_'):
+                    return None
+
+                # Don't test files in directories that start with a '_' if those
+                # directories are inside docs. Note that we *should* allow for
+                # example /tmp/_q/docs/file.rst but not /tmp/docs/_build/file.rst
+                # If we don't find 'docs' in the path, we should just skip this
+                # check to be safe. We also want to skip any api sub-directory
+                # of docs.
+                if 'docs' in parts:
+                    # We index from the end on the off chance that the temporary
+                    # directory includes 'docs' in the path, e.g.
+                    # /tmp/docs/371j/docs/index.rst You laugh, but who knows! :)
+                    # Also, it turns out lists don't have an rindex method. Huh??!!
+                    docs_index = len(parts) - 1 - parts[::-1].index('docs')
+                    if any(x.startswith('_') or x == 'api' for x in parts[docs_index:]):
+                        return None
+
+                # TODO: Get better names on these items when they are
+                # displayed in py.test output
+                if PYTEST_GE_7_0:
+                    return self._doctest_textfile_item_cls.from_parent(parent, path=Path(path))
+                elif PYTEST_GE_5_4:
+                    return self._doctest_textfile_item_cls.from_parent(parent, fspath=path)
+                else:
+                    return self._doctest_textfile_item_cls(path, parent)
 
 
 class DocTestFinderPlus(doctest.DocTestFinder):
