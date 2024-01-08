@@ -519,31 +519,31 @@ def pytest_configure(config):
     config.pluginmanager.unregister(doctest_plugin)
 
 
-if PYTEST_GE_8_0:
+class DoctestPlus:
+    def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
+        """
+        doctest_module_item_cls should be a class inheriting
+        `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
+        running of a single doctest found in a Python module.  This is passed
+        in as an argument because the actual class to be used may not be
+        available at import time, depending on whether or not the doctest
+        plugin for py.test is available.
+        """
+        self._doctest_module_item_cls = doctest_module_item_cls
+        self._doctest_textfile_item_cls = doctest_textfile_item_cls
+        self._file_globs = file_globs
+        # Directories to ignore when adding doctests
+        self._ignore_paths = []
 
-    from _pytest.pathlib import commonpath, fnmatch_ex
-
-    class DoctestPlus:
-        def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
-            """
-            doctest_module_item_cls should be a class inheriting
-            `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
-            running of a single doctest found in a Python module.  This is passed
-            in as an argument because the actual class to be used may not be
-            available at import time, depending on whether or not the doctest
-            plugin for py.test is available.
-            """
-            self._doctest_module_item_cls = doctest_module_item_cls
-            self._doctest_textfile_item_cls = doctest_textfile_item_cls
-            self._file_globs = file_globs
-            # Directories to ignore when adding doctests
-            self._ignore_paths = []
+    if PYTEST_GE_8_0:
 
         def pytest_ignore_collect(self, collection_path, config):
             """
             Skip paths that match any of the doctest_norecursedirs patterns or
             if doctest_only is True then skip all regular test files (eg test_*.py).
             """
+            from _pytest.pathlib import fnmatch_ex
+
             collect_ignore = config._getconftest_pathlist("collect_ignore",
                                                           path=collection_path.parent)
 
@@ -619,6 +619,8 @@ if PYTEST_GE_8_0:
                 __doctest_requires__ = {('func1', 'func2'): ['scipy']}
 
             """
+            from _pytest.pathlib import commonpath, fnmatch_ex
+
             for ignore_path in self._ignore_paths:
                 if commonpath(ignore_path, file_path) == ignore_path:
                     return None
@@ -657,23 +659,7 @@ if PYTEST_GE_8_0:
                 # displayed in py.test output
                 return self._doctest_textfile_item_cls.from_parent(parent, path=file_path)
 
-else:
-
-    class DoctestPlus:
-        def __init__(self, doctest_module_item_cls, doctest_textfile_item_cls, file_globs):
-            """
-            doctest_module_item_cls should be a class inheriting
-            `pytest.doctest.DoctestItem` and `pytest.File`.  This class handles
-            running of a single doctest found in a Python module.  This is passed
-            in as an argument because the actual class to be used may not be
-            available at import time, depending on whether or not the doctest
-            plugin for py.test is available.
-            """
-            self._doctest_module_item_cls = doctest_module_item_cls
-            self._doctest_textfile_item_cls = doctest_textfile_item_cls
-            self._file_globs = file_globs
-            # Directories to ignore when adding doctests
-            self._ignore_paths = []
+    else:  # PYTEST_LT_8
 
         def pytest_ignore_collect(self, path, config):
             """
