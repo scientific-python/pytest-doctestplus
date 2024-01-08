@@ -680,11 +680,7 @@ else:
             Skip paths that match any of the doctest_norecursedirs patterns or
             if doctest_only is True then skip all regular test files (eg test_*.py).
             """
-            if PYTEST_GE_8_0:
-                dirpath = Path(path).parent
-                collect_ignore = config._getconftest_pathlist("collect_ignore",
-                                                              path=dirpath)
-            elif PYTEST_GE_7_0:
+            if PYTEST_GE_7_0:
                 dirpath = Path(path).parent
                 collect_ignore = config._getconftest_pathlist("collect_ignore",
                                                               path=dirpath,
