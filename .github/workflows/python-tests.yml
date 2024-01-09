@@ -57,7 +57,15 @@ jobs:
           - os: ubuntu-latest
             python-version: '3.11'
             toxenv: py311-test-pytest74
-            toxargs: --pre
+          - os: ubuntu-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest80
+          - os: macos-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest80
+          - os: windows-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest80
           - os: macos-latest
             python-version: '3.11'
             toxenv: py311-test-pytestdev
@@ -66,14 +74,14 @@ jobs:
             toxenv: py311-test-pytestdev
           - os: ubuntu-latest
             python-version: '3.12'
-            toxenv: py312-test-pytestdev
+            toxenv: py312-test-pytestdev-numpydev
 
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Tox
