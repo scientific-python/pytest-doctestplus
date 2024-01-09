@@ -57,7 +57,15 @@ jobs:
           - os: ubuntu-latest
             python-version: '3.11'
             toxenv: py311-test-pytest74
-            toxargs: --pre
+          - os: ubuntu-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest80
+          - os: macos-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest80
+          - os: windows-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest80
           - os: macos-latest
             python-version: '3.11'
             toxenv: py311-test-pytestdev
