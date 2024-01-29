@@ -259,34 +259,22 @@ def pytest_configure(config):
 
             if filepath in ("setup.py", "__main__.py"):
                 return
-            elif filepath == "conftest.py":
-                if PYTEST_GE_7_0:
-                    module = self.config.pluginmanager._importconftest(
-                        self.path, self.config.getoption("importmode"),
-                        rootpath=self.config.rootpath)
-                elif PYTEST_GT_5:
-                    module = self.config.pluginmanager._importconftest(
-                        self.fspath, self.config.getoption("importmode"))
-                else:
-                    module = self.config.pluginmanager._importconftest(
-                        self.fspath)
-            else:
-                try:
-                    if PYTEST_GT_5:
-                        from _pytest.pathlib import import_path
-                        mode = self.config.getoption("importmode")
+            try:
+                if PYTEST_GT_5:
+                    from _pytest.pathlib import import_path
+                    mode = self.config.getoption("importmode")
 
-                    if PYTEST_GE_7_0:
-                        module = import_path(fspath, mode=mode, root=self.config.rootpath)
-                    elif PYTEST_GT_5:
-                        module = import_path(fspath, mode=mode)
-                    else:
-                        module = fspath.pyimport()
-                except ImportError:
-                    if self.config.getvalue("doctest_ignore_import_errors"):
-                        pytest.skip("unable to import module %r" % fspath)
-                    else:
-                        raise
+                if PYTEST_GE_7_0:
+                    module = import_path(fspath, mode=mode, root=self.config.rootpath)
+                elif PYTEST_GT_5:
+                    module = import_path(fspath, mode=mode)
+                else:
+                    module = fspath.pyimport()
+            except ImportError:
+                if self.config.getvalue("doctest_ignore_import_errors"):
+                    pytest.skip("unable to import module %r" % fspath)
+                else:
+                    raise
 
             options = get_optionflags(self) | FIX
 
