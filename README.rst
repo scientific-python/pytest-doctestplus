@@ -66,6 +66,10 @@ In either case, the plugin will automatically be registered for use with
 Usage
 -----
 
+Note: In lieu of ``setup.cfg``, ``pyproject.toml`` configuration is also
+supported; where ``setup.cfg`` is mentioned below, replace the syntax
+with TOML equivalent.
+
 .. _setup:
 
 Setup and Configuration
