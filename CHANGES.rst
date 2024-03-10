@@ -1,8 +1,7 @@
-1.3.0 (unreleased)
+1.2.1 (2024-03-09)
 ==================
 
-- Compatibility with pytest 8.2. [#241]
-- Compatibility with pytest 8.1.1 [#242]
+- Compatibility with pytest 8.1.1 [#241, #242]
 
 1.2.0 (2024-03-04)
 ==================
