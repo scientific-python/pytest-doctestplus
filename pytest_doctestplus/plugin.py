@@ -32,6 +32,7 @@ PYTEST_GT_5 = _pytest_version > Version('5.9.9')
 PYTEST_GE_5_4 = _pytest_version >= Version('5.4')
 PYTEST_GE_7_0 = _pytest_version >= Version('7.0')
 PYTEST_GE_8_0 = _pytest_version >= Version('8.0')
+PYTEST_GE_8_1_1 = _pytest_version >= Version('8.1.1')
 PYTEST_GE_8_2 = any([_pytest_version.is_devrelease,
                      _pytest_version.is_prerelease,
                      _pytest_version >= Version('8.2')])
@@ -265,7 +266,7 @@ def pytest_configure(config):
                     from _pytest.pathlib import import_path
                     mode = self.config.getoption("importmode")
 
-                if PYTEST_GE_8_2:
+                if PYTEST_GE_8_1_1:
                     consider_namespace_packages = self.config.getini("consider_namespace_packages")
                     module = import_path(fspath, mode=mode, root=self.config.rootpath,
                                          consider_namespace_packages=consider_namespace_packages)
