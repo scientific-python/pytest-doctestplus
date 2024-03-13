@@ -17,26 +17,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        pytest-version:
+          - "5.3"  # last version of 5.x series
+          - "6.2"  # last version of 6.x series
+          - "7.0"
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "dev"
         include:
-          - { os: ubuntu-latest, python-version: 3.8, toxenv: py38-test-pytestoldest }
-          - { os: windows-latest, python-version: 3.8, toxenv: py38-test-pytest50 }
-          - { os: macos-latest, python-version: 3.8, toxenv: py38-test-pytest51 }
-          - { os: ubuntu-latest, python-version: 3.8, toxenv: py38-test-pytest52 }
-          - { os: windows-latest, python-version: 3.8, toxenv: py38-test-pytest53 }
-          - { os: ubuntu-latest, python-version: 3.8, toxenv: py38-test-pytest60 }
-          - { os: ubuntu-latest, python-version: 3.9, toxenv: py39-test-pytest61 }
-          - { os: ubuntu-latest, python-version: 3.9, toxenv: py39-test-pytest62 }
-          - { os: ubuntu-latest, python-version: 3.10, toxenv: py310-test-pytest70 }
-          - { os: ubuntu-latest, python-version: 3.10, toxenv: py310-test-pytest71 }
-          - { os: windows-latest, python-version: 3.11, toxenv: py311-test-pytest72 }
-          - { os: ubuntu-latest, python-version: 3.11, toxenv: py311-test-pytest73 }
-          - { os: ubuntu-latest, python-version: 3.11, toxenv: py311-test-pytest74 }
-          - { os: ubuntu-latest, python-version: 3.12, toxenv: py312-test-pytest80 }
-          - { os: macos-latest, python-version: 3.12, toxenv: py312-test-pytest80 }
-          - { os: windows-latest, python-version: 3.12, toxenv: py312-test-pytest80 }
-          - { os: macos-latest, python-version: 3.11, toxenv: py311-test-pytestdev }
-          - { os: windows-latest, python-version: 3.11, toxenv: py311-test-pytestdev }
-          - { os: ubuntu-latest, python-version: 3.12, toxenv: py312-test-pytestdev-numpydev }
+          # testing some relatively olv versions with Linux only
+          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "5.0" }
+          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "5.1" }
+          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "5.2" }
+          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "6.0" }
+          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "6.1" }
+          # some special cases
+          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "oldest" }
+          - { os: "ubuntu-20.04", python-version: "3.12", pytest-version: "dev-numpydev" }
 
     steps:
     - uses: actions/checkout@v4
@@ -49,4 +52,12 @@ jobs:
     - name: Install Tox
       run: python -m pip install tox
     - name: Run Tox
-      run: tox ${{ matrix.toxargs }} -v -e ${{ matrix.toxenv }}
+      env:
+        PY: ${{ matrix.python-version }}
+        PT: ${{ matrix.pytest-version }}
+      run: |
+        # crete the token as "pyXY-test-pytestXY" from the matrix with drop dots
+        toxenv=py"${PY//./}"-test-pytest${PT//./}
+        echo $toxenv
+        # run the particular tox environment
+        tox ${{ matrix.toxargs }} -v -e ${toxenv}
