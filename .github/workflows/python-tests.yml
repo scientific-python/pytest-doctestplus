@@ -38,7 +38,7 @@ jobs:
           - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "6.0" }
           - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "6.1" }
           # some special cases
-          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "oldest" }
+          - { os: "ubuntu-20.04", python-version: "3.8", pytest-version: "4.6" }
           - { os: "ubuntu-20.04", python-version: "3.12", pytest-version: "dev-numpydev" }
 
     steps:
