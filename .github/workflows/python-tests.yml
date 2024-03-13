@@ -19,28 +19,28 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: 3.8
+            python-version: '3.8'
             toxenv: py38-test-pytestoldest
           - os: windows-latest
-            python-version: 3.8
+            python-version: '3.8'
             toxenv: py38-test-pytest50
           - os: macos-latest
-            python-version: 3.8
+            python-version: '3.8'
             toxenv: py38-test-pytest51
           - os: ubuntu-latest
-            python-version: 3.8
+            python-version: '3.8'
             toxenv: py38-test-pytest52
           - os: windows-latest
-            python-version: 3.8
+            python-version: '3.8'
             toxenv: py38-test-pytest53
           - os: ubuntu-latest
-            python-version: 3.8
+            python-version: '3.8'
             toxenv: py38-test-pytest60
           - os: ubuntu-latest
-            python-version: 3.9
+            python-version: '3.9'
             toxenv: py39-test-pytest61
           - os: ubuntu-latest
-            python-version: 3.9
+            python-version: '3.9'
             toxenv: py39-test-pytest62
           - os: ubuntu-latest
             python-version: '3.10'
@@ -66,6 +66,15 @@ jobs:
           - os: windows-latest
             python-version: '3.12'
             toxenv: py312-test-pytest80
+          - os: ubuntu-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest81
+          - os: macos-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest81
+          - os: windows-latest
+            python-version: '3.12'
+            toxenv: py312-test-pytest81
           - os: macos-latest
             python-version: '3.11'
             toxenv: py311-test-pytestdev
