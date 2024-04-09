@@ -1,5 +1,6 @@
 import glob
 import os
+from platform import python_version
 from textwrap import dedent
 import sys
 
@@ -1140,6 +1141,9 @@ def test_main(testdir):
     testdir.inline_run(pkg, '--doctest-plus').assertoutcome(passed=0)
 
 
+@pytest.mark.xfail(
+        python_version() == '3.11.9',
+        reason='broken by https://github.com/python/cpython/pull/115440')
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
 
@@ -1154,7 +1158,18 @@ def test_ufunc(testdir):
             return 1
         """)
     testdir.makepyfile(module2="""
-        from _module2 import foo
+        import functools
+        from _module2 import foo, bar, bat as _bat
+
+
+        def wrap_func(func):
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return wrapper
+
+
+        bat = wrap_func(_bat)
         """)
     testdir.makepyfile(setup="""
         from setuptools import setup, Extension
@@ -1173,13 +1188,13 @@ def test_ufunc(testdir):
         #include <Python.h>
 
 
-        static double foo_inner(double a, double b)
+        static double ufunc_inner(double a, double b)
         {
             return a + b;
         }
 
 
-        static void foo_loop(
+        static void ufunc_loop(
             char **args,
             const npy_intp *dimensions,
             const npy_intp *steps,
@@ -1188,18 +1203,17 @@ def test_ufunc(testdir):
             const npy_intp n = dimensions[0];
             for (npy_intp i = 0; i < n; i ++)
             {
-                *(double *) &args[2][i * steps[2]] = foo_inner(
+                *(double *) &args[2][i * steps[2]] = ufunc_inner(
                 *(double *) &args[0][i * steps[0]],
                 *(double *) &args[1][i * steps[1]]);
             }
         }
 
 
-        static PyUFuncGenericFunction foo_loops[] = {foo_loop};
-        static char foo_types[] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE};
-        static void *foo_data[] = {NULL};
-        static const char foo_name[] = "foo";
-        static const char foo_docstring[] = ">>> foo(1, 2)\n3.0";
+        static PyUFuncGenericFunction ufunc_loops[] = {ufunc_loop};
+        static char ufunc_types[] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE};
+        static void *ufunc_data[] = {NULL};
+        static const char ufunc_docstring[] = ">>> foo(1, 2)\n3.0";
 
         static PyModuleDef moduledef = {
             .m_base = PyModuleDef_HEAD_INIT,
@@ -1217,17 +1231,50 @@ def test_ufunc(testdir):
             if (!module)
                 return NULL;
 
-            PyObject *obj = PyUFunc_FromFuncAndData(
-                foo_loops, foo_data, foo_types, 1, 2, 1, PyUFunc_None, foo_name,
-                foo_docstring, 0);
-            if (!obj)
+            /* Add a ufunc _with_ a docstring. */
+            PyObject *foo = PyUFunc_FromFuncAndData(
+                ufunc_loops, ufunc_data, ufunc_types, 1, 2, 1, PyUFunc_None,
+                "foo", ufunc_docstring, 0);
+            if (!foo)
             {
                 Py_DECREF(module);
                 return NULL;
             }
-            if (PyModule_AddObject(module, foo_name, obj) < 0)
+            if (PyModule_AddObject(module, "foo", foo) < 0)
             {
-                Py_DECREF(obj);
+                Py_DECREF(foo);
+                Py_DECREF(module);
+                return NULL;
+            }
+
+            /* Add a ufunc _without_ a docstring. */
+            PyObject *bar = PyUFunc_FromFuncAndData(
+                ufunc_loops, ufunc_data, ufunc_types, 1, 2, 1, PyUFunc_None,
+                "bar", NULL, 0);
+            if (!bar)
+            {
+                Py_DECREF(module);
+                return NULL;
+            }
+            if (PyModule_AddObject(module, "bar", bar) < 0)
+            {
+                Py_DECREF(bar);
+                Py_DECREF(module);
+                return NULL;
+            }
+
+            /* Add another ufunc _without_ a docstring. */
+            PyObject *bat = PyUFunc_FromFuncAndData(
+                ufunc_loops, ufunc_data, ufunc_types, 1, 2, 1, PyUFunc_None,
+                "bat", NULL, 0);
+            if (!bat)
+            {
+                Py_DECREF(module);
+                return NULL;
+            }
+            if (PyModule_AddObject(module, "bat", bat) < 0)
+            {
+                Py_DECREF(bat);
                 Py_DECREF(module);
                 return NULL;
             }
