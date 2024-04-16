@@ -1142,7 +1142,7 @@ def test_main(testdir):
 
 
 @pytest.mark.xfail(
-        python_version() == '3.11.9',
+        python_version() in ('3.11.9', '3.12.3'),
         reason='broken by https://github.com/python/cpython/pull/115440')
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
