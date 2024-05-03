@@ -16,6 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      # The aim with the matrix below is to walk through a representative but not full combination of OS, Python, and pytest versions.
       matrix:
         include:
           - os: ubuntu-latest
