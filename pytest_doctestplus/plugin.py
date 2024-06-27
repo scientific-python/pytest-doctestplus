@@ -896,7 +896,9 @@ def write_modified_file(fname, new_fname, changes):
         if change["test_lineno"] is None:
             bad_tests.append(change["name"])
             continue
-        lineno = change["test_lineno"] + change["example_lineno"] + 1
+        # Find the first line of the output:
+        lineno = change["test_lineno"] + change["example_lineno"]
+        lineno += change["source"].count("\n")
 
         indentation = " " * change["nindent"]
         want = indent(change["want"], indentation, lambda x: True)

@@ -1431,3 +1431,45 @@ def test_generate_diff_basic(testdir, capsys):
         result = f.read()
 
     assert result == original.replace("4", "2").replace("5", "3")
+
+
+def test_generate_diff_multiline(testdir, capsys):
+    p = testdir.makepyfile("""
+        def f():
+            '''
+            >>> print(2)
+            2
+            >>> for i in range(4):
+            ...     print(i)
+            1
+            2
+            '''
+            pass
+        """)
+    with open(p) as f:
+        original = f.read()
+
+    testdir.inline_run(p, "--doctest-plus-generate-diff")
+    diff = dedent("""
+         >>> for i in range(4):
+         ...     print(i)
+    +    0
+         1
+         2
+    +    3
+    """)
+    captured = capsys.readouterr()
+    print(captured.out)
+    print("====")
+    print(diff)
+    assert diff in captured.out
+
+    testdir.inline_run(p, "--doctest-plus-generate-diff=overwrite")
+    captured = capsys.readouterr()
+    assert "Applied fix to the following files" in captured.out
+
+    with open(p) as f:
+        result = f.read()
+
+    original_fixed = original.replace("1\n    2", "\n    ".join(["0", "1", "2", "3"]))
+    assert result == original_fixed
