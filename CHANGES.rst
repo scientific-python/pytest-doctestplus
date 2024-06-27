@@ -1,6 +1,7 @@
 1.3.0 (unreleased)
 ==================
 
+- Fixing output update for multiline code. [#253]
 
 1.2.1 (2024-03-09)
 ==================
