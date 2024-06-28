@@ -1459,9 +1459,6 @@ def test_generate_diff_multiline(testdir, capsys):
     +    3
     """)
     captured = capsys.readouterr()
-    print(captured.out)
-    print("====")
-    print(diff)
     assert diff in captured.out
 
     testdir.inline_run(p, "--doctest-plus-generate-diff=overwrite")
