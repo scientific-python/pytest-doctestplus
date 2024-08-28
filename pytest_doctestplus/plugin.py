@@ -900,7 +900,8 @@ def write_modified_file(fname, new_fname, changes):
         lineno = change["test_lineno"] + change["example_lineno"]
         lineno += change["source"].count("\n")
 
-        indentation = " " * change["nindent"]
+        indentation = len(text[lineno-1]) - len(text[lineno-1].lstrip())
+        indentation = text[lineno-1][:indentation]
         want = indent(change["want"], indentation, lambda x: True)
         # Replace fully blank lines with the required `<BLANKLINE>`
         # (May need to do this also if line contains only whitespace)

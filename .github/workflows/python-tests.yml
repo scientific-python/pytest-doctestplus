@@ -68,20 +68,20 @@ jobs:
             python-version: '3.12'
             toxenv: py312-test-pytest82
           - os: macos-latest
-            python-version: '3.12'
-            toxenv: py312-test-pytest82
+            python-version: '3.13-dev'
+            toxenv: py312-test-pytest83
           - os: windows-latest
-            python-version: '3.12'
-            toxenv: py312-test-pytest82
+            python-version: '3.13-dev'
+            toxenv: py312-test-pytestdev
           - os: macos-latest
-            python-version: '3.11'
-            toxenv: py311-test-pytestdev
-          - os: windows-latest
             python-version: '3.11'
             toxenv: py311-test-pytestdev
           - os: ubuntu-latest
             python-version: '3.12'
             toxenv: py312-test-pytestdev-numpydev
+          - os: ubuntu-latest
+            python-version: '3.13-dev'
+            toxenv: py313-test-pytestdev
 
     steps:
     - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
