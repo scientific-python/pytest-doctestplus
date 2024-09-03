@@ -2,6 +2,11 @@ name: Release
 
 on:
   pull_request:
+    # We also want this workflow triggered if the 'Build wheels' label is added
+    # or present when PR is updated
+    types:
+      - synchronize
+      - labeled
   push:
     tags:
       - '*'
