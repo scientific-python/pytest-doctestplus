@@ -1129,7 +1129,7 @@ def test_main(testdir):
         '''
         def f():
             raise RuntimeError("This is a CLI, do not execute module while doctesting")
-        
+
         f()
         '''
     )
@@ -1142,7 +1142,7 @@ def test_main(testdir):
 
 
 @pytest.mark.xfail(
-        python_version() in ('3.11.9', '3.12.3'),
+        python_version() in ('3.11.9', '3.11.10', '3.12.3'),
         reason='broken by https://github.com/python/cpython/pull/115440')
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
@@ -1348,7 +1348,7 @@ def norecursedirs_testdir(testdir, request):
     # Create a bad file that should be skipped by its name
     okay_subdir1 = testdir.mkdir("okay_foo_dir")
     bad_file = okay_subdir1.join("bad_file.py")
-    bad_file.write_text(bad_text, "utf-8")  
+    bad_file.write_text(bad_text, "utf-8")
     # Create a good file in that directory that doctest won't skip
     good_file1 = okay_subdir1.join("good_file1.py")
     good_file1.write_text(good_text, "utf-8")
@@ -1356,7 +1356,7 @@ def norecursedirs_testdir(testdir, request):
     # Create another bad file that should be skipped by its name
     okay_subdir2 = testdir.mkdir("okay_bar_dir")
     bad_file = okay_subdir2.join("bad_file.py")
-    bad_file.write_text(bad_text, "utf-8")  
+    bad_file.write_text(bad_text, "utf-8")
     # Create a good file in that directory that doctest won't skip
     good_file2 = okay_subdir2.join("good_file2.py")
     good_file2.write_text(good_text, "utf-8")
