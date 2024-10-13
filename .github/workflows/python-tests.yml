@@ -25,7 +25,7 @@ jobs:
           - os: windows-latest
             python-version: '3.8'
             toxenv: py38-test-pytest50
-          - os: macos-12
+          - os: macos-13
             python-version: '3.8'
             toxenv: py38-test-pytest51
           - os: ubuntu-latest
