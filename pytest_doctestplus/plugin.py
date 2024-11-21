@@ -208,8 +208,12 @@ def _is_numpy_ufunc(method):
 
 
 def pytest_configure(config):
-    doctest_plugin = config.pluginmanager.getplugin('doctest')
-    run_regular_doctest = config.option.doctestmodules and not config.option.doctest_plus
+    doctest_plugin = config.pluginmanager.getplugin("doctest")
+    if not hasattr(config.option, "doctestmodules"):
+        return
+    run_regular_doctest = (
+        config.option.doctestmodules and not config.option.doctest_plus
+    )
     if config.option.doctest_plus_generate_diff:
         config.option.doctest_only = True
     use_doctest_plus = config.getini(
