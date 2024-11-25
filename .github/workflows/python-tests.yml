@@ -68,11 +68,11 @@ jobs:
             python-version: '3.12'
             toxenv: py312-test-pytest82
           - os: macos-latest
-            python-version: '3.13-dev'
-            toxenv: py312-test-pytest83
+            python-version: '3.13'
+            toxenv: py313-test-pytest83
           - os: windows-latest
-            python-version: '3.13-dev'
-            toxenv: py312-test-pytestdev
+            python-version: '3.13'
+            toxenv: py313-test-pytestdev
           - os: macos-latest
             python-version: '3.11'
             toxenv: py311-test-pytestdev
@@ -80,7 +80,7 @@ jobs:
             python-version: '3.12'
             toxenv: py312-test-pytestdev-numpydev
           - os: ubuntu-latest
-            python-version: '3.13-dev'
+            python-version: '3.13'
             toxenv: py313-test-pytestdev
 
     steps:
