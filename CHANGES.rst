@@ -1,9 +1,13 @@
-1.3.0 (unreleased)
+1.3.0 (2024-11-25)
 ==================
 
 - Fixing output update for multiline code. [#253]
+
 - Fixing Python 3.13 compatibility. [#260]
+
 - Dropped ``setuptools`` as a runtime dependency. [#258]
+
+- Fixing bug of assuming doctestmodules exists on Namespace. [#271]
 
 1.2.1 (2024-03-09)
 ==================
