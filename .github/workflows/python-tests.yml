@@ -20,26 +20,17 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: '3.8'
-            toxenv: py38-test-pytestoldest
+            python-version: '3.9'
+            toxenv: py39-test-pytestoldest
           - os: windows-latest
-            python-version: '3.8'
-            toxenv: py38-test-pytest50
+            python-version: '3.9'
+            toxenv: py39-test-pytest50
           - os: macos-13
-            python-version: '3.8'
-            toxenv: py38-test-pytest51
-          - os: ubuntu-latest
-            python-version: '3.8'
-            toxenv: py38-test-pytest52
-          - os: windows-latest
-            python-version: '3.8'
-            toxenv: py38-test-pytest53
-          - os: ubuntu-latest
-            python-version: '3.8'
-            toxenv: py38-test-pytest60
+            python-version: '3.9'
+            toxenv: py39-test-pytest51
           - os: ubuntu-latest
             python-version: '3.9'
-            toxenv: py39-test-pytest61
+            toxenv: py39-test-pytest60
           - os: ubuntu-latest
             python-version: '3.9'
             toxenv: py39-test-pytest62
@@ -74,14 +65,11 @@ jobs:
             python-version: '3.13'
             toxenv: py313-test-pytestdev
           - os: macos-latest
-            python-version: '3.11'
-            toxenv: py311-test-pytestdev
-          - os: ubuntu-latest
             python-version: '3.12'
-            toxenv: py312-test-pytestdev-numpydev
+            toxenv: py312-test-pytestdev
           - os: ubuntu-latest
             python-version: '3.13'
-            toxenv: py313-test-pytestdev
+            toxenv: py313-test-pytestdev-numpydev
 
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2

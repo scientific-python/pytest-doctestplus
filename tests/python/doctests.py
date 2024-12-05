@@ -80,7 +80,7 @@ def depends_on_two_modules():
     """
 
 
-class ClassWithSomeBadDocTests(object):
+class ClassWithSomeBadDocTests:
     def this_test_works():
         """
         This test should be executed by --doctest-plus and should pass.
@@ -98,7 +98,7 @@ class ClassWithSomeBadDocTests(object):
         """
 
 
-class ClassWithAllBadDocTests(object):
+class ClassWithAllBadDocTests:
     def this_test_fails(self):
         """
         This test will cause a failure if __doctest_skip__ is not working.

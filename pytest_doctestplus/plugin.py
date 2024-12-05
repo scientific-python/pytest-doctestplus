@@ -893,7 +893,7 @@ def write_modified_file(fname, new_fname, changes):
     changes.sort(key=lambda x: (x["test_lineno"], x["example_lineno"]),
                  reverse=True)
 
-    with open(fname, "r") as f:
+    with open(fname) as f:
         text = f.readlines()
 
     for change in changes:
@@ -923,7 +923,7 @@ def write_modified_file(fname, new_fname, changes):
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     changesets = DebugRunnerPlus._changesets
     diff_mode = DebugRunnerPlus._generate_diff
-    DebugRunnerPlus._changesets = defaultdict(lambda: [])
+    DebugRunnerPlus._changesets = defaultdict(list)
     DebugRunnerPlus._generate_diff = None
     all_bad_tests = []
     if not diff_mode:
@@ -1004,7 +1004,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
 
 class DebugRunnerPlus(doctest.DebugRunner):
-    _changesets = defaultdict(lambda: [])
+    _changesets = defaultdict(list)
     _generate_diff = False
 
     def __init__(self, checker=None, verbose=None, optionflags=0,
