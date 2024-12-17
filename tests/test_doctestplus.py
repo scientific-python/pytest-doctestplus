@@ -314,7 +314,7 @@ class TestFloats:
         c = OutputChecker()
         got = []
         for char in ['A', 'B', 'C', 'D', 'E']:
-            got.append('{} {}'.format(char, float(ord(char))))
+            got.append(f'{char} {float(ord(char))}')
         got = '\n'.join(got)
 
         want = "A 65.0\nB 66.0\n...G 70.0"
