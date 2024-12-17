@@ -67,13 +67,13 @@ class OutputChecker(doctest.OutputChecker):
         front_sep = r'\s|[*+-,<=(\[]'
         back_sep = front_sep + r'|[>j)\]}]'
 
-        fbeg = r'^{}(?={}|$)'.format(got_floats, back_sep)
-        fmidend = r'(?<={}){}(?={}|$)'.format(front_sep, got_floats, back_sep)
-        self.num_got_rgx = re.compile(r'({}|{})'.format(fbeg, fmidend))
+        fbeg = fr'^{got_floats}(?={back_sep}|$)'
+        fmidend = fr'(?<={front_sep}){got_floats}(?={back_sep}|$)'
+        self.num_got_rgx = re.compile(fr'({fbeg}|{fmidend})')
 
-        fbeg = r'^{}(?={}|$)'.format(want_floats, back_sep)
-        fmidend = r'(?<={}){}(?={}|$)'.format(front_sep, want_floats, back_sep)
-        self.num_want_rgx = re.compile(r'({}|{})'.format(fbeg, fmidend))
+        fbeg = fr'^{want_floats}(?={back_sep}|$)'
+        fmidend = fr'(?<={front_sep}){want_floats}(?={back_sep}|$)'
+        self.num_want_rgx = re.compile(fr'({fbeg}|{fmidend})')
 
         # As of 2023-09-26, Python base class has no init, but just in case
         # it acquires one.
@@ -220,7 +220,7 @@ class OutputChecker(doctest.OutputChecker):
         # blank line, unless the DONT_ACCEPT_BLANKLINE flag is used.
         if not (flags & doctest.DONT_ACCEPT_BLANKLINE):
             # Replace <BLANKLINE> in want with a blank line.
-            want = re.sub(r'(?m)^{}\s*?$'.format(re.escape(doctest.BLANKLINE_MARKER)),
+            want = re.sub(fr'(?m)^{re.escape(doctest.BLANKLINE_MARKER)}\s*?$',
                           '', want)
             # If a line in got contains only spaces, then remove the
             # spaces.

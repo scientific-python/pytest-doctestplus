@@ -314,7 +314,7 @@ class TestFloats:
         c = OutputChecker()
         got = []
         for char in ['A', 'B', 'C', 'D', 'E']:
-            got.append('%s %s' % (char, float(ord(char))))
+            got.append(f'{char} {float(ord(char))}')
         got = '\n'.join(got)
 
         want = "A 65.0\nB 66.0\n...G 70.0"
@@ -1142,7 +1142,7 @@ def test_main(testdir):
 
 
 @pytest.mark.xfail(
-        python_version() in ('3.11.9', '3.11.10', '3.12.3'),
+        python_version() in ('3.11.9', '3.11.10', '3.11.11', '3.12.3'),
         reason='broken by https://github.com/python/cpython/pull/115440')
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
