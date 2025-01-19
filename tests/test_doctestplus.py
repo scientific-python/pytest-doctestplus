@@ -11,6 +11,13 @@ import pytest
 import doctest
 from pytest_doctestplus.output_checker import OutputChecker, FLOAT_CMP
 
+try:
+    import pytest_asyncio  # noqa: F401
+    has_pytest_asyncio = True
+except ImportError:
+    has_pytest_asyncio = False
+
+
 
 pytest_plugins = ['pytester']
 
@@ -1123,6 +1130,9 @@ def test_fail_data_dependency(testdir, cont_on_fail):
     assert ("something()\nUNEXPECTED EXCEPTION: NameError" in report.longreprtext) is cont_on_fail
 
 
+@pytest.mark.xfail(
+        has_pytest_asyncio,
+        reason='pytest_asyncio monkey-patches .collect()')
 def test_main(testdir):
     pkg = testdir.mkdir('pkg')
     code = dedent(

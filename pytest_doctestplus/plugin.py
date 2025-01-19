@@ -342,6 +342,7 @@ def pytest_configure(config):
                             test.name, self, runner, test)
 
     class DocTestTextfilePlus(pytest.Module):
+        obj = None
 
         def collect(self):
             if PYTEST_GE_7_0:
