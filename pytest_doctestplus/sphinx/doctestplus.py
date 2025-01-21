@@ -43,6 +43,7 @@ class DoctestRequiresDirective(DoctestSkipDirective):
 def setup(app):
 
     app.add_directive('doctest-requires', DoctestRequiresDirective)
+    app.add_directive('doctest-requires-all', DoctestRequiresDirective)
     app.add_directive('doctest-skip', DoctestSkipDirective)
     app.add_directive('doctest-skip-all', DoctestSkipDirective)
     app.add_directive('doctest', DoctestSkipDirective, override=True)

@@ -389,6 +389,10 @@ def pytest_configure(config):
              doctest chunk if the given modules/packages are not
              installed.
 
+           - ``.. doctest-requires-all:: module1, module2``: Skip all subsequent
+             doctest chunks if the given modules/packages are not
+             installed.
+
            - ``.. doctest-skip-all``: Skip all subsequent doctests.
 
            - ``.. doctest-remote-data::``: Skip the next doctest chunk if
@@ -422,10 +426,19 @@ def pytest_configure(config):
 
                 if isinstance(entry, str) and entry:
                     required = []
+                    required_all = []
                     skip_next = False
                     lines = entry.strip().splitlines()
+                    requires_all_match = [re.match(
+                        fr'{comment_char}\s+doctest-requires-all\s*::\s+(.*)', x) for x in lines]
+                    if any(requires_all_match):
+                        print(requires_all_match)
+                        required_all = [re.split(r'\s*[,\s]\s*', match.group(1)) for match in requires_all_match if match][0]
+
+                    required_modules_all = DocTestFinderPlus.check_required_modules(required_all)
+
                     if any(re.match(
-                            f'{comment_char} doctest-skip-all', x.strip()) for x in lines):
+                            f'{comment_char} doctest-skip-all', x.strip()) for x in lines) or not required_modules_all:
                         skip_all = True
                         continue
 
