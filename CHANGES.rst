@@ -1,6 +1,8 @@
 1.4.0 (unreleased)
 ==================
 
+- Fixing compatibility with pytest-asyncio. [#278]
+
 - Versions of Python <3.9 are no longer supported. [#274]
 
 1.3.0 (2024-11-25)
