@@ -432,7 +432,6 @@ def pytest_configure(config):
                     requires_all_match = [re.match(
                         fr'{comment_char}\s+doctest-requires-all\s*::\s+(.*)', x) for x in lines]
                     if any(requires_all_match):
-                        print(requires_all_match)
                         required_all = [re.split(r'\s*[,\s]\s*', match.group(1)) for match in requires_all_match if match][0]
 
                     required_modules_all = DocTestFinderPlus.check_required_modules(required_all)
