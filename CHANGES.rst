@@ -3,6 +3,10 @@
 
 - Fixing compatibility with pytest-asyncio. [#278]
 
+- Adding new directive ``doctest-requires-all`` to conditionally skip all
+  doctests in narrative documentations based on availability of
+  dependencies. [#280]
+
 - Versions of Python <3.9 are no longer supported. [#274]
 
 1.3.0 (2024-11-25)
