@@ -336,6 +336,9 @@ the package's ``setup.cfg`` file. The syntax for this option is a list of
 
 Multiple requirements can be specified if separated by semicolons.
 
+It is also possible to conditionally skip all the doctests in a narrative
+documentation with ``doctest-requires-all``.
+
 Remote Data
 ~~~~~~~~~~~
 

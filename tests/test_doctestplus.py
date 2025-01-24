@@ -435,6 +435,29 @@ def test_requires(testdir):
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
+def test_requires_all(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    # should be ignored
+    p = testdir.makefile(
+        '.rst',
+        """
+        .. doctest-requires-all:: foobar
+
+            >>> import foobar
+
+        This is a narrative line, before another doctest snippet
+
+           >>> import foobar
+        """
+    )
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
+
+
 def test_ignore_warnings_module(testdir):
 
     # First check that we get a warning if we don't add the IGNORE_WARNINGS
