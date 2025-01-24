@@ -7,6 +7,10 @@
   doctests in narrative documentations based on availability of
   dependencies. [#280]
 
+- Adding new directive ``doctest-remote-data-all`` to conditionally skip all
+  doctests in narrative documentations based on availability of
+  remote-data. [#281]
+
 - Versions of Python <3.9 are no longer supported. [#274]
 
 1.3.0 (2024-11-25)
