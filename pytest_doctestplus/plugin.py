@@ -444,7 +444,7 @@ def pytest_configure(config):
                         continue
 
                     if config.getoption('remote_data', 'none') != 'any':
-                        if any(re.match(fr'{comment_char} doctest-remote-data-all::', x.strip())
+                        if any(re.match(fr'{comment_char}\s+doctest-remote-data-all\s*::', x.strip())
                                for x in lines):
                             skip_all = True
                             continue
