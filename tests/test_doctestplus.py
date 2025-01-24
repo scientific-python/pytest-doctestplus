@@ -940,6 +940,41 @@ def test_doctest_skip(testdir):
     testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(skipped=1)
 
 
+def test_remote_data_all(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """)
+
+    p = testdir.makefile(
+        '.rst',
+        """
+        This is a narrative docs, which some of the lines requiring remote-data access.
+        The first code block always passes, the second is skipped without remote data and the
+        last section is skipped due to the all option.
+
+            >>> print("Test")
+            Test
+
+        .. doctest-remote-data-all::
+
+            >>> from contextlib import closing
+            >>> from urllib.request import urlopen
+            >>> with closing(urlopen('https://www.astropy.org')) as remote:
+            ...     remote.read()    # doctest: +IGNORE_OUTPUT
+
+        Narrative before a codeblock that should fail normally but with the all option in the
+        directive it is skipped over thus producing a passing status.
+
+            >>> print(123)
+        """
+    )
+
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst', '--remote-data').assertoutcome(failed=1)
+    testdir.inline_run(p, '--doctest-plus', '--doctest-rst').assertoutcome(passed=1)
+
+
 # We repeat all testst including remote data with and without it opted in
 def test_remote_data_url(testdir):
     testdir.makeini(

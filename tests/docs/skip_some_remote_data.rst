@@ -78,3 +78,20 @@ This should be skipped otherwise the test should fail::
     3
     >>> import warnings
     >>> warnings.warn('A warning occurred', UserWarning)  # doctest: +IGNORE_WARNINGS
+
+
+Remote data all followed by code cell
+=====================================
+
+This codeblock should fail, but is skipped:
+
+.. doctest-remote-data-all::
+
+    >>> 1 + 1
+    3
+
+The this following block should be executed with the simple remote data, but
+should be skipped with the all version.
+
+    >>> 1 + 2
+    5
