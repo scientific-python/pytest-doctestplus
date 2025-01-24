@@ -397,6 +397,9 @@ def pytest_configure(config):
 
            - ``.. doctest-remote-data::``: Skip the next doctest chunk if
              --remote-data is not passed.
+
+           - ``.. doctest-remote-data-all::``: Skip all subsequent doctest
+             chunks if --remote-data is not passed.
         """
 
         def parse(self, s, name=None):
@@ -429,15 +432,24 @@ def pytest_configure(config):
                     required_all = []
                     skip_next = False
                     lines = entry.strip().splitlines()
+
                     requires_all_match = [re.match(
                         fr'{comment_char}\s+doctest-requires-all\s*::\s+(.*)', x) for x in lines]
                     if any(requires_all_match):
-                        required_all = [re.split(r'\s*[,\s]\s*', match.group(1)) for match in requires_all_match if match][0]
-
+                        required_all = [re.split(r'\s*[,\s]\s*', match.group(1))
+                                        for match in requires_all_match if match][0]
                     required_modules_all = DocTestFinderPlus.check_required_modules(required_all)
+                    if not required_modules_all:
+                        skip_all = True
+                        continue
 
-                    if any(re.match(
-                            f'{comment_char} doctest-skip-all', x.strip()) for x in lines) or not required_modules_all:
+                    if config.getoption('remote_data', 'none') != 'any':
+                        if any(re.match(fr'{comment_char} doctest-remote-data-all::', x.strip())
+                               for x in lines):
+                            skip_all = True
+                            continue
+
+                    if any(re.match(f'{comment_char} doctest-skip-all', x.strip()) for x in lines):
                         skip_all = True
                         continue
 
