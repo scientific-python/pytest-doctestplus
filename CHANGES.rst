@@ -1,4 +1,4 @@
-1.4.0 (unreleased)
+1.4.0 (2025-01-24)
 ==================
 
 - Fixing compatibility with pytest-asyncio. [#278]
