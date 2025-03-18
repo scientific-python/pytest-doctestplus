@@ -111,7 +111,7 @@ def pytest_addoption(parser):
                          "Options accepted are 'txt', 'tex', and 'rst'. "
                          "This is no longer recommended, use --doctest-glob instead."
                      ))
-    
+
     parser.addoption("--text-file-encoding", action="store",
                      help="Specify encoding for files.",
                      default="utf-8")
@@ -146,7 +146,7 @@ def pytest_addoption(parser):
     parser.addini("text_file_format",
                   "Default format for docs. "
                   "This is no longer recommended, use --doctest-glob instead.")
-    
+
     parser.addini("text_file_encoding",
                   "Default encoding for text files.", default=None)
 
@@ -451,7 +451,7 @@ def pytest_configure(config):
                         continue
 
                     if config.getoption('remote_data', 'none') != 'any':
-                        if any(re.match(fr'{comment_char}\s+doctest-remote-data-all\s*::', x.strip())
+                        if any(re.match(fr'{comment_char}\s+doctest-remote-data-all\s*::', x.strip())  # noqa: E501
                                for x in lines):
                             skip_all = True
                             continue
@@ -960,7 +960,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     all_bad_tests = []
     if not diff_mode:
         return  # we do not report or apply diffs
-    
+
     # get encoding to open file default ini=None or option="utf-8"
     encoding = config.getini("text_file_encoding") or config.getoption("text_file_encoding")
 
