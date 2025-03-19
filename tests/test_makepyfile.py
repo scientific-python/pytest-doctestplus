@@ -199,8 +199,6 @@ def test_makepyfile(makepyfile_encoded):
 
     print(text, diff)
 
-    pass
-
 
 @pytest.mark.xfail(reason="UnicodeDecodeError")
 def test_basicfile(basic_encoded):
