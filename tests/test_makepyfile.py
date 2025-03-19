@@ -20,14 +20,6 @@ def enc(enc):
 all_encodings = set(filter(enc, aliases.values()))
 
 
-# @pytest.fixture(
-#     params=[
-#         "cp1252",
-#         "utf-8",
-#         "ascii",
-#         "latin1",
-#     ]
-# )
 @pytest.fixture(params=all_encodings)
 def encoding(request):
     return request.param
