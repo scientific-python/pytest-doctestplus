@@ -213,8 +213,6 @@ def test_basicfile(basic_encoded):
 
     print(text, diff)
 
-    pass
-
 
 def test_compare_make_basic_file(testdir, encoding, any_charset):
     """
