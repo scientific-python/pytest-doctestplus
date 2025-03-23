@@ -991,7 +991,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                 # exit status:
                 with subprocess.Popen(
                         ["git", "diff", "-p", "--no-index", fname, new_fname],
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding) as p:
                     p.wait()
                     # Diff should be fine, but write error if not:
                     diff = p.stderr.read()
