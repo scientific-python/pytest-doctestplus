@@ -53,8 +53,8 @@ def encoding(request):
         "accented_letters",
         "cyrillic_basic",
         "cyrillic_complex",
-        "chinese_combo",
-        "japanese_combo",
+        "chinese_computer",
+        "japanese_school",
     ],
 )
 def any_charset(request):
@@ -126,7 +126,7 @@ def basic_encoded(tmp_path, encoding, any_charset):
     yield file, diff, encoding
 
 
-@pytest.mark.skipif(not_debug(), reason="running in CI or debugging is not enabled.")
+@pytest.mark.skipif(not_debug(), reason="skipped in CI or debugging is not enabled.")
 def test_makepyfile(makepyfile_encoded):
     """
     Test is expected to fail because of UnicodeDecodeError.
@@ -141,7 +141,7 @@ def test_makepyfile(makepyfile_encoded):
     print(text, diff)
 
 
-@pytest.mark.skipif(not_debug(), reason="running in CI or debugging is not enabled.")
+@pytest.mark.skipif(not_debug(), reason="skipped in CI or debugging is not enabled.")
 def test_basicfile(basic_encoded):
     """
     Test is expected to fail because of UnicodeDecodeError.
