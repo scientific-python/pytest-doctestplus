@@ -1,96 +1,146 @@
+import locale
+from pathlib import Path
 from textwrap import dedent
+from typing import Callable, Tuple
 
 import pytest
 
 pytest_plugins = ["pytester"]
 
 
-@pytest.mark.parametrize("encoding", ["utf-8", "cp1252"])
-def test_file_encoding(testdir, capsys, encoding):
-    p = testdir.makepyfile(
-        """
-        def f():
-            '''
-            >>> print(2)
-            4
-            >>> print(3)
-            5
-            '''
-            pass
-        """
-    )
-    with open(p) as f:
-        original = f.read()
+@pytest.fixture(
+    params=[
+        ("A", "a", "utf-8"),
+        ("☆", "★", "utf-8"),
+        ("b", "B", "cp1252"),
+        ("☁", "☀", "utf-8"),
+    ],
+    ids=[
+        "Aa-utf8",
+        "star-utf8",
+        "bB-cp1252",
+        "cloud-utf8",
+    ],
+)
+def charset(request):
+    return request.param
 
-    testdir.inline_run(
-        p, "--doctest-plus-generate-diff", "--text-file-encoding", encoding
-    )
-    diff = dedent(
-        """
-         >>> print(2)
-    -    4
-    +    2
-         >>> print(3)
-    -    5
-    +    3
+
+@pytest.fixture()
+def basic_file(tmp_path: Path) -> Callable[[str, str, str], Tuple[Path, str, str]]:
+
+    def makebasicfile(a, b, encoding: str) -> Tuple[Path, str, str]:
+        """alternative implementation without the use of `testdir.makepyfile`."""
+
+        content = """
+            def f():
+                '''
+                >>> print('{}')
+                {}
+                '''
+                pass
+            """
+
+        original = dedent(content.format(a, b))
+        expected_result = dedent(content.format(a, a))
+
+        original_file = tmp_path.joinpath("test_basic.py")
+        original_file.write_text(original, encoding=encoding)
+
+        expected_diff = dedent(
+            f"""
+                 >>> print('{a}')
+            -    {b}
+            +    {a}
+            """
+        ).strip("\n")
+
+        return original_file, expected_diff, expected_result
+
+    return makebasicfile
+
+
+def test_basic_file_encoding_diff(testdir, capsys, basic_file, charset):
     """
-    )
-    captured = capsys.readouterr()
-    assert diff in captured.out
-
-    testdir.inline_run(
-        p, "--doctest-plus-generate-diff=overwrite", "--text-file-encoding", encoding
-    )
-    captured = capsys.readouterr()
-    assert "Applied fix to the following files" in captured.out
-
-    with open(p) as f:
-        result = f.read()
-
-    assert result == original.replace("4", "2").replace("5", "3")
-
-
-@pytest.mark.parametrize("encoding", ["utf-8"])
-def test_file_encoding_utf8(testdir, capsys, encoding):
-    p = testdir.makepyfile(
-        """
-        def f():
-            '''
-            >>> print(☆)
-            ★
-            >>> print(☁)
-            ☀
-            '''
-            pass
-        """,
-        encoding=encoding,
-    )
-    with open(p, encoding=encoding) as f:
-        original = f.read()
-
-    testdir.inline_run(
-        p, "--doctest-plus-generate-diff=diff", "--text-file-encoding", encoding
-    )
-    diff = dedent(
-        """
-         >>> print(☆)
-    -    ★
-    +    ☆
-         >>> print(☁)
-    -    ☀
-    +    ☁
+    Test the diff from console output is as expected.
     """
-    )
-    captured = capsys.readouterr()
-    assert diff in captured.out
+    a, b, encoding = charset
+
+    file, diff, _ = basic_file(a, b, encoding)
 
     testdir.inline_run(
-        p, "--doctest-plus-generate-diff=overwrite", "--text-file-encoding", encoding
+        file, "--doctest-plus-generate-diff", "--text-file-encoding", encoding
     )
-    captured = capsys.readouterr()
-    assert "Applied fix to the following files" in captured.out
 
-    with open(p, encoding=encoding) as f:
-        result = f.read()
+    stdout, _ = capsys.readouterr()
+    assert diff in stdout
 
-    assert result == original.replace("★", "☆").replace("☀", "☁")
+
+def test_basic_file_encoding_overwrite(testdir, basic_file, charset):
+    """
+    Test that the file is overwritten with the expected content.
+    """
+
+    a, b, encoding = charset
+
+    file, _, expected = basic_file(a, b, encoding)
+
+    testdir.inline_run(
+        file,
+        "--doctest-plus-generate-diff",
+        "overwrite",
+        "--text-file-encoding",
+        encoding,
+    )
+
+    assert expected in file.read_text(encoding)
+
+
+def test_legacy_diff(testdir, capsys, basic_file, charset):
+    """
+    Legacy test are supported to fail on Windows, when no encoding is provided.
+
+    On Windows this is cp1252, so "utf-8" are expected to fail while writing test files.
+    """
+    a, b, _ = charset
+
+    try:
+        file, diff, _ = basic_file(a, b, None)
+    except UnicodeEncodeError:
+        encoding = locale.getpreferredencoding(False)
+        reason = f"could not encode {repr(charset)} with {encoding=}"
+        pytest.xfail(reason=reason)
+
+    testdir.inline_run(
+        file,
+        "--doctest-plus-generate-diff",
+    )
+
+    stdout, _ = capsys.readouterr()
+
+    assert diff in stdout
+
+
+def test_legacy_overwrite(testdir, basic_file, charset):
+    """
+    Legacy test are supported to fail on Windows, when no encoding is provided.
+
+    On Windows this is cp1252, so "utf-8" are expected to fail while writing test files.
+    """
+
+    a, b, _encoding = charset
+
+    try:
+        file, _, expected = basic_file(a, b, None)
+    except UnicodeEncodeError:
+        encoding = locale.getpreferredencoding(False)
+        reason = f"could not encode {repr(charset)} with {encoding=}"
+        pytest.xfail(reason=reason)
+
+    testdir.inline_run(
+        file,
+        "--doctest-plus-generate-diff",
+        "overwrite",
+    )
+
+    assert expected in file.read_text(_encoding)
