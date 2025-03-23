@@ -11,7 +11,7 @@ pytest_plugins = ["pytester"]
 def enc(enc):
     try:
         _ = "abc".encode(enc)
-    except Exception:
+    except LookupError:
         return False
 
     return True
@@ -120,7 +120,7 @@ def makepyfile_encoded(testdir, encoding, any_charset):
         f"""
         def f():
             '''
-            >>> print({a})
+            >>> print('{a}')
             {b}
             '''
             pass
@@ -130,11 +130,11 @@ def makepyfile_encoded(testdir, encoding, any_charset):
 
     expected_diff = dedent(
         f"""
-            >>> print({a})
-        -   {b}
-        +   {a}
+             >>> print('{a}')
+        -    {b}
+        +    {a}
         """
-    )
+    ).strip("\n")
 
     yield original_file, expected_diff, encoding
 
@@ -147,7 +147,7 @@ def makebasicfile(tmp_path: Path, a, b, encoding: str) -> Tuple[Path, str]:
         f"""
         def f():
             '''
-            >>> print({a})
+            >>> print('{a}')
             {b}
             '''
             pass
@@ -158,11 +158,11 @@ def makebasicfile(tmp_path: Path, a, b, encoding: str) -> Tuple[Path, str]:
 
     expected_diff = dedent(
         f"""
-            >>> print({a})
-        -   {b}
-        +   {a}
+             >>> print('{a}')
+        -    {b}
+        +    {a}
         """
-    )
+    ).strip("\n")
 
     return original_file, expected_diff
 
@@ -225,7 +225,7 @@ def test_compare_make_basic_file(testdir, encoding, any_charset):
         f"""
         def f():
             '''
-            >>> print({a})
+            >>> print('{a}')
             {b}
             '''
             pass
@@ -239,11 +239,11 @@ def test_compare_make_basic_file(testdir, encoding, any_charset):
 
     make_diff = dedent(
         f"""
-            >>> print({a})
-        -   {b}
-        +   {a}
+             >>> print('{a}')
+        -    {b}
+        +    {a}
         """
-    )
+    ).strip("\n")
 
     # try to check if makepyfile screwed up and create python file in a different way
 
