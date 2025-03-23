@@ -29,7 +29,7 @@ def charset(request):
 @pytest.fixture()
 def basic_file(tmp_path: Path) -> Callable[[str, str, str], Tuple[Path, str, str]]:
 
-    def makebasicfile(a, b, encoding: str) -> Tuple[Path, str, str]:
+    def makebasicfile(a, b, encoding: str) -> Tuple[str, str, str]:
         """alternative implementation without the use of `testdir.makepyfile`."""
 
         content = """
@@ -55,7 +55,7 @@ def basic_file(tmp_path: Path) -> Callable[[str, str, str], Tuple[Path, str, str
             """
         ).strip("\n")
 
-        return original_file, expected_diff, expected_result
+        return str(original_file), expected_diff, expected_result
 
     return makebasicfile
 
@@ -93,7 +93,7 @@ def test_basic_file_encoding_overwrite(testdir, basic_file, charset):
         encoding,
     )
 
-    assert expected in file.read_text(encoding)
+    assert expected in Path(file).read_text(encoding)
 
 
 def test_legacy_diff(testdir, capsys, basic_file, charset):
@@ -143,4 +143,4 @@ def test_legacy_overwrite(testdir, basic_file, charset):
         "overwrite",
     )
 
-    assert expected in file.read_text(_encoding)
+    assert expected in Path(file).read_text(_encoding)
