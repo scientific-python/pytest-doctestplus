@@ -41,8 +41,8 @@ def encoding(request):
         ("é", "ü"),
         ("Я", "ж"),  # Cyrillic characters
         ("Ф", "Щ"),  # More Cyrillic
-        ("中", "国"),  # Chinese characters (zhong guo - China)
-        ("道", "德"),  # Chinese characters (dao de - way virtue)
+        ("電腦", "电脑"),  # Chinese: traditional vs simplified for "computer"
+        ("学校", "がっこう"),  # Japanese: Kanji vs Hiragana for "school"
     ],
     ids=[
         "numbers",
@@ -53,8 +53,8 @@ def encoding(request):
         "accented_letters",
         "cyrillic_basic",
         "cyrillic_complex",
-        "chinese_country",
-        "chinese_concept",
+        "chinese_combo",
+        "japanese_combo",
     ],
 )
 def any_charset(request):
