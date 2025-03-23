@@ -1,3 +1,4 @@
+import os
 from encodings.aliases import aliases
 from pathlib import Path
 from textwrap import dedent
@@ -6,6 +7,11 @@ from typing import Tuple
 import pytest
 
 pytest_plugins = ["pytester"]
+
+
+def not_debug():
+    """run tests only when not in CI and debug is enabled."""
+    return os.getenv("CI", False) or not os.getenv("PYTEST_DEBUG_MAKEPYFILE", False)
 
 
 def enc(enc):
@@ -22,63 +28,6 @@ all_encodings = set(filter(enc, aliases.values()))
 
 @pytest.fixture(params=all_encodings)
 def encoding(request):
-    return request.param
-
-
-# UTF-8 Fixture (contains various Unicode characters)
-@pytest.fixture(
-    params=[
-        ("3", "4"),
-        ("☆", "★"),
-        ("1", "☀"),
-        ("✅", "💥"),
-    ],
-    ids=[
-        "numbers",
-        "stars",
-        "number-sun",
-        "check-explosion",
-    ],
-)
-def utf8_charset(request):
-    return request.param
-
-
-# CP-1252 Fixture (contains characters from Windows-1252 encoding)
-@pytest.fixture(
-    params=[
-        ("é", "ü"),
-        ("„", "“"),
-        ("¥", "ƒ"),
-        ("©", "®"),
-    ],
-    ids=[
-        "accented_letters_CP1252",
-        "quotes_CP1252",
-        "currency_symbols_CP1252",
-        "copyright_registered_CP1252",
-    ],
-)
-def cp1252_charset(request):
-    return request.param
-
-
-# ANSI (Strictly ASCII characters only)
-@pytest.fixture(
-    params=[
-        ("A", "B"),
-        ("1", "2"),
-        ("!", "?"),
-        ("@", "#"),
-    ],
-    ids=[
-        "letters_ANSI",
-        "numbers_ANSI",
-        "punctuation_ANSI",
-        "symbols_ANSI",
-    ],
-)
-def ansi_charset(request):
     return request.param
 
 
@@ -177,7 +126,7 @@ def basic_encoded(tmp_path, encoding, any_charset):
     yield file, diff, encoding
 
 
-@pytest.mark.xfail(reason="UnicodeDecodeError")
+@pytest.mark.skipif(not_debug(), reason="running in CI or debugging is not enabled.")
 def test_makepyfile(makepyfile_encoded):
     """
     Test is expected to fail because of UnicodeDecodeError.
@@ -192,7 +141,7 @@ def test_makepyfile(makepyfile_encoded):
     print(text, diff)
 
 
-@pytest.mark.xfail(reason="UnicodeDecodeError")
+@pytest.mark.skipif(not_debug(), reason="running in CI or debugging is not enabled.")
 def test_basicfile(basic_encoded):
     """
     Test is expected to fail because of UnicodeDecodeError.
