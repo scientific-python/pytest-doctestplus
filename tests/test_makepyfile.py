@@ -154,7 +154,7 @@ def test_basicfile(basic_encoded):
 
     print(text, diff)
 
-
+@pytest.mark.skip(reason="makepyfile uses encoding only on bytes objects.")
 def test_compare_make_basic_file(testdir, encoding, any_charset):
     """
     Compare testdir.makepyfile with pathlib.Path.writetext to create python files.
@@ -209,3 +209,52 @@ def test_compare_make_basic_file(testdir, encoding, any_charset):
     assert (
         make_diff == basic_diff
     ), "sanity check - diffs always should be the same, if not my test implementation is wrong."
+
+
+def test_compare_write_bytes(testdir, encoding, any_charset):
+    """
+    `makeypfile` ignores keyword arguments `encoding` if content is not bytes.
+
+    1. create test data and convert to bytes, if encoding failes the test is skipped.
+    2. use both functions to create python file
+
+    - if both functions raise the same error, everything is as expected
+    - if Path.write_bytes succeeds so should `testdir.makepyfile` and error should be None
+    - both files sould exist after the test
+    """
+
+    a, b = any_charset
+
+    try:
+        bytes_content = dedent(f"""
+                def f():
+                    '''
+                    >>> print('{a}')
+                    {b}
+                    '''
+                    pass
+                """
+        ).encode(encoding)
+    except UnicodeEncodeError:
+        # skip test do testdata could not prepared
+        pytest.xfail(f"{repr(any_charset)} cannot be encoded with {encoding=}")
+
+    try:
+        make_file = testdir.makepyfile(
+            bytes_content,
+            encoding=encoding,
+        )
+    except Exception as e:
+        error = e  # if both function fail the same, everything is as expected
+    else:
+        error = None
+
+    basic_file = Path(str(testdir)).joinpath("test_basic.py")
+    try:
+        basic_file.write_bytes(bytes_content)
+    except Exception as e:
+        assert type(error) is type(e), f"basically never should happen, but {e=} was raised."
+    else:
+        assert error is None, f"makepyfile screwed up {encoding=} and raised {error=}"
+    
+    assert Path(make_file).is_file() and Path(basic_file).is_file(), "files are missing."
