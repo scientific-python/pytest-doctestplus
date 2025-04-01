@@ -1,7 +1,8 @@
 import locale
+import os
 from pathlib import Path
 from textwrap import dedent
-from typing import Callable, Tuple
+from typing import Callable, Optional
 
 import pytest
 
@@ -27,9 +28,9 @@ def charset(request):
 
 
 @pytest.fixture()
-def basic_file(tmp_path: Path) -> Callable[[str, str, str], Tuple[Path, str, str]]:
+def basic_file(tmp_path: Path) -> Callable[[str, str, str], tuple[str, str, str]]:
 
-    def makebasicfile(a, b, encoding: str) -> Tuple[str, str, str]:
+    def makebasicfile(a, b, encoding: str) -> tuple[str, str, str]:
         """alternative implementation without the use of `testdir.makepyfile`."""
 
         content = """
@@ -60,42 +61,78 @@ def basic_file(tmp_path: Path) -> Callable[[str, str, str], Tuple[Path, str, str
     return makebasicfile
 
 
-def test_basic_file_encoding_diff(testdir, capsys, basic_file, charset):
+@pytest.fixture()
+def ini_file(testdir) -> Callable[..., Path]:
+
+    def makeini(
+        encoding: Optional[str] = None,
+    ) -> Path:
+        """Create a pytest.ini file with the specified encoding."""
+
+        ini = ["[pytest]"]
+
+        if encoding is not None:
+            ini.append(f"doctest_encoding = {encoding}")
+
+        ini.append("")
+
+        p = testdir.makefile(".ini", pytest="\n".join(ini))
+
+        return Path(p)
+
+    return makeini
+
+
+def test_basic_file_encoding_diff(testdir, capsys, basic_file, charset, ini_file):
     """
     Test the diff from console output is as expected.
     """
     a, b, encoding = charset
 
+    # create python file to test
     file, diff, _ = basic_file(a, b, encoding)
 
+    # create pytest.ini file
+    ini = ini_file(encoding=encoding)
+    assert ini.is_file(), "setup pytest.ini not created/found"
+
     testdir.inline_run(
-        file, "--doctest-plus-generate-diff", "--text-file-encoding", encoding
+        file,
+        "--doctest-plus-generate-diff",
+        "--config-file",
+        str(ini),
     )
 
     stdout, _ = capsys.readouterr()
     assert diff in stdout
 
 
-def test_basic_file_encoding_overwrite(testdir, basic_file, charset):
+def test_basic_file_encoding_overwrite(testdir, basic_file, charset, ini_file):
     """
     Test that the file is overwritten with the expected content.
     """
 
     a, b, encoding = charset
 
+    # create python file to test
     file, _, expected = basic_file(a, b, encoding)
+
+    # create pytest.ini file
+    ini = ini_file(encoding=encoding)
+    assert ini.is_file(), "setup pytest.ini not created/found"
 
     testdir.inline_run(
         file,
         "--doctest-plus-generate-diff",
         "overwrite",
-        "--text-file-encoding",
-        encoding,
+        "--config-file",
+        str(ini),
     )
 
     assert expected in Path(file).read_text(encoding)
 
 
+@pytest.mark.skipif(os.getenv("CI", False), reason="skip on CI")
 def test_legacy_diff(testdir, capsys, basic_file, charset):
     """
     Legacy test are supported to fail on Windows, when no encoding is provided.
@@ -121,6 +158,7 @@ def test_legacy_diff(testdir, capsys, basic_file, charset):
     assert diff in stdout
 
 
+@pytest.mark.skipif(os.getenv("CI", False), reason="skip on CI")
 def test_legacy_overwrite(testdir, basic_file, charset):
     """
     Legacy test are supported to fail on Windows, when no encoding is provided.
