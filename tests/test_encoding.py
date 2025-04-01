@@ -99,7 +99,7 @@ def test_basic_file_encoding_diff(testdir, capsys, basic_file, charset, ini_file
     testdir.inline_run(
         file,
         "--doctest-plus-generate-diff",
-        "--config-file",
+        "-c",
         str(ini),
     )
 
@@ -125,7 +125,7 @@ def test_basic_file_encoding_overwrite(testdir, basic_file, charset, ini_file):
         file,
         "--doctest-plus-generate-diff",
         "overwrite",
-        "--config-file",
+        "-c",
         str(ini),
     )
 
