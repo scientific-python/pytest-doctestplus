@@ -112,10 +112,6 @@ def pytest_addoption(parser):
                          "This is no longer recommended, use --doctest-glob instead."
                      ))
 
-    parser.addoption("--text-file-encoding", action="store",
-                     help="Specify encoding for files.",
-                     default="utf-8")
-
     # Defaults to `atol` parameter from `numpy.allclose`.
     parser.addoption("--doctest-plus-atol", action="store",
                      help="set the absolute tolerance for float comparison",
@@ -146,9 +142,6 @@ def pytest_addoption(parser):
     parser.addini("text_file_format",
                   "Default format for docs. "
                   "This is no longer recommended, use --doctest-glob instead.")
-
-    parser.addini("text_file_encoding",
-                  "Default encoding for text files.", default=None)
 
     parser.addini("doctest_optionflags", "option flags for doctests",
                   type="args", default=["ELLIPSIS", "NORMALIZE_WHITESPACE"],)
@@ -961,8 +954,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     if not diff_mode:
         return  # we do not report or apply diffs
 
-    # get encoding to open file default ini=None or option="utf-8"
-    encoding = config.getini("text_file_encoding") or config.getoption("text_file_encoding")
+    encoding = config.getini("doctest_encoding")
 
     if diff_mode != "overwrite":
         # In this mode, we write a corrected file to a temporary folder in
