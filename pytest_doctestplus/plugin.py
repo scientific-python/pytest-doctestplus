@@ -444,7 +444,7 @@ def pytest_configure(config):
                         continue
 
                     if config.getoption('remote_data', 'none') != 'any':
-                        if any(re.match(fr'{comment_char}\s+doctest-remote-data-all\s*::', x.strip())
+                        if any(re.match(fr'{comment_char}\s+doctest-remote-data-all\s*::', x.strip())  # noqa: E501
                                for x in lines):
                             skip_all = True
                             continue
@@ -912,13 +912,13 @@ class DocTestFinderPlus(doctest.DocTestFinder):
         return tests
 
 
-def write_modified_file(fname, new_fname, changes):
+def write_modified_file(fname, new_fname, changes, encoding=None):
     # Sort in reversed order to edit the lines:
     bad_tests = []
     changes.sort(key=lambda x: (x["test_lineno"], x["example_lineno"]),
                  reverse=True)
 
-    with open(fname) as f:
+    with open(fname, encoding=encoding) as f:
         text = f.readlines()
 
     for change in changes:
@@ -939,7 +939,7 @@ def write_modified_file(fname, new_fname, changes):
 
         text[lineno:lineno+want.count("\n")] = [got]
 
-    with open(new_fname, "w") as f:
+    with open(new_fname, "w", encoding=encoding) as f:
         f.write("".join(text))
 
     return bad_tests
@@ -953,6 +953,8 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     all_bad_tests = []
     if not diff_mode:
         return  # we do not report or apply diffs
+
+    encoding = config.getini("doctest_encoding")
 
     if diff_mode != "overwrite":
         # In this mode, we write a corrected file to a temporary folder in
@@ -974,14 +976,14 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                 new_fname = fname.replace(common_path, tmpdirname)
                 os.makedirs(os.path.split(new_fname)[0], exist_ok=True)
 
-                bad_tests = write_modified_file(fname, new_fname, changes)
+                bad_tests = write_modified_file(fname, new_fname, changes, encoding)
                 all_bad_tests.extend(bad_tests)
 
                 # git diff returns 1 to signal changes, so just ignore the
                 # exit status:
                 with subprocess.Popen(
                         ["git", "diff", "-p", "--no-index", fname, new_fname],
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding=encoding) as p:
                     p.wait()
                     # Diff should be fine, but write error if not:
                     diff = p.stderr.read()
@@ -1013,7 +1015,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             return
         terminalreporter.write_line("Applied fix to the following files:")
         for fname, changes in changesets.items():
-            bad_tests = write_modified_file(fname, fname, changes)
+            bad_tests = write_modified_file(fname, fname, changes, encoding)
             all_bad_tests.extend(bad_tests)
             terminalreporter.write_line(f"    {fname}")
 
