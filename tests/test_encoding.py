@@ -7,6 +7,7 @@ from typing import Callable, Optional
 import pytest
 
 pytest_plugins = ["pytester"]
+IS_CI = os.getenv("CI", "false") == "true"
 
 
 @pytest.fixture(
@@ -132,7 +133,7 @@ def test_basic_file_encoding_overwrite(testdir, basic_file, charset, ini_file):
     assert expected in Path(file).read_text(encoding)
 
 
-@pytest.mark.skipif(os.getenv("CI", False), reason="skip on CI")
+@pytest.mark.skipif(IS_CI, reason="skip on CI")
 def test_legacy_diff(testdir, capsys, basic_file, charset):
     """
     Legacy test are supported to fail on Windows, when no encoding is provided.
@@ -158,7 +159,7 @@ def test_legacy_diff(testdir, capsys, basic_file, charset):
     assert diff in stdout
 
 
-@pytest.mark.skipif(os.getenv("CI", False), reason="skip on CI")
+@pytest.mark.skipif(IS_CI, reason="skip on CI")
 def test_legacy_overwrite(testdir, basic_file, charset):
     """
     Legacy test are supported to fail on Windows, when no encoding is provided.
