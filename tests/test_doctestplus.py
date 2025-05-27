@@ -13,10 +13,12 @@ from pytest_doctestplus.output_checker import OutputChecker, FLOAT_CMP
 
 try:
     import pytest_asyncio  # noqa: F401
-    has_pytest_asyncio = True
+    if Version(pytest_asyncio.__version__) < Version('1.0'):
+        main_pytest_asyncio_xfails = True
+    else:
+        main_pytest_asyncio_xfails = False
 except ImportError:
-    has_pytest_asyncio = False
-
+    main_pytest_asyncio_xfails = False
 
 
 pytest_plugins = ['pytester']
@@ -1189,7 +1191,7 @@ def test_fail_data_dependency(testdir, cont_on_fail):
 
 
 @pytest.mark.xfail(
-        has_pytest_asyncio,
+        main_pytest_asyncio_xfails,
         reason='pytest_asyncio monkey-patches .collect()')
 def test_main(testdir):
     pkg = testdir.mkdir('pkg')
