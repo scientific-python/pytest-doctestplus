@@ -769,6 +769,8 @@ def test_ignore_glob_option(testdir):
     ).assertoutcome(passed=2)
 
 
+# We see unclosed file ResourceWarning on windows with python 3.14
+@pytest.mark.filterwarnings('ignore:unclosed file:ResourceWarning')
 def test_doctest_only(testdir, makepyfile, maketestfile, makerstfile):
     # regular python files with doctests
     makepyfile(p1='>>> 1 + 1\n2')
