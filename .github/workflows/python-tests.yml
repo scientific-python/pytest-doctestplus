@@ -62,13 +62,16 @@ jobs:
             python-version: '3.13'
             toxenv: py313-test-pytest83
           - os: windows-latest
-            python-version: '3.14-dev'
+            python-version: '3.13'
+            toxenv: py313-test-pytest84
+          - os: windows-latest
+            python-version: '3.14'
             toxenv: py314-test-pytestdev
           - os: macos-latest
-            python-version: '3.14-dev'
+            python-version: '3.14'
             toxenv: py314-test-pytestdev
           - os: ubuntu-latest
-            python-version: '3.14-dev'
+            python-version: '3.14'
             toxenv: py314-test-pytestdev-numpydev
           - os: ubuntu-latest
             python-version: '3.13'
