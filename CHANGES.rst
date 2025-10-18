@@ -1,7 +1,8 @@
-1.5.0 (unreleased)
+1.5.0 (2025-10-17)
 ==================
 
-
+- Adding the usage of the ``doctest_encoding`` ini option when overwriting
+  files with the ``doctest-plus-generate-diff`` option. [#284]
 
 1.4.0 (2025-01-24)
 ==================
