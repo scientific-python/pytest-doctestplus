@@ -1,8 +1,9 @@
 import glob
 import os
+import sys
+import warnings
 from platform import python_version
 from textwrap import dedent
-import sys
 
 from packaging.version import Version
 
@@ -25,6 +26,7 @@ pytest_plugins = ['pytester']
 
 
 PYTEST_LT_6 = Version(pytest.__version__) < Version('6.0.0')
+PYTEST_LT_8_5 = Version(pytest.__version__) < Version('8.5.0.dev')
 
 
 def test_ignored_whitespace(testdir):
@@ -734,9 +736,17 @@ def test_ignore_option(testdir):
     testdir.inline_run(
         '--doctest-plus', '--doctest-rst', '--ignore', '.'
     ).assertoutcome(passed=0)
-    testdir.inline_run(
-        '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
-    ).assertoutcome(passed=2)
+    if os.name == "nt" and python_version() == "3.14.0" and not PYTEST_LT_8_5:
+        with warnings.catch_warnings():
+            # unclosed file pytest.EXE
+            warnings.filterwarnings("ignore", category=ResourceWarning)
+                testdir.inline_run(
+                    '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
+                ).assertoutcome(passed=2)
+    else:
+        testdir.inline_run(
+            '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
+        ).assertoutcome(passed=2)
 
 
 def test_ignore_glob_option(testdir):
