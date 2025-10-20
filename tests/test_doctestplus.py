@@ -738,8 +738,8 @@ def test_ignore_option(testdir):
     ).assertoutcome(passed=0)
     if os.name == "nt" and python_version() == "3.14.0" and not PYTEST_LT_8_5:
         with warnings.catch_warnings():
-            # unclosed file pytest.EXE
-            warnings.filterwarnings("ignore", category=ResourceWarning)
+            # ResourceWarning unclosed file pytest.EXE --> PytestUnraisableExceptionWarning
+            warnings.filterwarnings("ignore")
             testdir.inline_run(
                 '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
             ).assertoutcome(passed=2)
