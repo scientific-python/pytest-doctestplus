@@ -740,9 +740,9 @@ def test_ignore_option(testdir):
         with warnings.catch_warnings():
             # unclosed file pytest.EXE
             warnings.filterwarnings("ignore", category=ResourceWarning)
-                testdir.inline_run(
-                    '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
-                ).assertoutcome(passed=2)
+            testdir.inline_run(
+                '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
+            ).assertoutcome(passed=2)
     else:
         testdir.inline_run(
             '--doctest-plus', '--doctest-rst', '--ignore', 'bar.py'
