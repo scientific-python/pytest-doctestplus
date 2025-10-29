@@ -1,10 +1,13 @@
-from functools import partial
+import sys
 import textwrap
+from functools import partial
 from packaging.version import Version
+from platform import python_version
 
 import pytest
 import numpy as np
 
+PYTEST_LT_8_5 = Version(pytest.__version__) < Version('8.5.0.dev')
 
 # Keep this until we require numpy to be >=2.0 or there is a directive in doctestplus
 # to support multiple ways of repr
@@ -53,3 +56,10 @@ def makerstfile(testdir):
         return testdir.makefile('.rst', *args, **kwargs)
 
     return make
+
+
+# Windows + Python 3.14.0 + pytest-dev have ResourceWarning, see
+# https://github.com/scientific-python/pytest-doctestplus/issues/305
+def pytest_runtestloop(session):
+    if sys.platform == 'win32' and python_version() == "3.14.0" and not PYTEST_LT_8_5:
+        session.add_marker(pytest.mark.filterwarnings('ignore::ResourceWarning'))
