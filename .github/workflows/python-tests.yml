@@ -25,13 +25,10 @@ jobs:
           - os: windows-latest
             python-version: '3.9'
             toxenv: py39-test-pytest50
-          - os: macos-13
-            python-version: '3.9'
-            toxenv: py39-test-pytest51
           - os: ubuntu-latest
             python-version: '3.9'
             toxenv: py39-test-pytest60
-          - os: ubuntu-latest
+          - os: macos-latest
             python-version: '3.9'
             toxenv: py39-test-pytest62
           - os: ubuntu-latest
