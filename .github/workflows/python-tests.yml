@@ -64,6 +64,7 @@ jobs:
           - os: windows-latest
             python-version: '3.14'
             toxenv: py314-test-pytestdev
+            posargs: -v
           - os: macos-latest
             python-version: '3.14'
             toxenv: py314-test-pytestdev

@@ -1,7 +1,6 @@
 import glob
 import os
 import sys
-import warnings
 from platform import python_version
 from textwrap import dedent
 
@@ -26,7 +25,6 @@ pytest_plugins = ['pytester']
 
 
 PYTEST_LT_6 = Version(pytest.__version__) < Version('6.0.0')
-PYTEST_LT_8_5 = Version(pytest.__version__) < Version('8.5.0.dev')
 
 
 def test_ignored_whitespace(testdir):
@@ -732,13 +730,7 @@ def test_ignore_option(testdir):
     testdir.makefile('.rst', foo='>>> 1+1\n2')
 
     testdir.inline_run('--doctest-plus').assertoutcome(passed=2)
-    if os.name == "nt" and python_version() == "3.14.0" and not PYTEST_LT_8_5:
-        with warnings.catch_warnings():
-            # ResourceWarning unclosed file pytest.EXE --> PytestUnraisableExceptionWarning
-            warnings.filterwarnings("ignore")
-            testdir.inline_run('--doctest-plus', '--doctest-rst').assertoutcome(passed=3)
-    else:
-        testdir.inline_run('--doctest-plus', '--doctest-rst').assertoutcome(passed=3)
+    testdir.inline_run('--doctest-plus', '--doctest-rst').assertoutcome(passed=3)
     testdir.inline_run(
         '--doctest-plus', '--doctest-rst', '--ignore', '.'
     ).assertoutcome(passed=0)

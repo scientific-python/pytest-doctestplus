@@ -1,10 +1,9 @@
-from functools import partial
 import textwrap
+from functools import partial
 from packaging.version import Version
 
 import pytest
 import numpy as np
-
 
 # Keep this until we require numpy to be >=2.0 or there is a directive in doctestplus
 # to support multiple ways of repr
