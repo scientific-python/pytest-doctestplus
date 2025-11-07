@@ -14,6 +14,12 @@ from docutils.nodes import literal_block
 from docutils.parsers.rst import Directive
 
 
+class NoRunDirective(Directive):
+    def run(self):
+        # Simply do not add any content when this directive is encountered
+        return []
+
+
 class DoctestSkipDirective(Directive):
     has_content = True
 
@@ -26,12 +32,8 @@ class DoctestSkipDirective(Directive):
         return [literal_block(code, code)]
 
 
-class DoctestOmitDirective(Directive):
+class DoctestOmitDirective(NoRunDirective):
     has_content = True
-
-    def run(self):
-        # Simply do not add any content when this directive is encountered
-        return []
 
 
 class DoctestRequiresDirective(DoctestSkipDirective):
@@ -40,15 +42,20 @@ class DoctestRequiresDirective(DoctestSkipDirective):
     optional_arguments = 64
 
 
+class DoctestAllDirective(NoRunDirective):
+    optional_arguments = 64
+    has_content = False
+
+
 def setup(app):
 
     app.add_directive('doctest-requires', DoctestRequiresDirective)
-    app.add_directive('doctest-requires-all', DoctestRequiresDirective)
+    app.add_directive('doctest-requires-all', DoctestAllDirective)
     app.add_directive('doctest-skip', DoctestSkipDirective)
-    app.add_directive('doctest-skip-all', DoctestSkipDirective)
+    app.add_directive('doctest-skip-all', DoctestAllDirective)
     app.add_directive('doctest', DoctestSkipDirective, override=True)
     app.add_directive('doctest-remote-data', DoctestSkipDirective)
-    app.add_directive('doctest-remote-data-all', DoctestSkipDirective)
+    app.add_directive('doctest-remote-data-all', DoctestAllDirective)
     # Code blocks that use this directive will not appear in the generated
     # documentation. This is intended to hide boilerplate code that is only
     # useful for testing documentation using doctest, but does not actually

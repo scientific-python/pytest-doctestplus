@@ -87,6 +87,8 @@ This codeblock should fail, but is skipped:
 
 .. doctest-remote-data-all::
 
+.. code-block::
+
     >>> 1 + 1
     3
 
