@@ -879,14 +879,17 @@ class DocTestFinderPlus(doctest.DocTestFinder):
 
         if hasattr(obj, '__doctest_skip__') or hasattr(obj, '__doctest_requires__'):
 
-            def test_filter(test):
+            def conditionally_insert_skip(test):
+                """
+                Insert skip statement if `test` matches `__doctest_(skip|requires)__`.
+                """
                 for pat in getattr(obj, '__doctest_skip__', []):
                     if pat == '*':
-                        return False
+                        self._prepend_skip(test)
                     elif pat == '.' and test.name == name:
-                        return False
+                        self._prepend_skip(test)
                     elif fnmatch.fnmatch(test.name, '.'.join((name, pat))):
-                        return False
+                        self._prepend_skip(test)
 
                 reqs = getattr(obj, '__doctest_requires__', {})
                 for pats, mods in reqs.items():
@@ -903,13 +906,37 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                         else:
                             continue  # The pattern does not apply
 
-                        if not self.check_required_modules(mods):
-                            return False
+                        for mod in mods:
+                            self._prepend_importorskip(test, module=mod)
                 return True
 
-            tests = list(filter(test_filter, tests))
+            for _test in tests:
+                conditionally_insert_skip(_test)
 
         return tests
+
+    def _prepend_skip(self, test):
+        """Prepends `pytest.skip` before the doctest."""
+        source = (
+            "import pytest; "
+            "pytest.skip('listed in `__doctest_skip__`'); "
+            # Don't impact what's available in the namespace
+            "del pytest"
+        )
+        importorskip = doctest.Example(source=source, want="")
+        test.examples.insert(0, importorskip)
+
+    def _prepend_importorskip(self, test, *, module):
+        """Prepends `pytest.importorskip` before the doctest."""
+        source = (
+            "import pytest; "
+            # Hide output of this statement in `_`, otherwise doctests fail
+            f"_ = pytest.importorskip({module!r}); "
+            # Don't impact what's available in the namespace
+            "del pytest"
+        )
+        importorskip = doctest.Example(source=source, want="")
+        test.examples.insert(0, importorskip)
 
 
 def write_modified_file(fname, new_fname, changes, encoding=None):
