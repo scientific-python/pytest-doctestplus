@@ -450,6 +450,7 @@ def test_requires_all(testdir):
         """
         .. doctest-requires-all:: foobar
 
+        .. code-block::
             >>> import foobar
 
         This is a narrative line, before another doctest snippet
@@ -962,6 +963,8 @@ def test_remote_data_all(testdir):
             Test
 
         .. doctest-remote-data-all::
+
+        .. code-block::
 
             >>> from contextlib import closing
             >>> from urllib.request import urlopen
