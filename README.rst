@@ -253,12 +253,14 @@ of the line here.
 
 .. code-block:: rst
 
-    .. doctest-skip-all
+    .. doctest-skip-all::
 
-       >>> import non_existing
-       >>> non_existing.write_pseudo_code()
-       All the doctests are skipped in the file below
+    All the doctests are skipped in the file below
 
+    .. code-block::
+
+      >>> import non_existing
+      >>> non_existing.write_pseudo_code()
 
 Skip Unconditionally
 ^^^^^^^^^^^^^^^^^^^^
