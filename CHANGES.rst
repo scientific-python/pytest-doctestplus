@@ -1,7 +1,8 @@
 1.6.0 (unreleased)
 ==================
 
-
+- Ensure that tests skipped with `__doctest_skip__` and `__doctest_requires__`
+  show up as skipped tests in Pytest's output. [#312]
 
 1.5.0 (2025-10-17)
 ==================
