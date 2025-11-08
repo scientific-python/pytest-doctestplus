@@ -1580,6 +1580,10 @@ def test_requires_module_variable(testdir):
         
         def g():
             '''
+            Test that call to `pytest.importorskip` is not visible
+
+            >>> assert "pytest" not in locals()
+            >>> assert "___" not in locals()
             >>> 1 + 1
             2
             '''
