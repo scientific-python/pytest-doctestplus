@@ -1567,7 +1567,10 @@ def test_skip_module_variable(testdir):
 
 def test_requires_module_variable(testdir):
     p = testdir.makepyfile("""
-        __doctest_requires__ = {("f",): ["module_that_is_not_availabe"]}
+        __doctest_requires__ = {
+            ("f",): ["module_that_is_not_availabe"],
+            ("g",): ["pytest"],
+        }
 
         def f():
             '''

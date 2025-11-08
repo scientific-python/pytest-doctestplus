@@ -930,10 +930,10 @@ class DocTestFinderPlus(doctest.DocTestFinder):
         """Prepends `pytest.importorskip` before the doctest."""
         source = (
             "import pytest; "
-            # Hide output of this statement in `_`, otherwise doctests fail
-            f"_ = pytest.importorskip({module!r}); "
+            # Hide output of this statement in `___`, otherwise doctests fail 
+            f"___ = pytest.importorskip({module!r}); "
             # Don't impact what's available in the namespace
-            "del pytest"
+            "del pytest; del ___"
         )
         importorskip = doctest.Example(source=source, want="")
         test.examples.insert(0, importorskip)
