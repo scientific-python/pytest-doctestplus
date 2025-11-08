@@ -1545,3 +1545,51 @@ def test_generate_diff_multiline(testdir, capsys):
 
     original_fixed = original.replace("1\n    2", "\n    ".join(["0", "1", "2", "3"]))
     assert result == original_fixed
+
+
+def test_skip_module_variable(testdir):
+    p = testdir.makepyfile("""
+        __doctest_skip__ = ["f"]
+    
+        def f():
+            '''
+            >>> 1 + 2
+            5
+            '''
+            pass
+        
+        def g():
+            '''
+            >>> 1 + 1
+            2
+            '''
+            pass
+        """)
+    testdir.inline_run(p, '--doctest-plus').assertoutcome(passed=1, skipped=1)
+
+
+def test_requires_module_variable(testdir):
+    p = testdir.makepyfile("""
+        __doctest_requires__ = {
+            ("f",): ["module_that_is_not_availabe"],
+            ("g",): ["pytest"],
+        }
+
+        def f():
+            '''
+            >>> import module_that_is_not_availabe
+            '''
+            pass
+        
+        def g():
+            '''
+            Test that call to `pytest.importorskip` is not visible
+
+            >>> assert "pytest" not in locals()
+            >>> assert "___" not in locals()
+            >>> 1 + 1
+            2
+            '''
+            pass
+        """)
+    testdir.inline_run(p, '--doctest-plus').assertoutcome(passed=1, skipped=1)
