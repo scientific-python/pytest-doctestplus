@@ -1,8 +1,12 @@
-1.6.0 (unreleased)
+1.6.0 (2025-11-20)
 ==================
 
-- Ensure that tests skipped with `__doctest_skip__` and `__doctest_requires__`
-  show up as skipped tests in Pytest's output. [#312]
+- Fixing directives that should not have any content and therefore fixing
+  previously crashing sphinx builds. Using these directives with a content
+  now results an error. [#311]
+
+- Ensure that tests skipped with ``__doctest_skip__`` and
+  ``__doctest_requires__`` show up as skipped tests in Pytest's output. [#312]
 
 1.5.0 (2025-10-17)
 ==================
