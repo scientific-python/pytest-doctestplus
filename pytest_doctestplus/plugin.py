@@ -28,14 +28,8 @@ from .output_checker import (FIX, IGNORE_WARNINGS, REMOTE_DATA, SHOW_WARNINGS,
                              OutputChecker)
 
 _pytest_version = Version(pytest.__version__)
-PYTEST_GT_5 = _pytest_version > Version('5.9.9')
-PYTEST_GE_5_4 = _pytest_version >= Version('5.4')
-PYTEST_GE_7_0 = _pytest_version >= Version('7.0')
 PYTEST_GE_8_0 = _pytest_version >= Version('8.0')
 PYTEST_GE_8_1_1 = _pytest_version >= Version('8.1.1')
-PYTEST_GE_8_2 = any([_pytest_version.is_devrelease,
-                     _pytest_version.is_prerelease,
-                     _pytest_version >= Version('8.2')])
 
 comment_characters = {
     '.txt': '#',
@@ -256,30 +250,21 @@ def pytest_configure(config):
         def collect(self):
             # When running directly from pytest we need to make sure that we
             # don't accidentally import setup.py!
-            if PYTEST_GE_7_0:
-                fspath = self.path
-                filepath = self.path.name
-            else:
-                fspath = self.fspath
-                filepath = self.fspath.basename
+            fspath = self.path
+            filepath = self.path.name
 
             if filepath in ("setup.py", "__main__.py"):
                 return
             try:
-                if PYTEST_GT_5:
-                    from _pytest.pathlib import import_path
-                    mode = self.config.getoption("importmode")
+                from _pytest.pathlib import import_path
+                mode = self.config.getoption("importmode")
 
                 if PYTEST_GE_8_1_1:
                     consider_namespace_packages = self.config.getini("consider_namespace_packages")
                     module = import_path(fspath, mode=mode, root=self.config.rootpath,
                                          consider_namespace_packages=consider_namespace_packages)
-                elif PYTEST_GE_7_0:
-                    module = import_path(fspath, mode=mode, root=self.config.rootpath)
-                elif PYTEST_GT_5:
-                    module = import_path(fspath, mode=mode)
                 else:
-                    module = fspath.pyimport()
+                    module = import_path(fspath, mode=mode, root=self.config.rootpath)
             except ImportError:
                 if self.config.getvalue("doctest_ignore_import_errors"):
                     pytest.skip("unable to import module %r" % fspath)
@@ -345,12 +330,8 @@ def pytest_configure(config):
         obj = None
 
         def collect(self):
-            if PYTEST_GE_7_0:
-                fspath = self.path
-                filepath = self.path.name
-            else:
-                fspath = self.fspath
-                filepath = self.fspath.basename
+            fspath = self.path
+            filepath = self.path.name
 
             encoding = self.config.getini("doctest_encoding")
             text = fspath.read_text(encoding)
@@ -689,14 +670,10 @@ class DoctestPlus:
             Skip paths that match any of the doctest_norecursedirs patterns or
             if doctest_only is True then skip all regular test files (eg test_*.py).
             """
-            if PYTEST_GE_7_0:
-                dirpath = Path(path).parent
-                collect_ignore = config._getconftest_pathlist("collect_ignore",
-                                                              path=dirpath,
-                                                              rootpath=config.rootpath)
-            else:
-                dirpath = path.dirpath()
-                collect_ignore = config._getconftest_pathlist("collect_ignore", path=dirpath)
+            dirpath = Path(path).parent
+            collect_ignore = config._getconftest_pathlist("collect_ignore",
+                                                          path=dirpath,
+                                                          rootpath=config.rootpath)
 
             # The collect_ignore conftest.py variable should cause all test
             # runners to ignore this file and all subfiles and subdirectories
@@ -779,12 +756,7 @@ class DoctestPlus:
                     return None
 
                 # Don't override the built-in doctest plugin
-                if PYTEST_GE_7_0:
-                    return self._doctest_module_item_cls.from_parent(parent, path=Path(path))
-                elif PYTEST_GE_5_4:
-                    return self._doctest_module_item_cls.from_parent(parent, fspath=path)
-                else:
-                    return self._doctest_module_item_cls(path, parent)
+                return self._doctest_module_item_cls.from_parent(parent, path=Path(path))
 
             elif any([path.check(fnmatch=pat) for pat in self._file_globs]):
                 # Ignore generated .rst files
@@ -811,12 +783,7 @@ class DoctestPlus:
 
                 # TODO: Get better names on these items when they are
                 # displayed in py.test output
-                if PYTEST_GE_7_0:
-                    return self._doctest_textfile_item_cls.from_parent(parent, path=Path(path))
-                elif PYTEST_GE_5_4:
-                    return self._doctest_textfile_item_cls.from_parent(parent, fspath=path)
-                else:
-                    return self._doctest_textfile_item_cls(path, parent)
+                return self._doctest_textfile_item_cls.from_parent(parent, path=Path(path))
 
 
 class DocTestFinderPlus(doctest.DocTestFinder):
@@ -930,7 +897,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
         """Prepends `pytest.importorskip` before the doctest."""
         source = (
             "import pytest; "
-            # Hide output of this statement in `___`, otherwise doctests fail 
+            # Hide output of this statement in `___`, otherwise doctests fail
             f"___ = pytest.importorskip({module!r}); "
             # Don't impact what's available in the namespace
             "del pytest; del ___"

@@ -24,9 +24,6 @@ except ImportError:
 pytest_plugins = ['pytester']
 
 
-PYTEST_LT_6 = Version(pytest.__version__) < Version('6.0.0')
-
-
 def test_ignored_whitespace(testdir):
     testdir.makeini(
         """
@@ -863,8 +860,6 @@ SUBPACKAGE_REQUIRES_PYPROJECT = (
 
 @pytest.fixture()
 def subpackage_requires_testdir(testdir, request):
-    if request.param[0] == 'makepyprojecttoml' and PYTEST_LT_6:
-        return None, None
 
     config_file = getattr(testdir, request.param[0])(request.param[1])
 
@@ -902,7 +897,6 @@ def test_doctest_subpackage_requires(subpackage_requires_testdir, caplog):
 
 
 @pytest.mark.parametrize(('import_mode', 'expected'), [
-    pytest.param('importlib', dict(passed=2), marks=pytest.mark.skipif(PYTEST_LT_6, reason="importlib import mode not supported on Pytest <6"), id="importlib"),
     pytest.param('append', dict(failed=1), id="append"),
     pytest.param('prepend', dict(failed=1), id="prepend"),
 ])
@@ -1390,8 +1384,6 @@ NORCURSEDIRS_PYPROJECT = (
 
 @pytest.fixture()
 def norecursedirs_testdir(testdir, request):
-    if request.param[0] == 'makepyprojecttoml' and PYTEST_LT_6:
-        return None, None
 
     config_file = getattr(testdir, request.param[0])(request.param[1])
 
@@ -1550,14 +1542,14 @@ def test_generate_diff_multiline(testdir, capsys):
 def test_skip_module_variable(testdir):
     p = testdir.makepyfile("""
         __doctest_skip__ = ["f"]
-    
+
         def f():
             '''
             >>> 1 + 2
             5
             '''
             pass
-        
+
         def g():
             '''
             >>> 1 + 1
@@ -1580,7 +1572,7 @@ def test_requires_module_variable(testdir):
             >>> import module_that_is_not_availabe
             '''
             pass
-        
+
         def g():
             '''
             Test that call to `pytest.importorskip` is not visible
