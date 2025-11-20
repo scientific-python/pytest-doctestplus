@@ -20,20 +20,8 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: '3.9'
-            toxenv: py39-test-pytestoldest
-          - os: windows-latest
-            python-version: '3.9'
-            toxenv: py39-test-pytest50
-          - os: ubuntu-latest
-            python-version: '3.9'
-            toxenv: py39-test-pytest60
-          - os: macos-latest
-            python-version: '3.9'
-            toxenv: py39-test-pytest62
-          - os: ubuntu-latest
             python-version: '3.10'
-            toxenv: py310-test-pytest70
+            toxenv: py10-test-pytestoldest
           - os: ubuntu-latest
             python-version: '3.10'
             toxenv: py310-test-pytest71

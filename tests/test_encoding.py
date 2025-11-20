@@ -2,7 +2,8 @@ import locale
 import os
 from pathlib import Path
 from textwrap import dedent
-from typing import Callable, Optional
+from typing import Optional
+from collections.abc import Callable
 
 import pytest
 
@@ -66,7 +67,7 @@ def basic_file(tmp_path: Path) -> Callable[[str, str, str], tuple[str, str, str]
 def ini_file(testdir) -> Callable[..., Path]:
 
     def makeini(
-        encoding: Optional[str] = None,
+        encoding: str | None = None,
     ) -> Path:
         """Create a pytest.ini file with the specified encoding."""
 
