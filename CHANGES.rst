@@ -1,7 +1,7 @@
 1.7.0 (unreleased)
 ==================
 
-- Versions of Python <3.10 are no longer supported. [#313]
+- Versions of Python <3.10 and pytest<7 are no longer supported. [#313]
 
 1.6.0 (2025-11-20)
 ==================
