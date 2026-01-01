@@ -15,3 +15,5 @@ updates:
           - "*"
     labels:
       - "no-changelog-entry-needed"
+    cooldown:
+      default-days: 14
