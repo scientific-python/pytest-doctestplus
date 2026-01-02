@@ -26,7 +26,7 @@ class DoctestSkipDirective(Directive):
     def run(self):
         # Check if there is any valid argument, and skip it. Currently only
         # 'win32' is supported.
-        if re.match('win32', self.content[0]):
+        if len(self.content) > 0 and re.match("win32", self.content[0]):
             self.content = self.content[2:]
         code = '\n'.join(self.content)
         return [literal_block(code, code)]
