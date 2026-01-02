@@ -102,3 +102,41 @@ Code in doctest should run only if version condition is satisfied:
 .. doctest-requires:: pytest>=1.0 pytest>=2.0
 
     >>> import pytest
+
+
+Combined Directives
+===================
+
+
+Marking code with two directives:
+
+.. deprecated:: 1.0
+.. doctest-requires:: numpy<=0.1
+
+    >>> 1 + 3
+    2
+
+
+The order should not matter:
+
+.. doctest-requires:: numpy<=0.1
+.. deprecated:: 1.0
+
+    >>> 1 + 3
+    2
+
+Try two doctestplus directives:
+
+.. doctest-requires:: sys
+.. doctest-skip::
+
+    >>> 1 + 3
+    2
+
+Switch the order and it should still not run:
+
+.. doctest-skip::
+.. doctest-requires:: sys
+
+    >>> 1 + 3
+    2
