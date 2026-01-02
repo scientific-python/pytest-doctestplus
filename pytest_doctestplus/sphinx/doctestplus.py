@@ -10,9 +10,8 @@ centrally managed from py.test and Sphinx is not used for running
 tests.
 """
 import re
-from docutils.nodes import literal_block
 from docutils.parsers.rst import Directive
-
+from sphinx.util.docutils import SphinxDirective
 
 class NoRunDirective(Directive):
     def run(self):
@@ -20,7 +19,7 @@ class NoRunDirective(Directive):
         return []
 
 
-class DoctestSkipDirective(Directive):
+class DoctestSkipDirective(SphinxDirective):
     has_content = True
 
     def run(self):
@@ -28,9 +27,9 @@ class DoctestSkipDirective(Directive):
         # 'win32' is supported.
         if len(self.content) > 0 and re.match("win32", self.content[0]):
             self.content = self.content[2:]
-        code = '\n'.join(self.content)
-        return [literal_block(code, code)]
 
+        nodes = self.parse_content_to_nodes()
+        return nodes
 
 class DoctestOmitDirective(NoRunDirective):
     has_content = True
