@@ -1,6 +1,10 @@
 1.7.0 (unreleased)
 ==================
 
+- Fixing crashing sphinx builds where multiple directives are used with the
+  first one expecting content. The order of the directives used does not
+  matter after this fix. [#316]
+
 - Versions of Python <3.10 and pytest<7 are no longer supported. [#313]
 
 1.6.0 (2025-11-20)
