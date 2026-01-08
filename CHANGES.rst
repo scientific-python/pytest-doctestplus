@@ -1,4 +1,4 @@
-1.7.0 (unreleased)
+1.7.0 (2026-01-07)
 ==================
 
 - Fixing crashing sphinx builds where multiple directives are used with the
