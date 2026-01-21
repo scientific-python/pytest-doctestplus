@@ -874,7 +874,7 @@ class DocTestFinderPlus(doctest.DocTestFinder):
                             continue  # The pattern does not apply
 
                         for mod in mods:
-                            self._prepend_importorskip(test, module=mod)
+                            self._prepend_module_check(test, module=mod)
                 return True
 
             for _test in tests:
@@ -893,17 +893,20 @@ class DocTestFinderPlus(doctest.DocTestFinder):
         importorskip = doctest.Example(source=source, want="")
         test.examples.insert(0, importorskip)
 
-    def _prepend_importorskip(self, test, *, module):
-        """Prepends `pytest.importorskip` before the doctest."""
+    def _prepend_module_check(self, test, *, module):
+        """Prepends module checker before the doctest."""
+        escaped_module = module.replace("'", "\\'")
         source = (
+            "from pytest_doctestplus.utils import ModuleChecker; "
             "import pytest; "
             # Hide output of this statement in `___`, otherwise doctests fail
-            f"___ = pytest.importorskip({module!r}); "
+            f"___ = ModuleChecker().check('{escaped_module}') or "
+            f"pytest.skip('could not import {escaped_module}'); "
             # Don't impact what's available in the namespace
-            "del pytest; del ___"
+            "del ModuleChecker, pytest, ___"
         )
-        importorskip = doctest.Example(source=source, want="")
-        test.examples.insert(0, importorskip)
+        module_check = doctest.Example(source=source, want="")
+        test.examples.insert(0, module_check)
 
 
 def write_modified_file(fname, new_fname, changes, encoding=None):
