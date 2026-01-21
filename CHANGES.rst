@@ -1,7 +1,9 @@
 1.8.0 (unreleased)
 ==================
 
-- No changes yet.
+- Fixing bug where `__doctest_requires__` with version specifiers (e.g.,
+  `numpy>=2.0`) incorrectly skipped tests even when dependencies were
+  satisfied. [#318]
 
 1.7.0 (2026-01-07)
 ==================
