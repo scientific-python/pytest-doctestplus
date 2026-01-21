@@ -1565,6 +1565,9 @@ def test_requires_module_variable(testdir):
         __doctest_requires__ = {
             ("f",): ["module_that_is_not_availabe"],
             ("g",): ["pytest"],
+            ("h",): ["pytest>=1.0"],
+            ("i",): ["pytest<1.0"],
+            ("j",): ["module_that_is_not_availabe>=1.0"],
         }
 
         def f():
@@ -1575,13 +1578,38 @@ def test_requires_module_variable(testdir):
 
         def g():
             '''
-            Test that call to `pytest.importorskip` is not visible
+            Make sure out internal variables are not visible.
 
+            >>> assert "ModuleChecker" not in locals()
             >>> assert "pytest" not in locals()
             >>> assert "___" not in locals()
             >>> 1 + 1
             2
             '''
             pass
+
+        def h():
+            '''
+            Make sure out internal variables are not visible.
+
+            >>> assert "ModuleChecker" not in locals()
+            >>> assert "pytest" not in locals()
+            >>> assert "___" not in locals()
+            >>> 1 + 1
+            2
+            '''
+            pass
+
+        def i():
+            '''
+            >>> assert False, "This should be skipped due to version requirement not being met"
+            '''
+            skip
+
+        def j():
+            '''
+            >>> import module_that_is_not_availabe
+            '''
+            skip
         """)
-    testdir.inline_run(p, '--doctest-plus').assertoutcome(passed=1, skipped=1)
+    testdir.inline_run(p, '--doctest-plus').assertoutcome(passed=2, skipped=3)
