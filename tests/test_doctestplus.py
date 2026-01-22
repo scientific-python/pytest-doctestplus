@@ -1604,12 +1604,12 @@ def test_requires_module_variable(testdir):
             '''
             >>> assert False, "This should be skipped due to version requirement not being met"
             '''
-            skip
+            pass
 
         def j():
             '''
             >>> import module_that_is_not_availabe
             '''
-            skip
+            pass
         """)
     testdir.inline_run(p, '--doctest-plus').assertoutcome(passed=2, skipped=3)
