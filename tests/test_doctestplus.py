@@ -1578,7 +1578,7 @@ def test_requires_module_variable(testdir):
 
         def g():
             '''
-            Make sure out internal variables are not visible.
+            Make sure our internal variables are not visible.
 
             >>> assert "ModuleChecker" not in locals()
             >>> assert "pytest" not in locals()
@@ -1590,7 +1590,7 @@ def test_requires_module_variable(testdir):
 
         def h():
             '''
-            Make sure out internal variables are not visible.
+            Make sure our internal variables are not visible.
 
             >>> assert "ModuleChecker" not in locals()
             >>> assert "pytest" not in locals()
