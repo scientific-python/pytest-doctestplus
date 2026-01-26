@@ -1,4 +1,4 @@
-1.8.0 (unreleased)
+1.7.1 (2026-01-26)
 ==================
 
 - Fixing bug where ``__doctest_requires__`` with version specifiers (e.g.,
