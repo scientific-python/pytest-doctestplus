@@ -22,6 +22,7 @@ except ImportError:
 
 
 pytest_plugins = ['pytester']
+py_version = Version(python_version())
 
 
 def test_ignored_whitespace(testdir):
@@ -1211,7 +1212,7 @@ def test_main(testdir):
 
 
 @pytest.mark.xfail(
-        python_version() in ('3.11.9', '3.11.10', '3.11.11', '3.11.12', '3.11.13', '3.11.14', '3.12.3'),
+        py_version > Version('3.11.8') and py_version < Version('3.12') or py_version == '3.12.3',
         reason='broken by https://github.com/python/cpython/pull/115440')
 def test_ufunc(testdir):
     pytest.importorskip('numpy')
