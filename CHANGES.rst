@@ -2,7 +2,7 @@
 ==================
 
 - Fixing ``FLOAT_CMP`` not comparing complex numbers with a negative
-  imaginary part, like ``(1.5-2.5j)``. [#XXX]
+  imaginary part, like ``(1.5-2.5j)``. [#328]
 
 1.7.1 (2026-01-26)
 ==================
