@@ -1,7 +1,8 @@
 1.8.0 (unreleased)
 ==================
 
-- No changes yet.
+- Fixing ``FLOAT_CMP`` not comparing complex numbers with a negative
+  imaginary part, like ``(1.5-2.5j)``. [#XXX]
 
 1.7.1 (2026-01-26)
 ==================
