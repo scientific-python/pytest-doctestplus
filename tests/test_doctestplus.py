@@ -147,6 +147,28 @@ def test_float_cmp_dict(testdir):
     reprec.assertoutcome(failed=0, passed=1)
 
 
+def test_float_cmp_complex(testdir):
+    testdir.makeini(
+        """
+        [pytest]
+        doctestplus = enabled
+    """
+    )
+    p = testdir.makepyfile(
+        """
+        def g():
+            '''
+            >>> x = complex(1/3., -2/3.)
+            >>> x    # doctest: +FLOAT_CMP
+            (0.333333-0.666666j)
+            '''
+            pass
+    """
+    )
+    reprec = testdir.inline_run(p, "--doctest-plus")
+    reprec.assertoutcome(failed=0, passed=1)
+
+
 def test_float_cmp_global(testdir):
     testdir.makeini("""
         [pytest]
